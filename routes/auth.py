@@ -8,8 +8,8 @@ SENHA_CORRETA = 'Intervet2025'
 @auth_bp.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        usuario = request.form['usuario']
-        senha = request.form['senha']
+        usuario = request.form['username']
+        senha = request.form['password']
 
         if usuario == USUARIO_CORRETO and senha == SENHA_CORRETA:
             session['usuario'] = usuario
