@@ -8,6 +8,8 @@ from routes.financeiro import financeiro_bp
 from routes.auth import auth_bp
 
 
+
+
 import os
 
 app = Flask(__name__)

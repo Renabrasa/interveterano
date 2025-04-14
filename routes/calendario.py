@@ -9,8 +9,8 @@ calendario_bp = Blueprint('calendario', __name__, template_folder='../templates/
 @calendario_bp.route('/calendario')
 def exibir_calendario():
     logado = session.get('logado', False)
-    return render_template('calendario/calendario.html', logado=logado)
-
+    return render_template('calendario.html', logado=logado)
+''
 
 # API para retornar os jogos em JSON (para o FullCalendar)
 @calendario_bp.route('/api/jogos')
@@ -29,6 +29,8 @@ def listar_jogos():
 # Criar novo jogo
 @calendario_bp.route('/api/jogos', methods=['POST'])
 def criar_jogo():
+    if not session.get('logado'):
+        return jsonify({"erro": "Acesso não autorizado"}), 403
     dados = request.json
     novo = Jogo(
         titulo=dados['titulo'],
@@ -46,6 +48,8 @@ def criar_jogo():
 # Atualizar jogo
 @calendario_bp.route('/api/jogos/<int:id>', methods=['PUT'])
 def editar_jogo(id):
+    if not session.get('logado'):
+        return jsonify({"erro": "Acesso não autorizado"}), 403
     jogo = Jogo.query.get_or_404(id)
     dados = request.json
     jogo.titulo = dados['titulo']
@@ -61,6 +65,8 @@ def editar_jogo(id):
 # Excluir jogo
 @calendario_bp.route('/api/jogos/<int:id>', methods=['DELETE'])
 def excluir_jogo(id):
+    if not session.get('logado'):
+        return jsonify({"erro": "Acesso não autorizado"}), 403
     jogo = Jogo.query.get_or_404(id)
     db.session.delete(jogo)
     db.session.commit()

@@ -1,6 +1,8 @@
 from flask import Blueprint, render_template, request, redirect, url_for,session
 from models.models import db, Jogador, Categoria, Posicao
 from flask import flash
+from routes.auth import login_required
+
 
 plantel_bp = Blueprint('plantel', __name__, template_folder='../templates/plantel')
 
@@ -12,6 +14,7 @@ def login_obrigatorio():
 
 
 @plantel_bp.route('/plantel')
+@login_required
 def exibir_plantel():
     retorno = login_obrigatorio()
     if retorno: return retorno

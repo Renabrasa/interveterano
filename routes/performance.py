@@ -1,29 +1,31 @@
-from flask import Blueprint, render_template, request, redirect, url_for,session
+from flask import Blueprint, render_template, request, redirect, url_for, session, flash, jsonify
 from models.models import db, Jogador, Convidado, Jogo, Performance
-from flask import flash
+from sqlalchemy import func
+from routes.auth import login_required
 
 
 performance_bp = Blueprint('performance', __name__, template_folder='../templates/performance')
 
-# ✅ Função de verificação de login
+# ✅ Verificação de login
 def login_obrigatorio():
     if 'usuario' not in session:
         session['destino'] = request.endpoint
         return redirect(url_for('auth.login'))
 
-
-# Página principal da performance
+# ---------------------
+# ROTA PRINCIPAL (PROTEGIDA)
+# ---------------------
 @performance_bp.route('/performance')
+@login_required
 def index():
     retorno = login_obrigatorio()
     if retorno: return retorno
-    
+
     jogadores = Jogador.query.all()
     convidados = Convidado.query.all()
     jogos = Jogo.query.order_by(Jogo.data.desc()).all()
     performances = Performance.query.all()
 
-    # Convertendo apenas os dados necessários para o JavaScript (JSON serializável)
     jogadores_json = [{'id': j.id, 'nome': j.nome} for j in jogadores]
     convidados_json = [{'id': c.id, 'nome': c.nome} for c in convidados]
 
@@ -37,10 +39,14 @@ def index():
         convidados_json=convidados_json
     )
 
-
-# Cadastro de nova performance
+# ---------------------
+# ADICIONAR (PROTEGIDA)
+# ---------------------
 @performance_bp.route('/performance/adicionar', methods=['POST'])
 def adicionar_performance():
+    retorno = login_obrigatorio()
+    if retorno: return retorno
+
     jogo_id = request.form['jogo_id']
     tipo = request.form['tipo']
     participante_id = request.form['participante_id']
@@ -48,7 +54,6 @@ def adicionar_performance():
     assistencias = int(request.form['assistencias'])
     participou = request.form.get('participou') == 'on'
 
-    # Verifica duplicidade
     existente = Performance.query.filter_by(
         jogo_id=jogo_id,
         jogador_id=participante_id if tipo == 'jogador' else None,
@@ -70,13 +75,15 @@ def adicionar_performance():
     db.session.commit()
     return redirect(url_for('performance.index'))
 
-
-
-# Rota para editar performance
+# ---------------------
+# EDITAR (PROTEGIDA)
+# ---------------------
 @performance_bp.route('/performance/editar/<int:id>', methods=['POST'])
 def editar_performance(id):
-    perf = Performance.query.get_or_404(id)
+    retorno = login_obrigatorio()
+    if retorno: return retorno
 
+    perf = Performance.query.get_or_404(id)
     tipo = request.form['tipo']
     participante_id = request.form['participante_id']
     jogo_id = request.form['jogo_id']
@@ -84,7 +91,6 @@ def editar_performance(id):
     assistencias = int(request.form['assistencias'])
     participou = request.form.get('participou') == 'on'
 
-    # Validação: impedir duplicidade ao editar (exclui a própria performance da verificação)
     duplicado = Performance.query.filter(
         Performance.jogo_id == jogo_id,
         Performance.id != id,
@@ -93,11 +99,9 @@ def editar_performance(id):
     ).first()
 
     if duplicado:
-       flash('Este participante já está registrado neste jogo.', 'erro')
-       return redirect(url_for('performance.index'))
+        flash('Este participante já está registrado neste jogo.', 'erro')
+        return redirect(url_for('performance.index'))
 
-
-    # Atualiza dados
     perf.jogo_id = jogo_id
     perf.gols = gols
     perf.assistencias = assistencias
@@ -108,26 +112,24 @@ def editar_performance(id):
     db.session.commit()
     return redirect(url_for('performance.index'))
 
-# Rota para excluir performance
+# ---------------------
+# EXCLUIR (PROTEGIDA)
+# ---------------------
 @performance_bp.route('/performance/excluir/<int:id>', methods=['POST'])
 def excluir_performance(id):
+    retorno = login_obrigatorio()
+    if retorno: return retorno
+
     perf = Performance.query.get_or_404(id)
     db.session.delete(perf)
     db.session.commit()
     return redirect(url_for('performance.index'))
 
-################################
-####### GRAFICOS ###############
-################################
-
-from flask import jsonify
-from sqlalchemy import func
-
-# Rota para retornar dados para os gráficos
+# ---------------------
+# GRÁFICOS (LIVRE)
+# ---------------------
 @performance_bp.route('/api/performance/graficos')
 def dados_graficos():
-    from sqlalchemy import func
-
     gols = db.session.query(Jogador.nome, func.sum(Performance.gols))\
         .join(Performance, Performance.jogador_id == Jogador.id)\
         .group_by(Jogador.id).all()
@@ -146,10 +148,7 @@ def dados_graficos():
     derrotas = db.session.query(func.count()).filter(Jogo.resultado == 'derrota').scalar()
 
     def formatar(lista):
-        return {
-            'labels': [item[0] for item in lista],
-            'valores': [item[1] for item in lista]
-        }
+        return {'labels': [i[0] for i in lista], 'valores': [i[1] for i in lista]}
 
     return jsonify({
         'gols': formatar(gols),
@@ -161,35 +160,23 @@ def dados_graficos():
         }
     })
 
-
 @performance_bp.route('/performance/graficos')
 def graficos():
     return render_template('performance/graficos.html')
 
-
 @performance_bp.route('/performance/grafico')
 def grafico_resultados():
-    from sqlalchemy import func
-    from models.models import Jogo
-
     vitorias = db.session.query(func.count()).filter(Jogo.resultado == 'vitória').scalar()
     empates = db.session.query(func.count()).filter(Jogo.resultado == 'empate').scalar()
     derrotas = db.session.query(func.count()).filter(Jogo.resultado == 'derrota').scalar()
 
     return render_template('performance/grafico.html', vitorias=vitorias, empates=empates, derrotas=derrotas)
 
-
-
-
-################################
-####### RAnking ###############
-################################
-
-
+# ---------------------
+# RANKING (LIVRE)
+# ---------------------
 @performance_bp.route('/performance/ranking')
 def ranking():
-    from sqlalchemy import func
-
     jogadores_stats = db.session.query(
         Jogador.nome,
         func.coalesce(func.sum(Performance.gols), 0),
@@ -212,7 +199,6 @@ def ranking():
     for nome, gols, assist, part in convidados_stats:
         ranking_total.append({'nome': nome + " (Convidado)", 'gols': gols, 'assist': assist, 'part': part})
 
-    # Ordena por gols, depois assistências, depois participações
     ranking_total.sort(key=lambda x: (x['gols'], x['assist'], x['part']), reverse=True)
 
     return render_template('performance/ranking.html', ranking=ranking_total)

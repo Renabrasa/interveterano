@@ -6,6 +6,8 @@ from io import BytesIO
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import A4
 import os
+from routes.auth import login_required
+
 
 financeiro_bp = Blueprint('financeiro', __name__)
 
@@ -19,6 +21,7 @@ def login_obrigatorio():
 # PAINEL MENSAL DE MENSALIDADES
 # ----------------------------
 @financeiro_bp.route('/financeiro')
+@login_required
 def painel_mensal():
     mes = request.args.get('mes') or datetime.today().strftime('%Y-%m')
 
@@ -119,6 +122,7 @@ def atualizar_valor_mensalidade_padrao():
 # RELATÓRIO DE MENSALIDADES (PDF)
 # ----------------------------
 @financeiro_bp.route('/financeiro/relatorio_mensalidades')
+@login_required
 def relatorio_mensalidades():
     mes = request.args.get('mes') or datetime.today().strftime('%Y-%m')
     vencimento = datetime.strptime(mes + '-15', '%Y-%m-%d')
@@ -170,6 +174,7 @@ def relatorio_mensalidades():
 # PAINEL DE RELATÓRIOS FINANCEIROS AVANÇADOS
 # ----------------------------
 @financeiro_bp.route('/financeiro/relatorios/financeiros')
+@login_required
 def relatorios_financeiros():
     jogadores = Jogador.query.filter_by(ativo=True).order_by(Jogador.nome).all()
     ano_atual = datetime.today().year
@@ -283,6 +288,7 @@ def relatorio_fluxo_caixa():
 # ENTRADAS
 # ==========================
 @financeiro_bp.route('/financeiro/entradas')
+@login_required
 def exibir_entradas():
     retorno = login_obrigatorio()
     if retorno: return retorno
@@ -386,6 +392,7 @@ def exibir_saldo():
                            mes_primeiro=mes_primeiro)
 
 @financeiro_bp.route('/financeiro/relatorios')
+@login_required
 def relatorios():
     retorno = login_obrigatorio()
     if retorno: return retorno

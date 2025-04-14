@@ -1,5 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for, session
 from models.models import db, Convidado, Categoria, Posicao
+from routes.auth import login_required
 
 convidado_bp = Blueprint('convidado', __name__, template_folder='../templates/convidado')
 
@@ -11,6 +12,7 @@ def login_obrigatorio():
 
 
 @convidado_bp.route('/convidados')
+@login_required
 def exibir_convidados():
     retorno = login_obrigatorio()
     if retorno: return retorno
