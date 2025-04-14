@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Desempenho da Equipe</h1>
+
+<div class="grafico-container">
+    <h2>Gols por Jogador</h2>
+    <canvas id="grafico-gols"></canvas>
+</div>
+
+<div class="grafico-container">
+    <h2>Assistências por Jogador</h2>
+    <canvas id="grafico-assistencias"></canvas>
+</div>
+
+<div class="grafico-container">
+    <h2>Participações por Jogador</h2>
+    <canvas id="grafico-participacoes"></canvas>
+</div>
+
+<div class="grafico-container">
+    <h2>Resultados da Equipe</h2>
+    <canvas id="grafico-resultados"></canvas>
+</div>
+
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+fetch('/api/performance/graficos')
+    .then(res => res.json())
+    .then(dados => {
+        new Chart(document.getElementById('grafico-gols'), {
+            type: 'bar',
+            data: {
+                labels: dados.gols.labels,
+                datasets: [{
+                    label: 'Gols',
+                    data: dados.gols.valores,
+                    backgroundColor: 'rgba(200, 0, 0, 0.7)'
+                }]
+            }
+        });
+
+        new Chart(document.getElementById('grafico-assistencias'), {
+            type: 'bar',
+            data: {
+                labels: dados.assistencias.labels,
+                datasets: [{
+                    label: 'Assistências',
+                    data: dados.assistencias.valores,
+                    backgroundColor: 'rgba(0, 100, 200, 0.7)'
+                }]
+            }
+        });
+
+        new Chart(document.getElementById('grafico-participacoes'), {
+            type: 'pie',
+            data: {
+                labels: dados.participacoes.labels,
+                datasets: [{
+                    label: 'Participações',
+                    data: dados.participacoes.valores,
+                    backgroundColor: [
+                        '#990000', '#cc0000', '#e60000', '#ff4d4d', '#ff9999',
+                        '#1f77b4', '#aec7e8', '#c5d7f2'
+                    ]
+                }]
+            }
+        });
+
+        new Chart(document.getElementById('grafico-resultados'), {
+            type: 'pie',
+            data: {
+                labels: dados.resultados.labels,
+                datasets: [{
+                    data: dados.resultados.valores,
+                    backgroundColor: ['#28a745', '#ffc107', '#dc3545'],
+                    borderColor: ['#ffffff', '#ffffff', '#ffffff'],
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { position: 'bottom' },
+                    title: {
+                        display: true,
+                        text: 'Desempenho da Equipe'
+                    }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

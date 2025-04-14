@@ -1,0 +1,165 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<!-- ALERTAS -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    {% for categoria, msg in messages %}
+      <div class="alerta {{ categoria }}">{{ msg }}</div>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+
+<h1>Controle de Performance</h1>
+
+<form method="POST" action="{{ url_for('performance.adicionar_performance') }}" class="form-jogador">
+    <label>Tipo:</label>
+    <select name="tipo" id="tipo" required onchange="trocarParticipante()">
+        <option value="jogador">Jogador</option>
+        <option value="convidado">Convidado</option>
+    </select>
+
+    <label>Participante:</label>
+    <select name="participante_id" id="participante_id" required></select>
+
+    <label>Jogo:</label>
+    <select name="jogo_id" required>
+        {% for jogo in jogos %}
+            <option value="{{ jogo.id }}">{{ jogo.data.strftime('%d/%m %H:%Mh') }} - {{ jogo.titulo }}</option>
+        {% endfor %}
+    </select>
+
+    <label>Gols:</label>
+    <input type="number" name="gols" value="0" min="0">
+
+    <label>Assistências:</label>
+    <input type="number" name="assistencias" value="0" min="0">
+
+    <label>
+        <input type="checkbox" name="participou" checked>
+        Participou do jogo
+    </label>
+
+    <button type="submit">Registrar</button>
+</form>
+
+<hr>
+
+<h2>Histórico de Performance</h2>
+
+<!-- 🔎 FILTROS -->
+<div class="filtros-performance" style="margin-bottom: 20px;">
+    <input type="text" id="filtro-texto" placeholder="🔍 Buscar por nome, jogo ou data..." style="padding: 10px; width: 100%; margin-bottom: 10px; border-radius: 5px; border: 1px solid #ccc;">
+
+    <select id="filtro-jogo" style="padding: 10px; border-radius: 5px; margin-right: 10px;">
+        <option value="">🎯 Todos os Jogos</option>
+        {% for jogo in jogos %}
+            <option value="{{ jogo.titulo }}">{{ jogo.data.strftime('%d/%m') }} - {{ jogo.titulo }}</option>
+        {% endfor %}
+    </select>
+
+    <select id="filtro-participante" style="padding: 10px; border-radius: 5px; margin-right: 10px;">
+        <option value="">👤 Todos os Participantes</option>
+        {% for j in jogadores %}
+            <option value="{{ j.nome }}">{{ j.nome }} (Jogador)</option>
+        {% endfor %}
+        {% for c in convidados %}
+            <option value="{{ c.nome }}">{{ c.nome }} (Convidado)</option>
+        {% endfor %}
+    </select>
+
+    <input type="date" id="filtro-data" style="padding: 10px; border-radius: 5px;">
+</div>
+
+<table>
+    <thead>
+        <tr>
+            <th>Data</th>
+            <th>Jogo</th>
+            <th>Participante</th>
+            <th>Gols</th>
+            <th>Assistências</th>
+            <th>Participou</th>
+            <th>Ações</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for p in performances %}
+        <tr>
+            <td>{{ p.jogo.data.strftime('%Y-%m-%d') }}</td>
+            <td>{{ p.jogo.titulo }}</td>
+            <td>
+                {% if p.jogador %}{{ p.jogador.nome }}{% else %}{{ p.convidado.nome }}{% endif %}
+            </td>
+            <td>{{ p.gols }}</td>
+            <td>{{ p.assistencias }}</td>
+            <td>{{ 'Sim' if p.participou else 'Não' }}</td>
+            <td>
+                <form action="{{ url_for('performance.excluir_performance', id=p.id) }}" method="POST" style="display:inline;">
+                    <button type="submit" onclick="return confirm('Deseja excluir esta performance?')">Excluir</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<script>
+    const jogadores = {{ jogadores_json | tojson }};
+    const convidados = {{ convidados_json | tojson }};
+
+    function trocarParticipante() {
+        const tipo = document.getElementById('tipo').value;
+        const select = document.getElementById('participante_id');
+        select.innerHTML = '';
+
+        const lista = tipo === 'jogador' ? jogadores : convidados;
+
+        lista.forEach(p => {
+            const opt = document.createElement('option');
+            opt.value = p.id;
+            opt.textContent = `${p.nome} (${tipo === 'jogador' ? 'Jogador' : 'Convidado'})`;
+            select.appendChild(opt);
+        });
+    }
+
+    window.onload = trocarParticipante;
+
+    // Oculta alertas
+    setTimeout(() => {
+        document.querySelectorAll('.alerta').forEach(el => el.style.display = 'none');
+    }, 5000);
+
+    // Filtro dinâmico completo
+    const inputTexto = document.getElementById('filtro-texto');
+    const inputJogo = document.getElementById('filtro-jogo');
+    const inputPart = document.getElementById('filtro-participante');
+    const inputData = document.getElementById('filtro-data');
+
+    [inputTexto, inputJogo, inputPart, inputData].forEach(input => {
+        input.addEventListener('input', aplicarFiltro);
+    });
+
+    function aplicarFiltro() {
+        const termo = inputTexto.value.toLowerCase();
+        const jogo = inputJogo.value.toLowerCase();
+        const participante = inputPart.value.toLowerCase();
+        const data = inputData.value;
+
+        document.querySelectorAll('table tbody tr').forEach(linha => {
+            const texto = linha.innerText.toLowerCase();
+            const colunas = linha.getElementsByTagName('td');
+            const dataLinha = colunas[0].textContent;
+
+            const matchTexto = texto.includes(termo);
+            const matchJogo = jogo === '' || colunas[1].textContent.toLowerCase().includes(jogo);
+            const matchPart = participante === '' || colunas[2].textContent.toLowerCase().includes(participante);
+            const matchData = data === '' || dataLinha === data;
+
+            linha.style.display = (matchTexto && matchJogo && matchPart && matchData) ? '' : 'none';
+        });
+    }
+</script>
+
+{% endblock %}

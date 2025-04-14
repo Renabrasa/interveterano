@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>🏆 Ranking de Performance</h1>
+
+<table>
+    <thead>
+        <tr>
+            <th>Posição</th>
+            <th>Nome</th>
+            <th>Gols</th>
+            <th>Assistências</th>
+            <th>Participações</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for p in ranking %}
+        <tr class="{% if loop.index == 1 %}ouro{% elif loop.index == 2 %}prata{% elif loop.index == 3 %}bronze{% endif %}">
+            <td>{{ loop.index }}º</td>
+            <td>{{ p.nome }}</td>
+            <td>{{ p.gols }}</td>
+            <td>{{ p.assist }}</td>
+            <td>{{ p.part }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<style>
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 30px;
+}
+thead {
+    background-color: #eee;
+}
+th, td {
+    padding: 10px;
+    text-align: left;
+    border: 1px solid #ccc;
+}
+.ouro {
+    background-color: #fff7d6;
+    font-weight: bold;
+}
+.prata {
+    background-color: #e7e7e7;
+}
+.bronze {
+    background-color: #f3e0cb;
+}
+</style>
+
+{% endblock %}

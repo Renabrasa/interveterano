@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+<!--{% set ano, mes_num = mes.split('-')|map('int') %}
+{% set data_atual = namespace() %}
+{% set data_atual.anterior = (mes_num - 1) if mes_num > 1 else 12 %}
+{% set data_atual.proximo = (mes_num + 1) if mes_num < 12 else 1 %}
+{% set data_atual.ano_ant = (ano - 1) if mes_num == 1 else ano %}
+{% set data_atual.ano_prox = (ano + 1) if mes_num == 12 else ano %}
+{% set mes_anterior = "{}-{:02d}".format(data_atual.ano_ant, data_atual.anterior) %}
+{% set mes_proximo = "{}-{:02d}".format(data_atual.ano_prox, data_atual.proximo) %}
+-->
+
+{% block content %}
+<div class="painel-container">
+    <h1>Financeiro - Entradas (Mensalidades)</h1>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    {% for categoria, mensagem in messages %}
+      <div class="alerta {{ categoria }}">{{ mensagem }}</div>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+
+       
+    <div class="tabs">
+        <a href="{{ url_for('financeiro.exibir_entradas', mes=mes) }}" class="tab active">Entradas</a>
+        <a href="{{ url_for('financeiro.exibir_saidas', mes=mes) }}" class="tab">Saídas</a>
+        <a href="{{ url_for('financeiro.exibir_saldo', mes=mes) }}" class="tab">Resumo</a>
+    </div>
+
+    <form method="GET" action="{{ url_for('financeiro.exibir_entradas') }}" class="filtro-mes">
+        <button type="button" onclick="mudarMes(-1)">◀</button>
+        <input type="month" name="mes" value="{{ mes }}" onchange="this.form.submit()">
+        <button type="button" onclick="mudarMes(1)">▶</button>
+    </form>
+    <form method="POST" action="{{ url_for('financeiro.gerar_mensalidades') }}" class="form-mensalidade-valores">
+        <label for="valor_mensalidade"><strong>Valor:</strong></label>
+        <input type="number" step="0.01" name="valor_mensalidade" id="valor_mensalidade" placeholder="R$" required>
+        <input type="hidden" name="mes" value="{{ mes }}">
+        <button type="submit">💾 Aplicar</button>
+    </form>
+
+    
+    <table class="tabela-financeira">
+        <thead>
+            <tr>
+                <th>Jogador</th>
+                <th>Valor</th>
+                <th>Status</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for j in jogadores %}
+            {% set m = mensalidades|selectattr("jogador_id", "equalto", j.id)|first %}
+            <tr>
+                <td>{{ j.nome }}</td>
+                <td>
+                    {% if m %}
+                        R$ {{ '%.2f'|format(m.valor) }}
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
+                <td>
+                    {% if m %}
+                        {{ "✅ Pago" if m.pago else "❌ Pendente" }}
+                    {% else %}
+                        Sem registro
+                    {% endif %}
+                </td>
+                <td>
+                    {% if m %}
+                        {% if not m.pago %}
+                            <a href="{{ url_for('financeiro.registrar_pagamento_mensalidade', mensalidade_id=m.id) }}">✅ Baixar</a>
+                        {% else %}
+                            <form action="{{ url_for('financeiro.cancelar_baixa_mensalidade', id=m.id) }}" method="POST" style="display:inline;">
+                                <button type="submit" title="Cancelar baixa">↩️</button>
+                            </form>
+                        {% endif %}
+                    {% else %}
+                        <span style="color: gray;">-</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+        
+    </table>
+</div>
+<script>
+    const inputMes = document.querySelector('input[name="mes"]');
+
+    function mudarMes(offset) {
+        let [ano, mes] = inputMes.value.split('-').map(Number);
+        mes += offset;
+
+        if (mes < 1) {
+            mes = 12;
+            ano -= 1;
+        } else if (mes > 12) {
+            mes = 1;
+            ano += 1;
+        }
+
+        const novoMes = `${ano}-${mes.toString().padStart(2, '0')}`;
+        window.location.href = `?mes=${novoMes}`;
+    }
+</script>
+<script>
+    setTimeout(() => {
+       document.querySelectorAll('.alerta').forEach(el => el.style.display = 'none');
+   }, 5000);
+</script>
+{% endblock %}

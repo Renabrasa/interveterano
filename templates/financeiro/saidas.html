@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+
+{% set ano, mes_num = mes.split('-')|map('int') %}
+{% set anterior = (mes_num - 1) if mes_num > 1 else 12 %}
+{% set proximo = (mes_num + 1) if mes_num < 12 else 1 %}
+{% set ano_ant = (ano - 1) if mes_num == 1 else ano %}
+{% set ano_prox = (ano + 1) if mes_num == 12 else ano %}
+{% set mes_anterior = "{}-{:02d}".format(ano_ant, anterior) %}
+{% set mes_proximo = "{}-{:02d}".format(ano_prox, proximo) %}
+
+{% block content %}
+<div class="painel-container">
+    <h1>Financeiro - Saídas</h1>
+
+    <div class="tabs">
+        <a href="{{ url_for('financeiro.exibir_entradas', mes=mes) }}" class="tab">Entradas</a>
+        <a href="{{ url_for('financeiro.exibir_saidas', mes=mes) }}" class="tab active">Saídas</a>
+        <a href="{{ url_for('financeiro.exibir_saldo', mes=mes) }}" class="tab">Resumo</a>
+    </div>
+
+    <form method="GET" action="{{ url_for('financeiro.exibir_saidas') }}" class="filtro-mes">
+        <button type="button" onclick="mudarMes(-1)">◀</button>
+        <input type="month" name="mes" value="{{ mes }}" onchange="this.form.submit()">
+        <button type="button" onclick="mudarMes(1)">▶</button>
+    </form>
+
+    <h3>Nova Saída</h3>
+    <form method="POST" action="{{ url_for('financeiro.exibir_saidas', mes=mes) }}">
+        <input type="text" name="descricao" placeholder="Descrição" required>
+        <input type="text" name="categoria" placeholder="Categoria" required>
+        <input type="number" step="0.01" name="valor" placeholder="Valor" required>
+        <input type="date" name="data" required>
+        <button type="submit">Salvar</button>
+    </form>
+
+    <h3>Saídas registradas</h3>
+    <table class="tabela-financeira">
+        <thead>
+            <tr>
+                <th>Data</th>
+                <th>Descrição</th>
+                <th>Categoria</th>
+                <th>Valor</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for s in saidas %}
+            <tr>
+                <td>{{ s.data.strftime('%d/%m/%Y') }}</td>
+                <td>{{ s.descricao }}</td>
+                <td>{{ s.categoria }}</td>
+                <td style="color:red;">R$ {{ '%.2f'|format(s.valor) }}</td>
+                <td>
+                    <a href="{{ url_for('financeiro.excluir_saida', id=s.id) }}" onclick="return confirm('Excluir saída?')">🗑️</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+<script>
+    const inputMes = document.querySelector('input[name="mes"]');
+
+    function mudarMes(offset) {
+        let [ano, mes] = inputMes.value.split('-').map(Number);
+        mes += offset;
+
+        if (mes < 1) {
+            mes = 12;
+            ano -= 1;
+        } else if (mes > 12) {
+            mes = 1;
+            ano += 1;
+        }
+
+        const novoMes = `${ano}-${mes.toString().padStart(2, '0')}`;
+        window.location.href = `?mes=${novoMes}`;
+    }
+</script>
+
+{% endblock %}

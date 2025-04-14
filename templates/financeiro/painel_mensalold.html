@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="painel-container">
+    <h1>Painel Financeiro Mensal</h1>
+
+    <!-- MÊS DE TRABALHO E VALOR MENSALIDADE -->
+    <div class="painel-topo">
+        <form method="GET" action="{{ url_for('financeiro.painel_mensal') }}">
+            <label><strong>Mês de trabalho:</strong></label>
+            <input type="month" name="mes" value="{{ mes }}" onchange="this.form.submit()">
+        </form>
+
+        <div class="mensalidade-box">
+            <form method="POST" action="{{ url_for('financeiro.atualizar_valor_mensalidade_padrao') }}">
+                <label><strong>Mensalidade: R$</strong></label>
+                <input type="number" step="0.01" name="novo_valor" placeholder="Ex: 30.00" required style="width:80px;">
+                <input type="hidden" name="mes" value="{{ mes }}">
+                <button type="submit">Atualizar</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MENSALIDADES DO PLANTEL -->
+    <div class="mensalidades-header">
+        <h2>Mensalidades do Plantel</h2>
+    </div>
+
+    <table class="tabela-financeira">
+        <thead>
+            <tr>
+                <th>Jogador</th>
+                <th>Valor</th>
+                <th>Status</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for j in jogadores %}
+            {% set m = mensalidades|selectattr("jogador_id", "equalto", j.id)|first %}
+            <tr>
+                <td>{{ j.nome }}</td>
+                <td>R$ {{ '%.2f'|format(m.valor) }}</td>
+                <td>
+                    {% if m.pago %}
+                        ✅ {{ m.data_pagamento.strftime('%d/%m/%Y') }}
+                    {% else %}
+                        ❌ Pendente
+                    {% endif %}
+                </td>
+                <td>
+                    {% if not m.pago %}
+                        <!-- Baixar -->
+                        <a href="{{ url_for('financeiro.registrar_pagamento_mensalidade', mensalidade_id=m.id) }}" title="Dar baixa">✅</a>
+                    {% else %}
+                        <!-- Cancelar baixa -->
+                        <form action="{{ url_for('financeiro.cancelar_baixa_mensalidade', id=m.id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Cancelar baixa desta mensalidade?')">
+                            <button type="submit" title="Cancelar baixa" style="background:none;border:none;cursor:pointer;">↩️</button>
+                        </form>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- SAÍDAS DO CLUBE -->
+    <h2>Saídas do Clube no Mês</h2>
+    <table class="tabela-financeira">
+        <thead>
+            <tr>
+                <th>Data</th>
+                <th>Descrição</th>
+                <th>Categoria</th>
+                <th>Valor</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for s in saidas %}
+            <tr>
+                <td>{{ s.data.strftime('%d/%m/%Y') }}</td>
+                <td>{{ s.descricao }}</td>
+                <td>{{ s.categoria }}</td>
+                <td style="color: red;">R$ {{ '%.2f'|format(s.valor) }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

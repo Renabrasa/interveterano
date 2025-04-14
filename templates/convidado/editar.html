@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Editar Convidado</h1>
+
+<form method="POST" enctype="multipart/form-data" class="form-jogador">
+    <input type="text" name="nome" value="{{ convidado.nome }}" required>
+
+    <select name="categoria" required>
+        {% for cat in categorias %}
+            <option value="{{ cat.id }}" {% if convidado.categoria_id == cat.id %}selected{% endif %}>{{ cat.nome }}</option>
+        {% endfor %}
+    </select>
+
+    <select name="posicao" required>
+        {% for pos in posicoes %}
+            <option value="{{ pos.id }}" {% if convidado.posicao_id == pos.id %}selected{% endif %}>{{ pos.nome }}</option>
+        {% endfor %}
+    </select>
+
+    <select name="pe_preferencial" required>
+        <option value="Direito" {% if convidado.pe_preferencial == 'Direito' %}selected{% endif %}>Direito</option>
+        <option value="Esquerdo" {% if convidado.pe_preferencial == 'Esquerdo' %}selected{% endif %}>Esquerdo</option>
+        <option value="Ambos" {% if convidado.pe_preferencial == 'Ambos' %}selected{% endif %}>Ambos</option>
+    </select>
+
+    <input type="file" name="foto" accept="image/*">
+    {% if convidado.foto %}
+        <p>Foto atual:</p>
+        <img src="data:image/jpeg;base64,{{ convidado.foto }}" width="100" height="100" style="object-fit: cover; border-radius: 5px;">
+    {% endif %}
+
+    <button type="submit">Salvar Alterações</button>
+    <a href="{{ url_for('convidado.exibir_convidados') }}">Cancelar</a>
+</form>
+{% endblock %}

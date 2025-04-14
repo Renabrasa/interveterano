@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="container-relatorios">
+    <h1>📄 Relatórios do Clube</h1>
+
+    <div class="box-relatorio">
+        <h3>📋 Mensalidades</h3>
+        <p>Relatório por mês com status de pagamento (baixadas, a vencer, vencidas).</p>
+        <a href="{{ url_for('financeiro.relatorio_mensalidades', mes=mes) }}" class="botao-relatorio">Gerar Relatório</a>
+    </div>
+<!--
+    <div class="box-relatorio">
+        <h3>📊 Performance</h3>
+        <p>Ranking de gols, assistências e participações dos jogadores.</p>
+        <a href="{{ url_for('financeiro.relatorio_performance') }}" class="botao-relatorio">Gerar Relatório</a>
+    </div>
+--> 
+    <div class="box-relatorio">
+        <h3>💰 Financeiro</h3>
+        <p>Resumo das entradas, saídas e saldo acumulado por mês.</p>
+        <li><a href="{{ url_for('financeiro.relatorios_financeiros') }}">📊 Relatórios Financeiros Gerenciais</a></li>
+    </div>
+   
+</div>
+
+{% endblock %}

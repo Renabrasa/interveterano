@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Clube Inter Veterano</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/financeiro.css') }}">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+
+    <!-- Botão hambúrguer -->
+    <input type="checkbox" id="menu-toggle">
+    <label for="menu-toggle" class="menu-icon">☰</label>
+
+    <div class="wrapper">
+        <div class="layout">
+            <aside class="sidebar">
+                <h2>Inter Veterano</h2>
+                <nav>
+                    <a href="{{ url_for('home') }}">🏠 <span>Home</span></a>
+                    <a href="{{ url_for('plantel.exibir_plantel') }}">🧑‍🤝‍🧑 <span>Plantel</span></a>
+                    <a href="{{ url_for('convidado.exibir_convidados') }}">🙋‍♂️ <span>Convidados</span></a>
+                    <a href="{{ url_for('calendario.exibir_calendario') }}">📅 <span>Calendário</span></a>
+                    <a href="{{ url_for('performance.index') }}">📊 <span>Performance</span></a>
+                    <a href="{{ url_for('performance.graficos') }}">📈 Gráficos</a>
+                    <a href="{{ url_for('performance.ranking') }}">🏅 Ranking</a>
+                    <a href="{{ url_for('financeiro.exibir_entradas') }}">💰 Financeiro</a>
+                    <a href="{{ url_for('financeiro.relatorios') }}">📄 Relatórios</a>
+                    <a href="{{ url_for('auth.logout') }}">🔐 Sair</a>
+                </nav>
+            </aside>
+                  
+            <main class="content">
+                {% block content %}{% endblock %}
+            </main>
+        </div>
+    </div>
+    
+</body>
+</html>

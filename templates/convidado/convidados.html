@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<!-- ALERTAS -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    {% for categoria, mensagem in messages %}
+      <div class="alerta {{ categoria }}">{{ mensagem }}</div>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+
+<h1>Cadastro de Convidados</h1>
+
+
+<form action="{{ url_for('convidado.adicionar_convidado') }}" method="POST" enctype="multipart/form-data" class="form-jogador">
+    <input type="text" name="nome" placeholder="Nome do Convidado" required>
+
+    <select name="categoria" required>
+        <option value="">Selecione a Categoria</option>
+        {% for cat in categorias %}
+            <option value="{{ cat.id }}">{{ cat.nome }}</option>
+        {% endfor %}
+    </select>
+
+    <select name="posicao" required>
+        <option value="">Selecione a Posição</option>
+        {% for pos in posicoes %}
+            <option value="{{ pos.id }}">{{ pos.nome }}</option>
+        {% endfor %}
+    </select>
+
+    <select name="pe_preferencial" required>
+        <option value="">Pé Preferencial</option>
+        <option value="Direito">Direito</option>
+        <option value="Esquerdo">Esquerdo</option>
+        <option value="Ambos">Ambos</option>
+    </select>
+
+    <input type="file" name="foto" accept="image/*">
+
+    <button type="submit">Salvar</button>
+</form>
+
+<h2>Convidados Cadastrados</h2>
+<table>
+    <thead>
+        <tr>
+            <th>Nome</th>
+            <th>Categoria</th>
+            <th>Posição</th>
+            <th>Pé</th>
+            <th>Foto</th>
+            <th>Ações</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for convidado in convidados %}
+        <tr>
+            <td>{{ convidado.nome }}</td>
+            <td>{{ convidado.categoria.nome }}</td>
+            <td>{{ convidado.posicao.nome }}</td>
+            <td>{{ convidado.pe_preferencial }}</td>
+            <td>
+                {% if convidado.foto %}
+                    <img src="data:image/jpeg;base64,{{ convidado.foto }}" width="50" height="50" style="object-fit: cover; border-radius: 5px;">
+                {% else %}
+                    Sem foto
+                {% endif %}
+            </td>
+            <td>
+                <a href="{{ url_for('convidado.editar_convidado', id=convidado.id) }}">Editar</a> |
+                <a href="{{ url_for('convidado.excluir_convidado', id=convidado.id) }}">Excluir</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<script>
+    setTimeout(() => {
+       document.querySelectorAll('.alerta').forEach(el => el.style.display = 'none');
+   }, 5000);
+</script>
+{% endblock %}

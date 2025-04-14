@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+
+<!--{% set ano, mes_num = mes.split('-')|map('int') %}
+{% set anterior = (mes_num - 1) if mes_num > 1 else 12 %}
+{% set proximo = (mes_num + 1) if mes_num < 12 else 1 %}
+{% set ano_ant = (ano - 1) if mes_num == 1 else ano %}
+{% set ano_prox = (ano + 1) if mes_num == 12 else ano %}
+{% set mes_anterior = "{}-{:02d}".format(ano_ant, anterior) %}
+{% set mes_proximo = "{}-{:02d}".format(ano_prox, proximo) %}
+-->
+{% block content %}
+<div class="painel-container">
+    <h1>Financeiro - Resumo do Mês</h1>
+
+    <div class="tabs">
+        <a href="{{ url_for('financeiro.exibir_entradas', mes=mes) }}" class="tab">Entradas</a>
+        <a href="{{ url_for('financeiro.exibir_saidas', mes=mes) }}" class="tab">Saídas</a>
+        <a href="{{ url_for('financeiro.exibir_saldo', mes=mes) }}" class="tab active">Resumo</a>
+    </div>
+
+    <form method="GET" action="{{ url_for('financeiro.exibir_saldo') }}" class="filtro-mes">
+        <button type="button" onclick="mudarMes(-1)">◀</button>
+        <input type="month" name="mes" value="{{ mes }}" onchange="this.form.submit()">
+        <button type="button" onclick="mudarMes(1)">▶</button>
+    </form>
+
+    {% if mes == mes_primeiro %}
+    <form method="POST" style="margin-top: 20px;">
+        <label><strong>Saldo inicial do sistema:</strong></label>
+        <input type="number" step="0.01" name="saldo_inicial" value="{{ saldo_inicial }}" required>
+        <button type="submit">Atualizar</button>
+    </form>
+    {% else %}
+    <div style="margin-top: 20px;">
+        <strong>Saldo inicial do sistema:</strong> R$ {{ '%.2f'|format(saldo_inicial) }}
+    </div>
+    {% endif %}
+
+    <div class="cards-resumo">
+        <div class="card-resumo entrada">
+            <h3>Entradas Acumuladas</h3>
+            <p>R$ {{ '%.2f'|format(entradas) }}</p>
+        </div>
+        <div class="card-resumo saida">
+            <h3>Saídas Acumuladas</h3>
+            <p>R$ {{ '%.2f'|format(saidas) }}</p>
+        </div>
+        <div class="card-resumo saldo">
+            <h3>Saldo Atual</h3>
+            <p style="color: {{ 'green' if saldo >= 0 else 'red' }}">R$ {{ '%.2f'|format(saldo) }}</p>
+        </div>
+    </div>
+</div>
+<script>
+    const inputMes = document.querySelector('input[name="mes"]');
+
+    function mudarMes(offset) {
+        let [ano, mes] = inputMes.value.split('-').map(Number);
+        mes += offset;
+
+        if (mes < 1) {
+            mes = 12;
+            ano -= 1;
+        } else if (mes > 12) {
+            mes = 1;
+            ano += 1;
+        }
+
+        const novoMes = `${ano}-${mes.toString().padStart(2, '0')}`;
+        window.location.href = `?mes=${novoMes}`;
+    }
+</script>
+
+{% endblock %}

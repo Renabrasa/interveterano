@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="painel-container">
+    <h1>📊 Relatórios Financeiros Gerenciais</h1>
+
+    <div class="cards-relatorios-gerenciais">
+        <!-- FLUXO DE CAIXA COMPARATIVO -->
+        <div class="card-relatorio">
+            <h3>📈 Fluxo de Caixa Comparativo</h3>
+            <form method="GET" action="{{ url_for('financeiro.relatorio_fluxo_caixa') }}">
+                <label>Início:</label>
+                <input type="month" name="inicio" required>
+                <label>Fim:</label>
+                <input type="month" name="fim" required>
+                <button type="submit">Gerar Relatório</button>
+            </form>
+        </div>
+
+        <!-- FLUXO DE CAIXA ANALÍTICO -->
+        <div class="card-relatorio">
+            <h3>📘 Fluxo de Caixa Analítico</h3>
+            <form method="GET" action="{{ url_for('financeiro.relatorio_fluxo_caixa_analitico') }}">
+                <label>Início:</label>
+                <input type="month" name="inicio" required>
+                <label>Fim:</label>
+                <input type="month" name="fim" required>
+                <button type="submit">Gerar Relatório</button>
+            </form>
+        </div>
+
+        <!-- INADIMPLÊNCIA -->
+        <div class="card-relatorio">
+            <h3>🚨 Inadimplência</h3>
+            <form method="GET" action="{{ url_for('financeiro.relatorio_inadimplencia') }}">
+                <label>Início:</label>
+                <input type="month" name="inicio" required>
+                <label>Fim:</label>
+                <input type="month" name="fim" required>
+                <button type="submit">Gerar Relatório</button>
+            </form>
+        </div>
+
+        <!-- RELATÓRIO INDIVIDUAL -->
+        <div class="card-relatorio">
+            <h3>🧑 Relatório Individual</h3>
+            <form method="GET" action="{{ url_for('financeiro.relatorio_individual') }}">
+                <label>Jogador:</label>
+                <select name="jogador_id" required>
+                    {% for jogador in jogadores %}
+                        <option value="{{ jogador.id }}">{{ jogador.nome }}</option>
+                    {% endfor %}
+                </select>
+                <button type="submit">Gerar Relatório</button>
+            </form>
+        </div>
+
+        <!-- RESUMO ANUAL -->
+        <div class="card-relatorio">
+            <h3>📅 Resumo Anual de Movimento</h3>
+            <form method="GET" action="{{ url_for('financeiro.relatorio_resumo_anual') }}">
+                <label>Ano:</label>
+                <input type="number" name="ano" value="{{ ano }}" min="2020" max="2100" required>
+                <button type="submit">Gerar Relatório</button>
+            </form>
+        </div>
+
+        <!-- SAÍDAS DETALHADAS -->
+        <div class="card-relatorio">
+            <h3>💸 Relatório de Saídas Detalhadas</h3>
+            <form method="GET" action="{{ url_for('financeiro.relatorio_saidas_detalhadas') }}">
+                <label>Início:</label>
+                <input type="month" name="inicio" required>
+                <label>Fim:</label>
+                <input type="month" name="fim" required>
+                <button type="submit">Gerar Relatório</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
