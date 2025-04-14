@@ -12,7 +12,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db.init_app(app)
 
 with app.app_context():
-    categorias = ['Jogador', 'Treinador', 'Convidado', 'Presidente']
+    categorias = ['Jogador', 'Treinador', 'Convidado', 'Presidente', 'Goleiro']
     for nome in categorias:
         if not Categoria.query.filter_by(nome=nome).first():
             db.session.add(Categoria(nome=nome))

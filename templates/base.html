@@ -17,8 +17,11 @@
     <div class="wrapper">
         <div class="layout">
             <aside class="sidebar">
-                <h2>Inter Veterano</h2>
-                <nav>
+                <div style="display: flex; align-items: center; gap: 10px; padding: 10px;">
+                    <img src="{{ url_for('static', filename='img/logoredondo.png') }}" alt="Logo Inter" width="40" height="40" style="border-radius: 50%;">
+                    <h2 style="margin: 0; font-size: 1.2em; color: white;">Inter Veterano</h2>
+                </div>
+               <nav>
                     <a href="{{ url_for('home') }}">🏠 <span>Home</span></a>
                     <a href="{{ url_for('plantel.exibir_plantel') }}">🧑‍🤝‍🧑 <span>Plantel</span></a>
                     <a href="{{ url_for('convidado.exibir_convidados') }}">🙋‍♂️ <span>Convidados</span></a>

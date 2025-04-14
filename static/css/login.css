@@ -1,0 +1,72 @@
+body {
+    margin: 0;
+    padding: 0;
+    background: url('../img/fundo_login.jpg') no-repeat center center fixed;
+    background-size: cover;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+.login-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    backdrop-filter: brightness(0.6);
+}
+
+.login-box {
+    background-color: rgba(0, 0, 0, 0.75);
+    padding: 40px;
+    border-radius: 15px;
+    box-shadow: 0 0 25px rgba(255, 0, 0, 0.6);
+    text-align: center;
+    color: white;
+    width: 300px;
+}
+
+.login-box h2 {
+    margin: 0 0 10px;
+    color: #ff4c4c;
+}
+
+.login-box p {
+    margin-bottom: 30px;
+    font-size: 14px;
+}
+
+.login-box input[type="text"],
+.login-box input[type="password"] {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border: none;
+    border-radius: 5px;
+}
+
+.login-box button {
+    width: 100%;
+    padding: 10px;
+    background-color: #b30000;
+    color: white;
+    font-weight: bold;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.login-box button:hover {
+    background-color: #e60000;
+}
+
+.login-box .voltar {
+    display: block;
+    margin-top: 15px;
+    color: #ccc;
+    font-size: 13px;
+    text-decoration: none;
+}
+
+.login-box .voltar:hover {
+    text-decoration: underline;
+}
