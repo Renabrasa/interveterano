@@ -40,6 +40,32 @@
             </main>
         </div>
     </div>
-    
-</body>
+    <style>
+        .alerta {
+            padding: 10px;
+            margin: 10px;
+            border-radius: 5px;
+            color: white;
+            background-color: #28a745; /* verde sucesso */
+            font-weight: bold;
+            text-align: center;
+        }
+        .alerta.erro {
+            background-color: #dc3545; /* vermelho erro */
+        }
+      </style>
+      
+      <script>
+        setTimeout(() => {
+            document.querySelectorAll('.alerta').forEach(el => el.style.display = 'none');
+        }, 4000); // desaparece em 4 segundos
+      </script>
+      {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for categoria, mensagem in messages %}
+          <div class="alerta {{ categoria }}">{{ mensagem }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+   </body>
 </html>
