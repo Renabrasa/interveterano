@@ -16,8 +16,8 @@ def login_obrigatorio():
 @plantel_bp.route('/plantel')
 @login_required
 def exibir_plantel():
-    retorno = login_obrigatorio()
-    if retorno: return retorno
+    #retorno = login_obrigatorio()
+    #if retorno: return retorno
     
     jogadores = Jogador.query.filter_by(ativo=True).all()
     categorias = Categoria.query.all()
@@ -27,6 +27,7 @@ def exibir_plantel():
 import base64
 
 @plantel_bp.route('/plantel/adicionar', methods=['POST'])
+@login_required
 def adicionar_jogador():
     from sqlalchemy import func
     nome = request.form['nome']
@@ -60,6 +61,7 @@ def adicionar_jogador():
 
 
 @plantel_bp.route('/plantel/excluir/<int:id>', methods=['GET'])
+@login_required
 def excluir_jogador(id):
     jogador = Jogador.query.get_or_404(id)
     jogador.ativo = False
@@ -70,6 +72,7 @@ def excluir_jogador(id):
 
 
 @plantel_bp.route('/plantel/editar/<int:id>', methods=['GET', 'POST'])
+@login_required
 def editar_jogador(id):
     jogador = Jogador.query.get_or_404(id)
     categorias = Categoria.query.all()

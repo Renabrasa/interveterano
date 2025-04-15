@@ -14,9 +14,7 @@ def login_obrigatorio():
 @convidado_bp.route('/convidados')
 @login_required
 def exibir_convidados():
-    retorno = login_obrigatorio()
-    if retorno: return retorno
-    
+        
     convidados = Convidado.query.all()
     categorias = Categoria.query.all()
     posicoes = Posicao.query.all()
@@ -25,6 +23,7 @@ def exibir_convidados():
 import base64
 
 @convidado_bp.route('/convidados/adicionar', methods=['POST'])
+@login_required
 def adicionar_convidado():
     from sqlalchemy import func
     from flask import flash
@@ -59,6 +58,7 @@ def adicionar_convidado():
 
 
 @convidado_bp.route('/convidados/excluir/<int:id>')
+@login_required
 def excluir_convidado(id):
     convidado = Convidado.query.get_or_404(id)
     db.session.delete(convidado)
@@ -66,6 +66,7 @@ def excluir_convidado(id):
     return redirect(url_for('convidado.exibir_convidados'))
 
 @convidado_bp.route('/convidados/editar/<int:id>', methods=['GET', 'POST'])
+@login_required
 def editar_convidado(id):
     convidado = Convidado.query.get_or_404(id)
     categorias = Categoria.query.all()

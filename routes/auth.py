@@ -1,6 +1,5 @@
 from flask import Blueprint, render_template, request, redirect, url_for, session, flash
-
-
+from functools import wraps
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -13,7 +12,9 @@ def login():
         if usuario == 'interadmin' and senha == 'Intervet2025':
             session['logado'] = True
             flash('Login realizado com sucesso!', 'sucesso')
-            return redirect(url_for('home'))
+
+            proxima_url = session.pop('proxima_url', None)
+            return redirect(proxima_url or url_for('home'))
         else:
             flash('Usuário ou senha inválidos.', 'erro')
             return redirect(url_for('auth.login'))
@@ -26,13 +27,12 @@ def logout():
     flash('Logout realizado com sucesso!', 'sucesso')
     return redirect(url_for('home'))
 
-from functools import wraps
-from flask import session, redirect, url_for, flash
-
+# Decorador para rotas protegidas
 def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if not session.get('logado'):
+            session['proxima_url'] = request.path
             flash('Você precisa estar logado para acessar esta página.', 'erro')
             return redirect(url_for('auth.login'))
         return f(*args, **kwargs)

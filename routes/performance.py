@@ -18,9 +18,7 @@ def login_obrigatorio():
 @performance_bp.route('/performance')
 @login_required
 def index():
-    retorno = login_obrigatorio()
-    if retorno: return retorno
-
+    
     jogadores = Jogador.query.all()
     convidados = Convidado.query.all()
     jogos = Jogo.query.order_by(Jogo.data.desc()).all()
@@ -43,9 +41,9 @@ def index():
 # ADICIONAR (PROTEGIDA)
 # ---------------------
 @performance_bp.route('/performance/adicionar', methods=['POST'])
+@login_required
 def adicionar_performance():
-    retorno = login_obrigatorio()
-    if retorno: return retorno
+    
 
     jogo_id = request.form['jogo_id']
     tipo = request.form['tipo']
@@ -79,9 +77,9 @@ def adicionar_performance():
 # EDITAR (PROTEGIDA)
 # ---------------------
 @performance_bp.route('/performance/editar/<int:id>', methods=['POST'])
+@login_required
 def editar_performance(id):
-    retorno = login_obrigatorio()
-    if retorno: return retorno
+    
 
     perf = Performance.query.get_or_404(id)
     tipo = request.form['tipo']
@@ -116,9 +114,9 @@ def editar_performance(id):
 # EXCLUIR (PROTEGIDA)
 # ---------------------
 @performance_bp.route('/performance/excluir/<int:id>', methods=['POST'])
+@login_required
 def excluir_performance(id):
-    retorno = login_obrigatorio()
-    if retorno: return retorno
+    
 
     perf = Performance.query.get_or_404(id)
     db.session.delete(perf)

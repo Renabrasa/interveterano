@@ -72,6 +72,7 @@ def painel_mensal():
 # AÇÕES SOBRE MENSALIDADES
 # ----------------------------
 @financeiro_bp.route('/financeiro/pagar/<int:mensalidade_id>')
+@login_required
 def registrar_pagamento_mensalidade(mensalidade_id):
     mensalidade = Mensalidade.query.get_or_404(mensalidade_id)
     mensalidade.pago = True
@@ -81,6 +82,7 @@ def registrar_pagamento_mensalidade(mensalidade_id):
     return redirect(url_for('financeiro.exibir_entradas', mes=mensalidade.mes_referencia))
 
 @financeiro_bp.route('/financeiro/mensalidade/<int:id>/cancelar', methods=['POST'])
+@login_required
 def cancelar_baixa_mensalidade(id):
     mensalidade = Mensalidade.query.get_or_404(id)
     mensalidade.pago = False
@@ -90,6 +92,7 @@ def cancelar_baixa_mensalidade(id):
     return redirect(url_for('financeiro.exibir_entradas', mes=mensalidade.mes_referencia))
 
 @financeiro_bp.route('/financeiro/mensalidade/<int:id>/excluir', methods=['POST'])
+@login_required
 def excluir_mensalidade(id):
     mensalidade = Mensalidade.query.get_or_404(id)
     mes = mensalidade.mes_referencia
@@ -102,6 +105,7 @@ def excluir_mensalidade(id):
 # ATUALIZAÇÃO GLOBAL DO VALOR PADRÃO
 # ----------------------------
 @financeiro_bp.route('/financeiro/atualizar_valor', methods=['POST'])
+@login_required
 def atualizar_valor_mensalidade_padrao():
     novo_valor = float(request.form['novo_valor'])
     mes = request.form['mes']
@@ -184,6 +188,7 @@ def relatorios_financeiros():
 # FLUXO DE CAIXA COMPARATIVO (PDF)
 # ----------------------------
 @financeiro_bp.route('/financeiro/relatorios/fluxo_caixa')
+@login_required
 def relatorio_fluxo_caixa():
     from reportlab.lib.pagesizes import A4
     from reportlab.pdfgen import canvas
@@ -290,9 +295,7 @@ def relatorio_fluxo_caixa():
 @financeiro_bp.route('/financeiro/entradas')
 @login_required
 def exibir_entradas():
-    retorno = login_obrigatorio()
-    if retorno: return retorno
-    
+        
     mes = request.args.get('mes') or datetime.today().strftime('%Y-%m')
 
     jogadores = Jogador.query.join(Categoria).filter(
@@ -317,6 +320,7 @@ def exibir_entradas():
 # SAÍDAS
 # ==========================
 @financeiro_bp.route('/financeiro/saidas', methods=['GET', 'POST'])
+@login_required
 def exibir_saidas():
     mes = request.args.get('mes') or datetime.today().strftime('%Y-%m')
     if request.method == 'POST':
@@ -345,6 +349,7 @@ def exibir_saidas():
     return render_template('financeiro/saidas.html', mes=mes, saidas=saidas)
 
 @financeiro_bp.route('/financeiro/saidas/excluir/<int:id>')
+@login_required
 def excluir_saida(id):
     saida = MovimentacaoFinanceira.query.get_or_404(id)
     mes = saida.data.strftime('%Y-%m')
@@ -357,6 +362,7 @@ def excluir_saida(id):
 # SALDO
 # ==========================
 @financeiro_bp.route('/financeiro/saldo', methods=['GET', 'POST'])
+@login_required
 def exibir_saldo():
     mes = request.args.get('mes') or datetime.today().strftime('%Y-%m')
     ano, mes_num = map(int, mes.split('-'))
@@ -394,13 +400,12 @@ def exibir_saldo():
 @financeiro_bp.route('/financeiro/relatorios')
 @login_required
 def relatorios():
-    retorno = login_obrigatorio()
-    if retorno: return retorno
-    
+      
     return render_template('financeiro/relatorios.html')
 
 
 @financeiro_bp.route('/financeiro/relatorios/inadimplencia')
+@login_required
 def relatorio_inadimplencia():
     from flask import send_file
     mes = request.args.get('mes') or datetime.today().strftime('%Y-%m')
@@ -457,6 +462,7 @@ def relatorio_inadimplencia():
 
 
 @financeiro_bp.route('/financeiro/relatorios/individual')
+@login_required
 def relatorio_individual():
     from flask import request, send_file
     jogador_id = request.args.get('jogador_id')
@@ -510,6 +516,7 @@ def relatorio_individual():
 
 
 @financeiro_bp.route('/financeiro/relatorios/resumo_anual')
+@login_required
 def relatorio_resumo_anual():
     from flask import request, send_file
     ano = int(request.args.get('ano') or datetime.today().year)
@@ -577,6 +584,7 @@ def relatorio_resumo_anual():
 
 
 @financeiro_bp.route('/financeiro/relatorios/saidas_detalhadas')
+@login_required
 def relatorio_saidas_detalhadas():
     from flask import request, send_file
     mes = request.args.get('mes') or datetime.today().strftime('%Y-%m')
@@ -634,12 +642,14 @@ def relatorio_saidas_detalhadas():
 
 
 @financeiro_bp.route('/financeiro/relatorio_performance')
+@login_required
 def relatorio_performance():
     return "<h1>Relatório de performance ainda não implementado.</h1>"
 
 
 
 @financeiro_bp.route('/financeiro/gerar_mensalidades', methods=['POST'])
+@login_required
 def gerar_mensalidades():
     mes = request.form['mes']
     valor_mensalidade = float(request.form['valor_mensalidade'])
@@ -670,6 +680,7 @@ def gerar_mensalidades():
 
 
 @financeiro_bp.route('/financeiro/relatorios/fluxo_caixa_analitico')
+@login_required
 def relatorio_fluxo_caixa_analitico():
     from reportlab.lib.colors import red, blue, green, black
     from reportlab.lib.pagesizes import A4
@@ -822,6 +833,7 @@ def relatorio_fluxo_caixa_analitico():
 
 
 @financeiro_bp.route('/financeiro/relatorios/gerar_fluxo_caixa')
+@login_required
 def gerar_fluxo_caixa():
     if 'analitico' in request.args:
         return redirect(url_for('financeiro.relatorio_fluxo_caixa_analitico', inicio=request.args['inicio'], fim=request.args['fim']))
