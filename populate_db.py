@@ -17,7 +17,7 @@ with app.app_context():
         if not Categoria.query.filter_by(nome=nome).first():
             db.session.add(Categoria(nome=nome))
 
-    posicoes = ['Goleiro', 'Zagueiro', 'Lateral', 'Volante', 'Meia', 'Atacante','Centroavante', 'Ponta', 'Treinador']
+    posicoes = ['Goleiro', 'Zagueiro', 'Lateral', 'Volante', 'Meia', 'Atacante','Centroavante', 'Ponta', 'Treinador','Presidente']
     for nome in posicoes:
         if not Posicao.query.filter_by(nome=nome).first():
             db.session.add(Posicao(nome=nome))
