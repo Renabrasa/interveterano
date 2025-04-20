@@ -36,6 +36,37 @@ app.register_blueprint(auth_bp)
 def home():
     return render_template('home.html')
 
+
+# ================================
+# EXECUÇÃO DO POPULATE
+# ================================
+
+
+@app.route('/rodar-populate')
+def rodar_populate():
+    chave = request.args.get('chave')
+    if chave != 'intersegura2025':
+        return "Acesso não autorizado", 403
+
+    from models.models import db, Categoria, Posicao
+
+    db.create_all()
+
+    categorias = ['Jogador', 'Treinador', 'Convidado', 'Presidente', 'Goleiro']
+    for nome in categorias:
+        if not Categoria.query.filter_by(nome=nome).first():
+            db.session.add(Categoria(nome=nome))
+
+    posicoes = ['Goleiro', 'Zagueiro', 'Lateral', 'Volante', 'Meia', 'Atacante','Centroavante', 'Ponta', 'Treinador','Presidente']
+    for nome in posicoes:
+        if not Posicao.query.filter_by(nome=nome).first():
+            db.session.add(Posicao(nome=nome))
+
+    db.session.commit()
+    return "✅ Banco populado com sucesso!"
+
+
+
 # ================================
 # EXECUÇÃO LOCAL
 # ================================
