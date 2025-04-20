@@ -1,4 +1,4 @@
-from flask import Flask, render_template
+from flask import Flask, render_template,request
 from models.models import db
 from routes.plantel import plantel_bp
 from routes.convidados import convidado_bp
