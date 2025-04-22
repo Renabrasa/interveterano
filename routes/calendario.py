@@ -31,17 +31,31 @@ def listar_jogos():
 def criar_jogo():
     if not session.get('logado'):
         return jsonify({"erro": "Acesso não autorizado"}), 403
-    dados = request.json
-    novo = Jogo(
-        titulo=dados['titulo'],
-        data=datetime.fromisoformat(dados['data']),
-        local=dados.get('local'),
-        inter_mandante=dados.get('inter_mandante', False),
-        resultado=dados.get('resultado')  # NOVO
-    )
-    db.session.add(novo)
-    db.session.commit()
-    return jsonify({'status': 'ok', 'id': novo.id})
+
+    dados = request.get_json()
+
+    try:
+        data_formatada = dados.get('data')
+        if not data_formatada:
+            return jsonify({'erro': 'Data não informada'}), 400
+
+        data_obj = datetime.fromisoformat(data_formatada)
+
+        novo = Jogo(
+            titulo=dados.get('titulo', ''),
+            data=data_obj,
+            local=dados.get('local', ''),
+            inter_mandante=bool(dados.get('inter_mandante', False)),
+            resultado=dados.get('resultado')  # pode ser None
+        )
+        db.session.add(novo)
+        db.session.commit()
+
+        return jsonify({'status': 'ok', 'id': novo.id})
+
+    except Exception as e:
+        return jsonify({'erro': f'Erro ao criar jogo: {str(e)}'}), 400
+
 
 
 
