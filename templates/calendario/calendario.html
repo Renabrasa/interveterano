@@ -7,7 +7,9 @@
     <a href="#" id="btn-exportar" class="botao">📤 Exportar Agenda</a>
 </div>
 
-<div id="calendar"></div>
+<div id="calendar-container">
+    <div id="calendar"></div>
+</div>
 
 <!-- Modal de Jogo -->
 <div id="jogo-modal" class="modal" style="display: none;">
@@ -71,7 +73,21 @@ document.addEventListener('DOMContentLoaded', function () {
             fetch(`/api/jogos/${info.event.id}`)
                 .then(res => res.json())
                 .then(jogo => abrirModal(jogo));
+        },
+
+        eventDidMount: function(info) {
+        // Acessa a célula do dia correspondente ao evento
+        const dia = info.event.start;
+        const seletor = `.fc-daygrid-day[data-date="${dia.toISOString().slice(0, 10)}"]`;
+
+        const celula = document.querySelector(seletor);
+        if (celula) {
+            celula.style.backgroundColor = '#ffe5e5';  // 🔴 tom claro de vermelho
+            celula.style.borderRadius = '5px';
         }
+  },
+
+
     });
 
     calendar.render();
@@ -104,7 +120,7 @@ function abrirModal(jogo = null, dataPadrao = null) {
         {% endif %}
     } else {
         document.getElementById('modal-title').innerText = "Novo Jogo";
-        document.getElementById('data').value = dataPadrao + 'T19:00';
+        document.getElementById('data').value = dataPadrao + 'T16:00';
     }
 
     document.getElementById('jogo-modal').style.display = 'flex';
