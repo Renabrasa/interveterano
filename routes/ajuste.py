@@ -8,7 +8,7 @@ ajuste_bp = Blueprint('ajuste', __name__)
 def ajustar_tabelas():
     try:
         with db.engine.begin() as conn:
-            conn.execute(text("ALTER TABLE performance ADD COLUMN gols_sofridos INTEGER DEFAULT 0"))
-        return "✅ Coluna gols_sofridos criada no banco do Render."
+            conn.execute(text("ALTER TABLE mensalidade ADD COLUMN isento_manual BOOLEAN DEFAULT FALSE"))
+        return "✅ Coluna isento_manual criada com sucesso no banco do Render."
     except Exception as e:
-        return f"⚠️ Erro ou coluna já existe: {str(e)}"
+        return f"⚠️ Erro ou já existe: {str(e)}"
