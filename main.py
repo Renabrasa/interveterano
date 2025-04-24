@@ -8,6 +8,8 @@ from routes.financeiro import financeiro_bp
 from routes.auth import auth_bp
 import os
 from routes.galeria import galeria_bp
+from sqlalchemy import text
+
 
 app = Flask(__name__)
 app.secret_key = 'inter-veterano-super-segura-2025'
@@ -45,7 +47,8 @@ def home():
 # ================================
 with app.app_context():
     try:
-        db.engine.execute("ALTER TABLE performance ADD COLUMN gols_sofridos INTEGER DEFAULT 0")
+        with db.engine.connect() as conn:
+        conn.execute(text("ALTER TABLE performance ADD COLUMN gols_sofridos INTEGER DEFAULT 0"))
         print("Coluna gols_sofridos adicionada com sucesso.")
     except Exception as e:
         print("Verificação da coluna gols_sofridos:", e)
