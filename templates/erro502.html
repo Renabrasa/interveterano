@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="erro-container">
+  <img src="{{ url_for('static', filename='img/erro502.png') }}" alt="Erro 502" class="erro-img">
+  <h1>Erro 502 - Bad Gateway</h1>
+  <p>Estamos enfrentando problemas na comunicação com o servidor.</p>
+  <p>Por favor, tente novamente mais tarde.</p>
+  <a href="{{ url_for('home') }}" class="btn-voltar">⬅ Voltar para a Home</a>
+</div>
+
+<style>
+.erro-container {
+  text-align: center;
+  margin-top: 60px;
+  padding: 20px;
+}
+.erro-img {
+  width: 100%;
+  max-width: 300px;
+  margin-bottom: 20px;
+}
+h1 {
+  color: #a00000;
+  margin-bottom: 10px;
+}
+p {
+  font-size: 16px;
+  color: #444;
+}
+.btn-voltar {
+  display: inline-block;
+  margin-top: 20px;
+  padding: 10px 20px;
+  background-color: #a00000;
+  color: white;
+  text-decoration: none;
+  border-radius: 5px;
+}
+.btn-voltar:hover {
+  background-color: #800000;
+}
+</style>
+{% endblock %}

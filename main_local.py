@@ -36,6 +36,17 @@ app.register_blueprint(galeria_bp)
 def home():
     return render_template('home.html')
 
+@app.route('/erro502')
+def simular_erro502():
+    from werkzeug.exceptions import BadGateway
+    raise BadGateway()
+
+
+@app.errorhandler(502)
+def erro_502(e):
+    return render_template('erro502.html'), 502
+
+
 # Executa a aplicação
 if __name__ == '__main__':
     app.run(debug=True)

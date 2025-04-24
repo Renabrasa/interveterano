@@ -43,6 +43,9 @@ app.register_blueprint(ajuste_bp)
 def home():
     return render_template('home.html')
 
+@app.errorhandler(502)
+def erro_502(e):
+    return render_template('erro502.html'), 502
 
 # ================================
 # EXECUÇÃO DO POPULATE
