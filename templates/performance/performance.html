@@ -33,6 +33,11 @@
     <label>Gols:</label>
     <input type="number" name="gols" value="0" min="0">
 
+    <div id="campo-gols-sofridos" style="visibility: hidden; height: 0; overflow: hidden;">
+        <label>Gols Sofridos:</label>
+        <input type="number" name="gols_sofridos" value="0" min="0">
+    </div>
+
     <label>Assistências:</label>
     <input type="number" name="assistencias" value="0" min="0">
 
@@ -48,19 +53,19 @@
 
 <h2>Histórico de Performance</h2>
 
-<!-- 🔎 FILTROS -->
+<!-- FILTROS -->
 <div class="filtros-performance" style="margin-bottom: 20px;">
-    <input type="text" id="filtro-texto" placeholder="🔍 Buscar por nome, jogo ou data..." style="padding: 10px; width: 100%; margin-bottom: 10px; border-radius: 5px; border: 1px solid #ccc;">
+    <input type="text" id="filtro-texto" placeholder="Buscar por nome, jogo ou data..." style="padding: 10px; width: 100%; margin-bottom: 10px; border-radius: 5px; border: 1px solid #ccc;">
 
     <select id="filtro-jogo" style="padding: 10px; border-radius: 5px; margin-right: 10px;">
-        <option value="">🎯 Todos os Jogos</option>
+        <option value="">Todos os Jogos</option>
         {% for jogo in jogos %}
             <option value="{{ jogo.titulo }}">{{ jogo.data.strftime('%d/%m') }} - {{ jogo.titulo }}</option>
         {% endfor %}
     </select>
 
     <select id="filtro-participante" style="padding: 10px; border-radius: 5px; margin-right: 10px;">
-        <option value="">👤 Todos os Participantes</option>
+        <option value="">Todos os Participantes</option>
         {% for j in jogadores %}
             <option value="{{ j.nome }}">{{ j.nome }} (Jogador)</option>
         {% endfor %}
@@ -79,6 +84,7 @@
             <th>Jogo</th>
             <th>Participante</th>
             <th>Gols</th>
+            <th>Gols Sofridos</th>
             <th>Assistências</th>
             <th>Participou</th>
             <th>Ações</th>
@@ -93,6 +99,7 @@
                 {% if p.jogador %}{{ p.jogador.nome }}{% else %}{{ p.convidado.nome }}{% endif %}
             </td>
             <td>{{ p.gols }}</td>
+            <td>{{ p.gols_sofridos if p.gols_sofridos is not none else '-' }}</td>
             <td>{{ p.assistencias }}</td>
             <td>{{ 'Sim' if p.participou else 'Não' }}</td>
             <td>
@@ -109,6 +116,11 @@
     const jogadores = {{ jogadores_json | tojson }};
     const convidados = {{ convidados_json | tojson }};
 
+    document.addEventListener('DOMContentLoaded', () => {
+        trocarParticipante();
+        document.getElementById('participante_id').addEventListener('change', atualizarVisibilidadeGols);
+    });
+
     function trocarParticipante() {
         const tipo = document.getElementById('tipo').value;
         const select = document.getElementById('participante_id');
@@ -122,16 +134,37 @@
             opt.textContent = `${p.nome} (${tipo === 'jogador' ? 'Jogador' : 'Convidado'})`;
             select.appendChild(opt);
         });
+
+        atualizarVisibilidadeGols();
     }
 
-    window.onload = trocarParticipante;
+    function atualizarVisibilidadeGols() {
+        const tipo = document.getElementById('tipo').value;
+        const participanteId = document.getElementById('participante_id').value;
+        const campoGolsSofridos = document.getElementById('campo-gols-sofridos');
 
-    // Oculta alertas
+        if (tipo === 'jogador') {
+            const jogador = jogadores.find(j => j.id == participanteId);
+            if (jogador && (jogador.posicao === 'Goleiro' || jogador.categoria === 'Goleiro')) {
+                campoGolsSofridos.style.visibility = 'visible';
+                campoGolsSofridos.style.height = 'auto';
+                campoGolsSofridos.style.overflow = 'visible';
+            } else {
+                campoGolsSofridos.style.visibility = 'hidden';
+                campoGolsSofridos.style.height = '0';
+                campoGolsSofridos.style.overflow = 'hidden';
+            }
+        } else {
+            campoGolsSofridos.style.visibility = 'hidden';
+            campoGolsSofridos.style.height = '0';
+            campoGolsSofridos.style.overflow = 'hidden';
+        }
+    }
+
     setTimeout(() => {
         document.querySelectorAll('.alerta').forEach(el => el.style.display = 'none');
     }, 5000);
 
-    // Filtro dinâmico completo
     const inputTexto = document.getElementById('filtro-texto');
     const inputJogo = document.getElementById('filtro-jogo');
     const inputPart = document.getElementById('filtro-participante');

@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>📸 Enviar Fotos do Jogo</h1>
+<form action="{{ url_for('galeria.envio_fotos', jogo_id=jogo.id) }}" method="POST" enctype="multipart/form-data">
+    <input type="file" name="fotos" accept="image/*" multiple required>
+    <button type="submit">Enviar Fotos</button>
+</form>
+<a href="{{ url_for('galeria.galeria') }}" class="botao-voltar">← Voltar à Galeria</a>
+{% endblock %}

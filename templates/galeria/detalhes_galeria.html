@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>📸 Fotos de {{ jogo.titulo }}</h1>
+
+<div style="display: flex; flex-wrap: wrap; gap: 10px;">
+  {% for foto in fotos %}
+    <img src="data:image/png;base64,{{ foto.imagem_base64 }}" style="width: 120px; height: auto; border-radius: 5px; box-shadow: 1px 1px 5px rgba(0,0,0,0.2);">
+  {% endfor %}
+</div>
+
+<a href="{{ url_for('galeria.galeria') }}" class="botao-voltar">← Voltar à Galeria</a>
+{% endblock %}

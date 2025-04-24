@@ -1,0 +1,57 @@
+.titulo-galeria {
+    text-align: center;
+    margin-bottom: 30px;
+    color: #800000;
+}
+
+.lista-jogos {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.card-jogo {
+    background: white;
+    border-left: 5px solid #800000;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.card-jogo h3 {
+    margin: 0;
+    font-size: 20px;
+}
+
+.card-jogo .data {
+    color: #555;
+    margin-bottom: 10px;
+}
+
+.acoes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.botao-acoes {
+    padding: 8px 12px;
+    background-color: #800000;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.botao-acoes:hover {
+    background-color: #a00000;
+}
+
+@media (max-width: 600px) {
+    .acoes {
+        flex-direction: column;
+    }
+}

@@ -7,6 +7,7 @@ from routes.performance import performance_bp
 from routes.financeiro import financeiro_bp
 from routes.auth import auth_bp
 import os
+from routes.galeria import galeria_bp
 
 app = Flask(__name__)
 app.secret_key = 'inter-veterano-super-segura-2025'
@@ -31,6 +32,8 @@ app.register_blueprint(calendario_bp)
 app.register_blueprint(performance_bp)
 app.register_blueprint(financeiro_bp)
 app.register_blueprint(auth_bp)
+app.register_blueprint(galeria_bp)
+
 
 @app.route('/')
 def home():
@@ -40,6 +43,12 @@ def home():
 # ================================
 # EXECUÇÃO DO POPULATE
 # ================================
+with app.app_context():
+    try:
+        db.engine.execute("ALTER TABLE performance ADD COLUMN gols_sofridos INTEGER DEFAULT 0")
+        print("Coluna gols_sofridos adicionada com sucesso.")
+    except Exception as e:
+        print("Verificação da coluna gols_sofridos:", e)
 
 
 # ================================

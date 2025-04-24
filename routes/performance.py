@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, request, redirect, url_for, session, flash, jsonify
-from models.models import db, Jogador, Convidado, Jogo, Performance
+from models.models import db, Jogador, Convidado, Jogo, Performance, Categoria
 from sqlalchemy import func
 from routes.auth import login_required
 
@@ -24,7 +24,13 @@ def index():
     jogos = Jogo.query.order_by(Jogo.data.desc()).all()
     performances = Performance.query.all()
 
-    jogadores_json = [{'id': j.id, 'nome': j.nome} for j in jogadores]
+    jogadores_json = [{
+       'id': j.id,
+       'nome': j.nome,
+       'posicao': j.posicao.nome if j.posicao else '',
+       'categoria': j.categoria.nome if j.categoria else ''
+    } for j in jogadores]
+
     convidados_json = [{'id': c.id, 'nome': c.nome} for c in convidados]
 
     return render_template(
@@ -49,6 +55,7 @@ def adicionar_performance():
     tipo = request.form['tipo']
     participante_id = request.form['participante_id']
     gols = int(request.form['gols'])
+    gols_sofridos = int(request.form.get('gols_sofridos') or 0)
     assistencias = int(request.form['assistencias'])
     participou = request.form.get('participou') == 'on'
 
@@ -66,6 +73,7 @@ def adicionar_performance():
         jogador_id=participante_id if tipo == 'jogador' else None,
         convidado_id=participante_id if tipo == 'convidado' else None,
         gols=gols,
+        gols_sofridos=gols_sofridos,  # ✅ aqui
         assistencias=assistencias,
         participou=participou
     )
@@ -86,6 +94,8 @@ def editar_performance(id):
     participante_id = request.form['participante_id']
     jogo_id = request.form['jogo_id']
     gols = int(request.form['gols'])
+    gols_sofridos = int(request.form.get('gols_sofridos') or 0)
+    print("GOLS SOFRIDOS:", gols_sofridos)
     assistencias = int(request.form['assistencias'])
     participou = request.form.get('participou') == 'on'
 
@@ -102,6 +112,7 @@ def editar_performance(id):
 
     perf.jogo_id = jogo_id
     perf.gols = gols
+    perf.gols_sofridos = gols_sofridos  # ✅ aqui
     perf.assistencias = assistencias
     perf.participou = participou
     perf.jogador_id = participante_id if tipo == 'jogador' else None
@@ -123,6 +134,32 @@ def excluir_performance(id):
     db.session.commit()
     return redirect(url_for('performance.index'))
 
+
+#
+# Rotas para goleiros
+#
+
+@performance_bp.route('/performance/goleiro/<int:jogador_id>/gols_sofridos')
+@login_required
+def grafico_gols_sofridos(jogador_id):
+    dados = db.session.query(
+        Jogo.data,
+        Jogo.titulo,
+        Performance.gols
+    ).join(Jogo).join(Jogador).join(Categoria).filter(
+        Performance.jogador_id == jogador_id,
+        (Jogador.posicao == 'Goleiro') | (Categoria.nome == 'Goleiro')
+    ).order_by(Jogo.data).all()
+
+    resultado = [
+        {'data': data.strftime('%d/%m'), 'titulo': titulo, 'gols': gols}
+        for data, titulo, gols in dados
+    ]
+    return jsonify(resultado)
+
+
+
+
 # ---------------------
 # GRÁFICOS (LIVRE)
 # ---------------------
@@ -140,10 +177,20 @@ def dados_graficos():
         .join(Performance, Performance.jogador_id == Jogador.id)\
         .filter(Performance.participou == True)\
         .group_by(Jogador.id).all()
-
+    
+    
     vitorias = db.session.query(func.count()).filter(Jogo.resultado == 'vitória').scalar()
     empates = db.session.query(func.count()).filter(Jogo.resultado == 'empate').scalar()
     derrotas = db.session.query(func.count()).filter(Jogo.resultado == 'derrota').scalar()
+
+    goleiros = db.session.query(Jogador.nome, func.sum(Performance.gols_sofridos))\
+    .join(Performance, Performance.jogador_id == Jogador.id)\
+    .filter(
+        Jogador.posicao.has(nome='Goleiro') |
+        Jogador.categoria.has(nome='Goleiro')
+    )\
+    .group_by(Jogador.id).all()
+ 
 
     def formatar(lista):
         return {'labels': [i[0] for i in lista], 'valores': [i[1] for i in lista]}
@@ -155,7 +202,8 @@ def dados_graficos():
         'resultados': {
             'labels': ['Vitórias', 'Empates', 'Derrotas'],
             'valores': [vitorias, empates, derrotas]
-        }
+        },
+        'goleiros': formatar(goleiros)  # 🔴 novo bloco incluído
     })
 
 @performance_bp.route('/performance/graficos')

@@ -61,7 +61,20 @@ class Jogo(db.Model):
     resultado = db.Column(db.String(20))  # vitória, empate, derrota
 
     
-#
+#MOsaico com as fotos de cada jogo 
+
+class FotoJogo(db.Model):
+    __tablename__ = 'foto_jogo'
+    id = db.Column(db.Integer, primary_key=True)
+    jogo_id = db.Column(db.Integer, db.ForeignKey('jogo.id'), nullable=False)
+    imagem_base64 = db.Column(db.Text, nullable=False)
+    data_envio = db.Column(db.DateTime, default=datetime.utcnow)
+
+    jogo = db.relationship("Jogo", backref="fotos")
+
+
+
+
 #
 #Modelos para performance
 #      
@@ -75,6 +88,7 @@ class Performance(db.Model):
     jogo_id = db.Column(db.Integer, db.ForeignKey('jogo.id'), nullable=False)
 
     gols = db.Column(db.Integer, default=0)
+    gols_sofridos = db.Column(db.Integer, default=0)  # ✅ aqui
     assistencias = db.Column(db.Integer, default=0)
     participou = db.Column(db.Boolean, default=True)
 
@@ -105,6 +119,7 @@ class Mensalidade(db.Model):
     valor = db.Column(db.Float, nullable=False)
     pago = db.Column(db.Boolean, default=False)
     data_pagamento = db.Column(db.Date)
+    isento_manual = db.Column(db.Boolean, default=False)
 
     jogador = db.relationship('Jogador', backref='mensalidades')
     

@@ -71,7 +71,7 @@ def painel_mensal():
 # ----------------------------
 # AÇÕES SOBRE MENSALIDADES
 # ----------------------------
-@financeiro_bp.route('/financeiro/pagar/<int:mensalidade_id>')
+@financeiro_bp.route('/financeiro/pagar/<int:mensalidade_id>',methods=['GET'])
 @login_required
 def registrar_pagamento_mensalidade(mensalidade_id):
     mensalidade = Mensalidade.query.get_or_404(mensalidade_id)
@@ -122,6 +122,28 @@ def atualizar_valor_mensalidade_padrao():
     return redirect(url_for('financeiro.exibir_entradas', mes=mes))
 
 
+
+
+# ----------------------------
+# Isenção manual de mensalidade
+# ----------------------------
+
+
+@financeiro_bp.route('/financeiro/isentar/<int:mensalidade_id>', methods=['POST'])
+@login_required
+def isentar_mensalidade(mensalidade_id):
+    mensalidade = Mensalidade.query.get_or_404(mensalidade_id)
+    mensalidade.valor = 0.00
+    mensalidade.pago = False  # garante que não fique "pago"
+    mensalidade.status = 'isento'  # opcional, caso use campo específico
+    db.session.commit()
+    flash('Mensalidade isenta com sucesso.', 'sucesso')
+    return redirect(request.referrer or url_for('financeiro.exibir_entradas'))
+
+
+
+
+
 # ----------------------------
 # RELATÓRIO DE MENSALIDADES (PDF)
 # ----------------------------
@@ -154,20 +176,26 @@ def relatorio_mensalidades():
     pdf.drawCentredString(largura / 2, altura - 50, f"RELATÓRIO DE MENSALIDADES - {mes}")
 
     y = altura - 100
-    def escrever_titulo(titulo, lista):
+    def escrever_titulo(titulo, lista,icone=None):
         nonlocal y
+        if icone:
+            icon_path = os.path.join('static', 'img', 'icons', icone)
+            if os.path.exists(icon_path):
+                pdf.drawImage(icon_path, 40, y - 1, width=14, height=14, mask='auto')
         pdf.setFont("Helvetica-Bold", 12)
         pdf.drawString(50, y, titulo)
         y -= 20
         pdf.setFont("Helvetica", 10)
         for m in lista:
-            pdf.drawString(60, y, f"{m.jogador.nome} - R$ {m.valor:.2f}")
-            y -= 15
+           status = "Isento" if m.valor == 0 else f"R$ {m.valor:.2f}"
+           pdf.drawString(60, y, f"{m.jogador.nome} - {status}")
+           y -= 15
         y -= 10
 
-    escrever_titulo("✅ Baixadas", baixadas)
-    escrever_titulo("❌ Vencidas", vencidas)
-    escrever_titulo("🟡 A Vencer", a_vencer)
+    escrever_titulo("   Baixadas (Pagas)", baixadas, 'check.png')
+    escrever_titulo("   Vencidas (Não pagas)", vencidas, 'erro.png')
+    escrever_titulo("   A Vencer (Ainda no prazo)", a_vencer, 'alerta.png')
+
 
     pdf.showPage()
     pdf.save()
@@ -403,25 +431,48 @@ def relatorios():
       
     return render_template('financeiro/relatorios.html')
 
-
 @financeiro_bp.route('/financeiro/relatorios/inadimplencia')
 @login_required
 def relatorio_inadimplencia():
     from flask import send_file
-    mes = request.args.get('mes') or datetime.today().strftime('%Y-%m')
-    vencimento = datetime.strptime(mes + '-15', '%Y-%m-%d')
+    inicio = request.args.get('inicio')
+    fim = request.args.get('fim')
+
     hoje = datetime.today()
 
-    mensalidades = Mensalidade.query.join(Jogador).join(Categoria).filter(
-        Mensalidade.mes_referencia == mes,
-        Mensalidade.pago == False,
-        Jogador.ativo == True,
-        hoje > vencimento
-    ).with_entities(
-        Jogador.nome.label('nome'),
-        Categoria.nome.label('categoria'),
-        Mensalidade.valor
-    ).all()
+    if not inicio or not fim:
+        mes = datetime.today().strftime('%Y-%m')
+        vencimento = datetime.strptime(mes + '-15', '%Y-%m-%d')
+        mensalidades = Mensalidade.query.join(Jogador).join(Categoria).filter(
+            Mensalidade.mes_referencia == mes,
+            Mensalidade.pago == False,
+            Jogador.ativo == True,
+            hoje > vencimento
+        ).with_entities(
+            Jogador.nome.label('nome'),
+            Categoria.nome.label('categoria'),
+            Mensalidade.valor,
+            Mensalidade.mes_referencia.label('mes')
+        ).all()
+        titulo = f"RELATÓRIO DE INADIMPLÊNCIA - {mes}"
+    else:
+        mensalidades = Mensalidade.query.join(Jogador).join(Categoria).filter(
+            Mensalidade.mes_referencia >= inicio,
+            Mensalidade.mes_referencia <= fim,
+            Mensalidade.pago == False,
+            Jogador.ativo == True
+        ).with_entities(
+            Jogador.nome.label('nome'),
+            Categoria.nome.label('categoria'),
+            Mensalidade.valor,
+            Mensalidade.mes_referencia.label('mes')
+        ).order_by(Mensalidade.mes_referencia).all()
+        titulo = f"RELATÓRIO DE INADIMPLÊNCIA - DE {inicio} A {fim}"
+
+    # Organiza os dados por mês
+    agrupado = {}
+    for m in mensalidades:
+        agrupado.setdefault(m.mes, []).append(m)
 
     buffer = BytesIO()
     pdf = canvas.Canvas(buffer, pagesize=A4)
@@ -429,36 +480,64 @@ def relatorio_inadimplencia():
 
     logo_path = os.path.join('static', 'img', 'escudo_inter.png')
     if os.path.exists(logo_path):
-        # Define o tamanho da imagem
         logo_width = 300
         logo_height = 300
-
-        # Calcula as coordenadas para centralizar
         x = (largura - logo_width) / 2
         y = (altura - logo_height) / 2
         pdf.drawImage(logo_path, x, y, width=logo_width, height=logo_height, preserveAspectRatio=True, mask='auto')
 
-
     pdf.setFont("Helvetica-Bold", 16)
-    pdf.drawCentredString(largura / 2, altura - 50, f"RELATÓRIO DE INADIMPLÊNCIA - {mes}")
+    pdf.drawCentredString(largura / 2, altura - 50, titulo)
 
     y = altura - 100
-    pdf.setFont("Helvetica-Bold", 12)
-    pdf.drawString(50, y, "Jogadores com mensalidade vencida:")
-    y -= 25
-
     pdf.setFont("Helvetica", 10)
-    for m in mensalidades:
-        pdf.drawString(60, y, f"{m.nome} - Categoria: {m.categoria} - Valor: R$ {m.valor:.2f}")
+    total_geral = 0
+
+    for mes, lista in agrupado.items():
+        pdf.setFont("Helvetica-Bold", 12)
+        pdf.drawString(50, y, f"🔸 MÊS: {mes}")
+        y -= 20
+        pdf.setFont("Helvetica", 10)
+
+        subtotal = 0
+        for m in lista:
+            valor_str = f"R$ {m.valor:.2f}"
+            if m.valor == 0:
+                valor_str += " (Isento)"
+            linha = f"{m.nome.ljust(30)}  {m.categoria.ljust(15)}  {valor_str.rjust(12)}"
+            pdf.drawString(60, y, linha)
+            y -= 15
+            subtotal += m.valor
+
+        pdf.setDash(1, 2)
+        pdf.line(60, y, largura - 60, y)
+        pdf.setDash()  # remove pontilhado
         y -= 15
-        if y < 100:
+        pdf.setFont("Helvetica-Bold", 10)
+        pdf.drawRightString(largura - 60, y, f"TOTAL MÊS: R$ {subtotal:.2f}")
+        total_geral += subtotal
+        y -= 30
+
+        if y < 120:
             pdf.showPage()
-            y = altura - 50
+            y = altura - 100
+
+    pdf.setDash(2, 2)  # traços e espaços mais visíveis
+    pdf.setLineWidth(0.5)
+    pdf.line(60, y, largura - 60, y)
+    pdf.setDash()  # remove pontilhado
+    pdf.setLineWidth(1)  # restaura largura padrão
+
+    y -= 20
+    pdf.setFont("Helvetica-Bold", 12)
+    pdf.drawRightString(largura - 60, y, f"TOTAL GERAL: R$ {total_geral:.2f}")
 
     pdf.showPage()
     pdf.save()
     buffer.seek(0)
-    return send_file(buffer, as_attachment=True, download_name=f"inadimplencia_{mes}.pdf", mimetype='application/pdf')
+    return send_file(buffer, as_attachment=True, download_name=f"inadimplencia_{datetime.today().strftime('%Y-%m')}.pdf", mimetype='application/pdf')
+
+
 
 
 @financeiro_bp.route('/financeiro/relatorios/individual')
@@ -547,10 +626,9 @@ def relatorio_resumo_anual():
     if os.path.exists(logo_path):
         logo_width = 300
         logo_height = 300
-        # Calcula as coordenadas para centralizar
         x = (largura - logo_width) / 2
-        y = (altura - logo_height) / 2
-        pdf.drawImage(logo_path, x, y, width=logo_width, height=logo_height, preserveAspectRatio=True, mask='auto')
+        y_logo = (altura - logo_height) / 2
+        pdf.drawImage(logo_path, x, y_logo, width=logo_width, height=logo_height, preserveAspectRatio=True, mask='auto')
 
     pdf.setFont("Helvetica-Bold", 16)
     pdf.drawCentredString(largura / 2, altura - 50, f"RESUMO ANUAL DE MOVIMENTAÇÃO - {ano}")
@@ -577,10 +655,28 @@ def relatorio_resumo_anual():
             pdf.showPage()
             y = altura - 50
 
+    # 🧾 Totais
+    y -= 10
+    total_entrada = sum(d['entrada'] for d in dados)
+    total_saida = sum(d['saida'] for d in dados)
+    total_saldo = total_entrada - total_saida
+
+    pdf.setFont("Helvetica-Bold", 11)
+    pdf.drawString(50, y, "TOTAL")
+    pdf.drawString(150, y, f"R$ {total_entrada:.2f}")
+    pdf.drawString(250, y, f"R$ {total_saida:.2f}")
+    if total_saldo >= 0:
+        pdf.setFillColorRGB(0, 0.5, 0)
+    else:
+        pdf.setFillColorRGB(1, 0, 0)
+    pdf.drawString(350, y, f"R$ {total_saldo:.2f}")
+    pdf.setFillColorRGB(0, 0, 0)
+
     pdf.showPage()
     pdf.save()
     buffer.seek(0)
     return send_file(buffer, as_attachment=True, download_name=f"resumo_anual_{ano}.pdf", mimetype='application/pdf')
+
 
 
 @financeiro_bp.route('/financeiro/relatorios/saidas_detalhadas')

@@ -63,7 +63,11 @@
                 </td>
                 <td>
                     {% if m %}
-                        {{ "✅ Pago" if m.pago else "❌ Pendente" }}
+                        {% if m.valor == 0 %}
+                            <span class="badge-isento">Isento</span>
+                        {% else %}
+                            {{ "✅ Pago" if m.pago else "❌ Pendente"  }}
+                        {% endif %}
                     {% else %}
                         Sem registro
                     {% endif %}
@@ -71,7 +75,13 @@
                 <td>
                     {% if m %}
                         {% if not m.pago %}
-                            <a href="{{ url_for('financeiro.registrar_pagamento_mensalidade', mensalidade_id=m.id) }}">✅ Baixar</a>
+                        <form action="{{ url_for('financeiro.registrar_pagamento_mensalidade', mensalidade_id=m.id) }}" method="GET" style="display:inline;">
+                            <button type="submit" title="Registrar pagamento">✅</button>
+                        </form>
+                        <form action="{{ url_for('financeiro.isentar_mensalidade', mensalidade_id=m.id) }}" method="POST" style="display:inline;">
+                            <button type="submit" title="Isentar mensalidade">🆓</button>
+                        </form>
+                        
                         {% else %}
                             <form action="{{ url_for('financeiro.cancelar_baixa_mensalidade', id=m.id) }}" method="POST" style="display:inline;">
                                 <button type="submit" title="Cancelar baixa">↩️</button>
@@ -106,21 +116,6 @@
         window.location.href = `?mes=${novoMes}`;
     }
 </script>
-<style>
-    .alerta {
-        padding: 10px;
-        margin: 10px;
-        border-radius: 5px;
-        color: white;
-        background-color: #28a745; /* verde sucesso */
-        font-weight: bold;
-        text-align: center;
-    }
-    .alerta.erro {
-        background-color: #dc3545; /* vermelho erro */
-    }
-  </style>
-  
   <script>
     setTimeout(() => {
         document.querySelectorAll('.alerta').forEach(el => el.style.display = 'none');

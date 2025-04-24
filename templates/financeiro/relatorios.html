@@ -7,7 +7,7 @@
     <div class="box-relatorio">
         <h3>📋 Mensalidades</h3>
         <p>Relatório por mês com status de pagamento (baixadas, a vencer, vencidas).</p>
-        <a href="{{ url_for('financeiro.relatorio_mensalidades', mes=mes) }}" class="botao-relatorio">Gerar Relatório</a>
+        <a href="{{ url_for('financeiro.relatorio_mensalidades', mes=mes) }}" class="botao-relatorio">📄 Gerar Relatório</a>
     </div>
 <!--
     <div class="box-relatorio">
@@ -19,7 +19,8 @@
     <div class="box-relatorio">
         <h3>💰 Financeiro</h3>
         <p>Resumo das entradas, saídas e saldo acumulado por mês.</p>
-        <li><a href="{{ url_for('financeiro.relatorios_financeiros') }}">📊 Relatórios Financeiros Gerenciais</a></li>
+       <!-- <li><a href="{{ url_for('financeiro.relatorios_financeiros') }}">📊 Relatórios Financeiros Gerenciais</a></li>-->
+        <a href="{{ url_for('financeiro.relatorios_financeiros') }}" class="botao-relatorio">📊 Relatórios Financeiros Gerenciais</a>
     </div>
    
 </div>

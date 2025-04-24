@@ -6,6 +6,7 @@ from routes.calendario import calendario_bp
 from routes.performance import performance_bp
 from routes.financeiro import financeiro_bp
 from routes.auth import auth_bp
+from routes.galeria import galeria_bp
 
 
 
@@ -28,6 +29,7 @@ app.register_blueprint(calendario_bp)
 app.register_blueprint(performance_bp)
 app.register_blueprint(financeiro_bp)
 app.register_blueprint(auth_bp)
+app.register_blueprint(galeria_bp)
 
 # Rota home
 @app.route('/')

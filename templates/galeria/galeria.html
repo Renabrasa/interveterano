@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>📷 Galeria de Jogos</h1>
+{% if jogos %}
+    <ul>
+        {% for jogo in jogos %}
+        <li>
+            <strong>{{ jogo.titulo }}</strong> ({{ jogo.data.strftime('%d/%m/%Y') }})
+            — <a href="{{ url_for('galeria.detalhes_galeria', jogo_id=jogo.id) }}">Ver Fotos</a>
+            — <a href="{{ url_for('galeria.envio_fotos', jogo_id=jogo.id) }}">Enviar Fotos</a>
+            — <a href="{{ url_for('galeria.exportar_mosaico', jogo_id=jogo.id) }}">Exportar Mosaico</a>
+        </li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>Nenhum jogo com fotos ainda. 😔</p>
+{% endif %}
+{% endblock %}
