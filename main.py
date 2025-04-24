@@ -9,6 +9,7 @@ from routes.auth import auth_bp
 import os
 from routes.galeria import galeria_bp
 from sqlalchemy import text
+from routes.ajuste import ajuste_bp
 
 
 app = Flask(__name__)
@@ -35,6 +36,7 @@ app.register_blueprint(performance_bp)
 app.register_blueprint(financeiro_bp)
 app.register_blueprint(auth_bp)
 app.register_blueprint(galeria_bp)
+app.register_blueprint(ajuste_bp)
 
 
 @app.route('/')
