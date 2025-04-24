@@ -48,13 +48,13 @@ def home():
 # EXECUÇÃO DO POPULATE
 # ================================
 # Executa no início para garantir que o campo exista no PostgreSQL
-with app.app_context():
-    with db.engine.begin() as conn:
-        try:
-            conn.execute(text("ALTER TABLE performance ADD COLUMN gols_sofridos INTEGER DEFAULT 0"))
-            print("✅ Coluna gols_sofridos criada com sucesso.")
-        except Exception as e:
-            print("⚠️ Coluna já existe ou erro ao criar:", e)
+#with app.app_context():
+#    with db.engine.begin() as conn:
+#        try:
+#            conn.execute(text("ALTER TABLE performance ADD COLUMN gols_sofridos INTEGER DEFAULT 0"))
+#            print("✅ Coluna gols_sofridos criada com sucesso.")
+#        except Exception as e:
+#            print("⚠️ Coluna já existe ou erro ao criar:", e)
 
 
 

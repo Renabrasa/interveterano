@@ -165,32 +165,41 @@ def grafico_gols_sofridos(jogador_id):
 # ---------------------
 @performance_bp.route('/api/performance/graficos')
 def dados_graficos():
+    # GOLS > 0
     gols = db.session.query(Jogador.nome, func.sum(Performance.gols))\
         .join(Performance, Performance.jogador_id == Jogador.id)\
-        .group_by(Jogador.id).all()
+        .group_by(Jogador.id)\
+        .having(func.sum(Performance.gols) > 0)\
+        .all()
 
+    # ASSISTÊNCIAS > 0
     assistencias = db.session.query(Jogador.nome, func.sum(Performance.assistencias))\
         .join(Performance, Performance.jogador_id == Jogador.id)\
-        .group_by(Jogador.id).all()
+        .group_by(Jogador.id)\
+        .having(func.sum(Performance.assistencias) > 0)\
+        .all()
 
+    # PARTICIPAÇÕES (sem filtro)
     participacoes = db.session.query(Jogador.nome, func.count(Performance.id))\
         .join(Performance, Performance.jogador_id == Jogador.id)\
         .filter(Performance.participou == True)\
-        .group_by(Jogador.id).all()
-    
+        .group_by(Jogador.id)\
+        .all()
     
     vitorias = db.session.query(func.count()).filter(Jogo.resultado == 'vitória').scalar()
     empates = db.session.query(func.count()).filter(Jogo.resultado == 'empate').scalar()
     derrotas = db.session.query(func.count()).filter(Jogo.resultado == 'derrota').scalar()
 
+    # GOLEIROS
     goleiros = db.session.query(Jogador.nome, func.sum(Performance.gols_sofridos))\
-    .join(Performance, Performance.jogador_id == Jogador.id)\
-    .filter(
-        Jogador.posicao.has(nome='Goleiro') |
-        Jogador.categoria.has(nome='Goleiro')
-    )\
-    .group_by(Jogador.id).all()
- 
+        .join(Performance, Performance.jogador_id == Jogador.id)\
+        .filter(
+            Jogador.posicao.has(nome='Goleiro') |
+            Jogador.categoria.has(nome='Goleiro')
+        )\
+        .group_by(Jogador.id)\
+        .having(func.sum(Performance.gols_sofridos) > 0)\
+        .all()
 
     def formatar(lista):
         return {'labels': [i[0] for i in lista], 'valores': [i[1] for i in lista]}
@@ -203,7 +212,7 @@ def dados_graficos():
             'labels': ['Vitórias', 'Empates', 'Derrotas'],
             'valores': [vitorias, empates, derrotas]
         },
-        'goleiros': formatar(goleiros)  # 🔴 novo bloco incluído
+        'goleiros': formatar(goleiros)
     })
 
 @performance_bp.route('/performance/graficos')
