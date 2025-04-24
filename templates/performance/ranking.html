@@ -1,54 +1,109 @@
 {% extends 'base.html' %}
-
 {% block content %}
+
 <h1>🏆 Ranking de Performance</h1>
 
-<table>
+<!-- PÓDIO -->
+<div class="podio">
+  <div class="posicao prata">
+    <div class="pos-label">🥈</div>
+    <div class="pos-nome">{{ ranking[1].nome }}</div>
+    <div class="pos-info">({{ ranking[1].posicao }})</div>
+    <div class="pos-dados">{{ ranking[1].gols }} gols • {{ ranking[1].assist }} assistências</div>
+  </div>
+  <div class="posicao ouro">
+    <div class="pos-label">🥇</div>
+    <div class="pos-nome">{{ ranking[0].nome }}</div>
+    <div class="pos-info">({{ ranking[0].posicao }})</div>
+    <div class="pos-dados">{{ ranking[0].gols }} gols • {{ ranking[0].assist }} assistências</div>
+  </div>
+  <div class="posicao bronze">
+    <div class="pos-label">🥉</div>
+    <div class="pos-nome">{{ ranking[2].nome }}</div>
+    <div class="pos-info">({{ ranking[2].posicao }})</div>
+    <div class="pos-dados">{{ ranking[2].gols }} gols • {{ ranking[2].assist }} assistências</div>
+  </div>
+</div>
+
+<!-- LISTA COMPLETA -->
+<h2 style="margin-top: 40px;">📋 Lista Completa</h2>
+<div class="tabela-wrapper">
+  <table class="ranking-table">
     <thead>
-        <tr>
-            <th>Posição</th>
-            <th>Nome</th>
-            <th>Gols</th>
-            <th>Assistências</th>
-            <th>Participações</th>
-        </tr>
+      <tr>
+        <th style="width: 10%;">Posição</th>
+        <th style="width: 40%;">Nome</th>
+        <th style="width: 15%;">Gols</th>
+        <th style="width: 15%;">Assistências</th>
+        <th style="width: 20%;">Participações</th>
+      </tr>
     </thead>
     <tbody>
-        {% for p in ranking %}
-        <tr class="{% if loop.index == 1 %}ouro{% elif loop.index == 2 %}prata{% elif loop.index == 3 %}bronze{% endif %}">
-            <td>{{ loop.index }}º</td>
-            <td>{{ p.nome }}</td>
-            <td>{{ p.gols }}</td>
-            <td>{{ p.assist }}</td>
-            <td>{{ p.part }}</td>
-        </tr>
-        {% endfor %}
+      {% for p in ranking %}
+      <tr class="{% if loop.index == 1 %}linha-ouro{% elif loop.index == 2 %}linha-prata{% elif loop.index == 3 %}linha-bronze{% endif %}">
+        <td>{{ loop.index }}º</td>
+        <td style="white-space: nowrap;">{{ p.nome }}</td>
+        <td>{{ p.gols }}</td>
+        <td>{{ p.assist }}</td>
+        <td>{{ p.part }}</td>
+      </tr>
+      {% endfor %}
     </tbody>
-</table>
+  </table>
+</div>
 
 <style>
-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 30px;
+.podio {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-bottom: 40px;
 }
-thead {
-    background-color: #eee;
+.posicao {
+  background: #f5f5f5;
+  border-radius: 10px;
+  padding: 10px;
+  width: 100px;
+  text-align: center;
+  font-weight: bold;
 }
-th, td {
-    padding: 10px;
-    text-align: left;
-    border: 1px solid #ccc;
+.ouro { background-color: #fff7d6; transform: scale(1.1); }
+.prata { background-color: #e7e7e7; }
+.bronze { background-color: #f3e0cb; }
+.pos-label { font-size: 30px; }
+.pos-nome { font-size: 14px; margin-top: 4px; }
+.pos-info { font-size: 12px; color: #555; margin-top: 2px; }
+.pos-dados { font-size: 12px; margin-top: 4px; }
+
+.tabela-wrapper {
+  overflow-x: auto;
+  width: 100%;
 }
-.ouro {
-    background-color: #fff7d6;
-    font-weight: bold;
+.ranking-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 400px;
 }
-.prata {
-    background-color: #e7e7e7;
+.ranking-table th,
+.ranking-table td {
+  border: 1px solid #ccc;
+  padding: 10px;
+  text-align: left;
+  word-break: break-word;
 }
-.bronze {
-    background-color: #f3e0cb;
+.ranking-table thead {
+  background-color: #f0f0f0;
+}
+.ranking-table .linha-ouro td {
+  background-color: #fff7d6;
+  font-weight: bold;
+}
+.ranking-table .linha-prata td {
+  background-color: #e7e7e7;
+}
+.ranking-table .linha-bronze td {
+  background-color: #f3e0cb;
 }
 </style>
 

@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, request, redirect, url_for, session, flash, jsonify
-from models.models import db, Jogador, Convidado, Jogo, Performance, Categoria
+from models.models import db, Jogador, Convidado, Jogo, Performance, Categoria,Posicao
 from sqlalchemy import func
 from routes.auth import login_required
 
@@ -234,9 +234,11 @@ def grafico_resultados():
 def ranking():
     jogadores_stats = db.session.query(
         Jogador.nome,
+        Jogador.posicao.has(),  # vai retornar True, mas precisamos acessar o nome depois
         func.coalesce(func.sum(Performance.gols), 0),
         func.coalesce(func.sum(Performance.assistencias), 0),
-        func.count(Performance.id)
+        func.count(Performance.id),
+        Jogador.posicao_id
     ).join(Performance).group_by(Jogador.id).all()
 
     convidados_stats = db.session.query(
@@ -246,14 +248,32 @@ def ranking():
         func.count(Performance.id)
     ).join(Performance).group_by(Convidado.id).all()
 
+    # pegar todas posições de uma vez
+    posicoes = {p.id: p.nome for p in db.session.query(Posicao).all()}
+
     ranking_total = []
 
-    for nome, gols, assist, part in jogadores_stats:
-        ranking_total.append({'nome': nome + " (Jogador)", 'gols': gols, 'assist': assist, 'part': part})
+    for nome, _, gols, assist, part, posicao_id in jogadores_stats:
+        ranking_total.append({
+            'nome': nome,
+            'categoria': 'Jogador',
+            'gols': gols,
+            'assist': assist,
+            'part': part,
+            'posicao': posicoes.get(posicao_id, '')
+        })
 
     for nome, gols, assist, part in convidados_stats:
-        ranking_total.append({'nome': nome + " (Convidado)", 'gols': gols, 'assist': assist, 'part': part})
+        ranking_total.append({
+            'nome': nome,
+            'categoria': 'Convidado',
+            'gols': gols,
+            'assist': assist,
+            'part': part,
+            'posicao': ''
+        })
 
     ranking_total.sort(key=lambda x: (x['gols'], x['assist'], x['part']), reverse=True)
 
     return render_template('performance/ranking.html', ranking=ranking_total)
+
