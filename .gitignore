@@ -1,3 +1,29 @@
 instance/inter.db
 main_render.py
 main.py
+*.db
+# Ignorar banco de dados local
+*.db
+
+# Ignorar arquivos temporários
+*.pyc
+__pycache__/
+
+# Ignorar arquivos do VSCode
+.vscode/
+
+# Ignorar ambientes virtuais
+venv/
+.env
+
+# Ignorar pastas de build/deploy temporárias
+build/
+dist/
+*.egg-info/
+
+# Ignorar logs
+*.log
+
+# Ignorar arquivos de configuração locais
+instance/
+config_local.py
