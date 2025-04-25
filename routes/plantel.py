@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, url_for,session
+from flask import Blueprint, render_template, request, redirect, url_for,session,flash
 from models.models import db, Jogador, Categoria, Posicao
 from flask import flash
 from routes.auth import login_required
@@ -38,7 +38,7 @@ def adicionar_jogador():
     # Verifica se já existe jogador com mesmo nome (ignora maiúsculas/minúsculas)
     jogador_existente = Jogador.query.filter(func.lower(Jogador.nome) == nome.lower()).first()
     if jogador_existente:
-        from flask import flash
+        
         flash('Já existe um jogador com esse nome!', 'erro')
         return redirect(url_for('plantel.exibir_plantel'))
 
@@ -56,6 +56,8 @@ def adicionar_jogador():
     )
     db.session.add(novo_jogador)
     db.session.commit()
+    
+    flash('Jogador cadastrado com sucesso!', 'sucesso') 
     return redirect(url_for('plantel.exibir_plantel'))
 
 
@@ -92,4 +94,14 @@ def editar_jogador(id):
         return redirect(url_for('plantel.exibir_plantel'))
 
     return render_template('plantel/editar.html', jogador=jogador, categorias=categorias, posicoes=posicoes)
+
+@plantel_bp.route('/jogador/<int:jogador_id>/remover_foto', methods=['POST'])
+@login_required
+def remover_foto(jogador_id):
+    jogador = Jogador.query.get_or_404(jogador_id)
+    jogador.foto = None
+    db.session.commit()
+    flash('Foto removida com sucesso!', 'info')
+    return redirect(url_for('plantel.editar_jogador', id=jogador.id))
+
 

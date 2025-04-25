@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, url_for, session
+from flask import Blueprint, render_template, request, redirect, url_for, session, flash
 from models.models import db, Convidado, Categoria, Posicao
 from routes.auth import login_required
 
@@ -26,7 +26,7 @@ import base64
 @login_required
 def adicionar_convidado():
     from sqlalchemy import func
-    from flask import flash
+    
 
     nome = request.form['nome']
     categoria_id = request.form['categoria']
@@ -87,3 +87,11 @@ def editar_convidado(id):
 
     return render_template('convidado/editar.html', convidado=convidado, categorias=categorias, posicoes=posicoes)
 
+@convidado_bp.route('/convidado/<int:convidado_id>/remover_foto', methods=['POST'])
+@login_required
+def remover_foto(convidado_id):
+    convidado = Convidado.query.get_or_404(convidado_id)
+    convidado.foto = None
+    db.session.commit()
+    flash('Foto removida com sucesso!', 'info')
+    return redirect(url_for('convidado.editar_convidado', id=convidado.id))
