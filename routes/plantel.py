@@ -6,6 +6,9 @@ from routes.auth import login_required
 
 plantel_bp = Blueprint('plantel', __name__, template_folder='../templates/plantel')
 
+# # Rota para exibir os jogadores
+
+
 # ✅ Função de verificação de login
 def login_obrigatorio():
     if 'usuario' not in session:

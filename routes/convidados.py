@@ -9,8 +9,8 @@ def login_obrigatorio():
     if 'usuario' not in session:
         session['destino'] = request.endpoint
         return redirect(url_for('auth.login'))
-
-
+#
+# # Rota para exibir os convidados
 @convidado_bp.route('/convidados')
 @login_required
 def exibir_convidados():
