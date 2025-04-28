@@ -59,8 +59,14 @@
 </div>
 
 <h2 class="titulo-tabela">Jogadores Cadastrados</h2>
+
+<!-- CAMPO DE PESQUISA -->
+<div class="pesquisa-container">
+  <input type="text" id="pesquisaJogador" placeholder="Pesquisar jogador..." class="campo-pesquisa">
+</div>
+
 <div class="tabela-container">
-<table class="tabela-jogadores">
+<table class="tabela-jogadores" id="tabelaJogadores">
   <thead>
     <tr>
       <th>Nome</th>
@@ -207,6 +213,20 @@
     color: #800000;
   }
 
+  .pesquisa-container {
+    max-width: 600px;
+    margin: 20px auto;
+    text-align: center;
+  }
+
+  .campo-pesquisa {
+    width: 100%;
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    font-size: 16px;
+  }
+
   .tabela-container {
     overflow-x: auto;
     margin: 0 auto;
@@ -262,6 +282,18 @@
       reader.readAsDataURL(file);
     }
   });
+
+  // SCRIPT DE FILTRO GERAL
+  document.getElementById('pesquisaJogador').addEventListener('keyup', function() {
+    var input = this.value.toLowerCase();
+    var linhas = document.querySelectorAll('#tabelaJogadores tbody tr');
+
+    linhas.forEach(function(linha) {
+      var textoCompleto = linha.innerText.toLowerCase();
+      linha.style.display = textoCompleto.includes(input) ? '' : 'none';
+    });
+  });
 </script>
+
 
 {% endblock %}
