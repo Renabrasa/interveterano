@@ -1,13 +1,12 @@
 {% extends 'base.html' %}
-<!-- ALERTAS -->
 {% block content %}
-<h1>Editar Jogador</h1>
+
+<h1 class="titulo-pagina">Editar Jogador</h1>
 
 <div class="form-card">
-  <!-- FORMULÁRIO PRINCIPAL -->
   <form method="POST" enctype="multipart/form-data" class="form-jogador">
     <div class="form-linha">
-      <!-- COLUNA ESQUERDA: FOTO -->
+      <!-- FOTO -->
       <div class="col-esquerda">
         <div class="foto-container">
           <label for="foto-input">
@@ -18,7 +17,7 @@
         </div>
       </div>
 
-      <!-- COLUNA DIREITA -->
+      <!-- CAMPOS -->
       <div class="col-direita">
         <input type="text" name="nome" value="{{ jogador.nome }}" placeholder="Nome do jogador" required>
 
@@ -34,7 +33,6 @@
           {% endfor %}
         </select>
 
-        <!-- CAMPO PÉ PREFERENCIAL COM LARGURA TOTAL -->
         <select name="pe_preferencial" required class="pe-preferencial">
           <option value="Direito" {% if jogador.pe_preferencial=='Direito' %}selected{% endif %}>Direito</option>
           <option value="Esquerdo" {% if jogador.pe_preferencial=='Esquerdo' %}selected{% endif %}>Esquerdo</option>
@@ -46,26 +44,33 @@
     <!-- BOTÕES -->
     <div class="botoes-finais">
       <button type="submit" class="btn-salvar">Salvar Alterações</button>
-      <a href="{{ url_for('plantel.exibir_plantel') }}">Cancelar</a>
+      <a href="{{ url_for('plantel.exibir_plantel') }}" class="btn-cancelar">Cancelar</a>
     </div>
   </form>
 
-  <!-- FORMULÁRIO EXCLUSIVO PARA REMOVER FOTO -->
+  <!-- BOTÃO REMOVER FOTO -->
   {% if jogador.foto %}
-  <form action="{{ url_for('plantel.remover_foto', jogador_id=jogador.id) }}" method="post">
+  <form action="{{ url_for('plantel.remover_foto', jogador_id=jogador.id) }}" method="post" class="form-remover-foto">
     <button type="submit" class="btn-remover-foto">🗑️</button>
   </form>
   {% endif %}
 </div>
 
 <style>
+  .titulo-pagina {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 24px;
+    color: #800000;
+  }
+
   .form-card {
     background: white;
     padding: 25px;
     border-radius: 12px;
-    max-width: 800px;
+    max-width: 600px;
     margin: 30px auto;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
     position: relative;
   }
 
@@ -78,15 +83,14 @@
   .form-linha {
     display: flex;
     gap: 20px;
-    align-items: flex-start;
+    align-items: center;
     flex-wrap: wrap;
   }
 
   .col-esquerda {
+    width: 150px;
     display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    width: 180px;
+    justify-content: center;
   }
 
   .foto-container {
@@ -96,41 +100,19 @@
   }
 
   .foto-preview {
-    width: 130px;
-    height: 180px;
+    width: 100%;
+    height: 100%;
     object-fit: cover;
     border-radius: 10px;
     border: 2px solid #ccc;
     cursor: pointer;
   }
 
-  .btn-remover-foto {
-    position: absolute;
-    top: 35px;
-    left: 125px;
-    background: #a00000;
-    color: white;
-    border: none;
-    padding: 5px 8px;
-    border-radius: 50%;
-    font-size: 10px;
-    cursor: pointer;
-    z-index: 10;
-  }
-
-  .pe-preferencial {
-    width: 100%;
-    padding: 10px;
-    border-radius: 6px;
-    border: 1px solid #ccc;
-    margin-top: 10px;
-  }
-
   .col-direita {
     flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 15px;
   }
 
   input[type="text"],
@@ -139,13 +121,17 @@
     padding: 10px;
     border-radius: 6px;
     border: 1px solid #ccc;
+    font-size: 16px;
+  }
+
+  .pe-preferencial {
+    width: 100%;
   }
 
   .botoes-finais {
     display: flex;
-    gap: 20px;
-    align-items: center;
-    margin-top: 10px;
+    justify-content: space-between;
+    margin-top: 20px;
   }
 
   .btn-salvar {
@@ -156,10 +142,39 @@
     border-radius: 6px;
     font-weight: bold;
     cursor: pointer;
+    flex: 1;
+    margin-right: 10px;
+  }
+
+  .btn-cancelar {
+    background-color: #ccc;
+    color: black;
+    text-decoration: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-weight: bold;
+    flex: 1;
+    text-align: center;
   }
 
   .btn-salvar:hover {
     background-color: #800000;
+  }
+
+  .form-remover-foto {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+  }
+
+  .btn-remover-foto {
+    background: #a00000;
+    color: white;
+    border: none;
+    padding: 6px 10px;
+    border-radius: 50%;
+    font-size: 14px;
+    cursor: pointer;
   }
 
   /* RESPONSIVO */
@@ -169,27 +184,25 @@
       align-items: center;
     }
 
-    .col-esquerda,
+    .col-esquerda {
+      width: 100%;
+    }
+
     .col-direita {
       width: 100%;
     }
 
-    .pe-preferencial {
-      width: 100%;
-    }
-
-    .btn-remover-foto {
-      top: 5px;
-      left: auto;
-      right: 10px;
+    .botoes-finais {
+      flex-direction: column;
+      gap: 10px;
     }
   }
 </style>
+
 <script>
   document.getElementById('foto-input').addEventListener('change', function (event) {
     const preview = document.querySelector('.foto-preview');
     const file = event.target.files[0];
-
     if (file) {
       const reader = new FileReader();
       reader.onload = function (e) {

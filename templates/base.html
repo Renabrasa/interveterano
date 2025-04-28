@@ -5,8 +5,45 @@
     <title>Clube Inter Veterano</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/financeiro.css') }}">
-
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        /* Correção do botão hambúrguer */
+        #menu-toggle {
+            display: none; /* Esconde o checkbox */
+        }
+        .menu-icon {
+            display: none;
+            font-size: 30px;
+            cursor: pointer;
+            color: white;
+            padding: 10px;
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            z-index: 1000;
+        }
+        @media (max-width: 768px) {
+            .menu-icon {
+                display: block; /* Exibe o botão no mobile */
+            }
+            .sidebar {
+                position: fixed;
+                left: -250px;
+                top: 0;
+                width: 250px;
+                height: 100%;
+                background-color: #800000;
+                transition: left 0.3s ease;
+                z-index: 999;
+            }
+            #menu-toggle:checked + .menu-icon + .wrapper .layout .sidebar {
+                left: 0;
+            }
+            .wrapper {
+                padding-left: 0;
+            }
+        }
+    </style>
 </head>
 <body>
 
@@ -18,10 +55,10 @@
         <div class="layout">
             <aside class="sidebar">
                 <div style="display: flex; align-items: center; gap: 10px; padding: 10px;">
-                    <img src="{{ url_for('static', filename='img/logoredondo.png') }}" alt="Logo Inter" width="40" height="40" style="border-radius: 50%;">
+                    <img src="{{ url_for('static', filename='img/logoredondo.png') }}" alt="Logo Inter" width="60" height="60" style="border-radius: 50%;">
                     <h2 style="margin: 0; font-size: 1.2em; color: white;">Inter Veterano</h2>
                 </div>
-               <nav>
+                <nav>
                     <a href="{{ url_for('home') }}">🏠 <span>Home</span></a>
                     <a href="{{ url_for('plantel.exibir_plantel') }}">🧑‍🤝‍🧑 <span>Plantel</span></a>
                     <a href="{{ url_for('convidado.exibir_convidados') }}">🙋‍♂️ <span>Convidados</span></a>
@@ -35,12 +72,13 @@
                     <a href="{{ url_for('auth.logout') }}">🔐 Sair</a>
                 </nav>
             </aside>
-                  
+
             <main class="content">
                 {% block content %}{% endblock %}
             </main>
         </div>
     </div>
+
     <style>
         .alerta {
             padding: 10px;
@@ -54,19 +92,21 @@
         .alerta.erro {
             background-color: #dc3545; /* vermelho erro */
         }
-      </style>
-      
-      <script>
+    </style>
+
+    <script>
         setTimeout(() => {
             document.querySelectorAll('.alerta').forEach(el => el.style.display = 'none');
-        }, 4000); // desaparece em 4 segundos
-      </script>
-      {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
+        }, 4000);
+    </script>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
         {% for categoria, mensagem in messages %}
-          <div class="alerta {{ categoria }}">{{ mensagem }}</div>
+            <div class="alerta {{ categoria }}">{{ mensagem }}</div>
         {% endfor %}
-      {% endif %}
+    {% endif %}
     {% endwith %}
-   </body>
+
+</body>
 </html>

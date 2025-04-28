@@ -1,206 +1,212 @@
 {% extends 'base.html' %}
-<!-- ALERTAS -->
 {% block content %}
-<h1>Editar Convidado</h1>
+
+<h1 class="titulo-pagina">Editar Convidado</h1>
 
 <div class="form-card">
 
-    {% if convidado.foto %}
-    <form action="{{ url_for('convidado.remover_foto', convidado_id=convidado.id) }}" method="post">
-        <button type="submit" class="btn-remover-foto">🗑️</button>
-    </form>
-    {% endif %}
+  {% if convidado.foto %}
+  <form action="{{ url_for('convidado.remover_foto', convidado_id=convidado.id) }}" method="post" class="form-remover-foto">
+    <button type="submit" class="btn-remover-foto">🗑️</button>
+  </form>
+  {% endif %}
 
-    <form method="POST" enctype="multipart/form-data" class="form-jogador">
-
-        <div class="form-linha">
-            <!-- COLUNA ESQUERDA: FOTO -->
-            <div class="col-esquerda">
-                <div class="foto-container">
-                    <label for="foto-input">
-                        <img src="data:image/jpeg;base64,{{ convidado.foto }}" alt="Foto do Convidado"
-                            class="foto-preview"
-                            onerror="this.src='{{ url_for('static', filename='img/avatar_padrao.png') }}'">
-                    </label>
-                    <input type="file" name="foto" id="foto-input" accept="image/*" style="display: none;">
-                </div>
-            </div>
-
-            <!-- COLUNA DIREITA -->
-            <div class="col-direita">
-                <input type="text" name="nome" value="{{ convidado.nome }}" placeholder="Nome do Convidado" required>
-
-                <select name="categoria" required>
-                    {% for cat in categorias %}
-                    <option value="{{ cat.id }}" {% if convidado.categoria_id==cat.id %}selected{% endif %}>{{ cat.nome
-                        }}</option>
-                    {% endfor %}
-                </select>
-
-                <select name="posicao" required>
-                    {% for pos in posicoes %}
-                    <option value="{{ pos.id }}" {% if convidado.posicao_id==pos.id %}selected{% endif %}>{{ pos.nome }}
-                    </option>
-                    {% endfor %}
-                </select>
-
-                <select name="pe_preferencial" required class="pe-preferencial">
-                    <option value="Direito" {% if convidado.pe_preferencial=='Direito' %}selected{% endif %}>Direito
-                    </option>
-                    <option value="Esquerdo" {% if convidado.pe_preferencial=='Esquerdo' %}selected{% endif %}>Esquerdo
-                    </option>
-                    <option value="Ambos" {% if convidado.pe_preferencial=='Ambos' %}selected{% endif %}>Ambos</option>
-                </select>
-            </div>
+  <form method="POST" enctype="multipart/form-data" class="form-jogador">
+    <div class="form-linha">
+      <!-- FOTO -->
+      <div class="col-esquerda">
+        <div class="foto-container">
+          <label for="foto-input">
+            <img src="data:image/jpeg;base64,{{ convidado.foto }}" alt="Foto do Convidado"
+              class="foto-preview"
+              onerror="this.src='{{ url_for('static', filename='img/avatar_padrao.png') }}'">
+          </label>
+          <input type="file" name="foto" id="foto-input" accept="image/*" style="display: none;">
         </div>
+      </div>
 
-        <div class="botoes-finais">
-            <button type="submit" class="btn-salvar">Salvar Alterações</button>
-            <a href="{{ url_for('convidado.exibir_convidados') }}">Cancelar</a>
-        </div>
+      <!-- CAMPOS -->
+      <div class="col-direita">
+        <input type="text" name="nome" value="{{ convidado.nome }}" placeholder="Nome do Convidado" required>
 
-    </form>
+        <select name="categoria" required>
+          {% for cat in categorias %}
+          <option value="{{ cat.id }}" {% if convidado.categoria_id==cat.id %}selected{% endif %}>{{ cat.nome }}</option>
+          {% endfor %}
+        </select>
+
+        <select name="posicao" required>
+          {% for pos in posicoes %}
+          <option value="{{ pos.id }}" {% if convidado.posicao_id==pos.id %}selected{% endif %}>{{ pos.nome }}</option>
+          {% endfor %}
+        </select>
+
+        <select name="pe_preferencial" required class="pe-preferencial">
+          <option value="Direito" {% if convidado.pe_preferencial=='Direito' %}selected{% endif %}>Direito</option>
+          <option value="Esquerdo" {% if convidado.pe_preferencial=='Esquerdo' %}selected{% endif %}>Esquerdo</option>
+          <option value="Ambos" {% if convidado.pe_preferencial=='Ambos' %}selected{% endif %}>Ambos</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="botoes-finais">
+      <button type="submit" class="btn-salvar">Salvar Alterações</button>
+      <a href="{{ url_for('convidado.exibir_convidados') }}" class="btn-cancelar">Cancelar</a>
+    </div>
+  </form>
 </div>
 
 <style>
-    .form-card {
-        background: white;
-        padding: 25px;
-        border-radius: 12px;
-        max-width: 800px;
-        margin: 30px auto;
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        position: relative;
-    }
+  .titulo-pagina {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 24px;
+    color: #800000;
+  }
 
-    .form-jogador {
-        display: flex;
-        flex-direction: column;
-        gap: 20px;
-    }
+  .form-card {
+    background: white;
+    padding: 25px;
+    border-radius: 12px;
+    max-width: 600px;
+    margin: 30px auto;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+    position: relative;
+  }
 
+  .form-jogador {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .form-linha {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .col-esquerda {
+    width: 150px;
+    display: flex;
+    justify-content: center;
+  }
+
+  .foto-container {
+    position: relative;
+    width: 130px;
+    height: 180px;
+  }
+
+  .foto-preview {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 10px;
+    border: 2px solid #ccc;
+    cursor: pointer;
+  }
+
+  .col-direita {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  input[type="text"],
+  select {
+    width: 100%;
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    font-size: 16px;
+  }
+
+  .pe-preferencial {
+    width: 100%;
+  }
+
+  .botoes-finais {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+  }
+
+  .btn-salvar {
+    background-color: #a00000;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    flex: 1;
+    margin-right: 10px;
+  }
+
+  .btn-cancelar {
+    background-color: #ccc;
+    color: black;
+    text-decoration: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-weight: bold;
+    flex: 1;
+    text-align: center;
+  }
+
+  .btn-salvar:hover {
+    background-color: #800000;
+  }
+
+  .form-remover-foto {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+  }
+
+  .btn-remover-foto {
+    background: #a00000;
+    color: white;
+    border: none;
+    padding: 6px 10px;
+    border-radius: 50%;
+    font-size: 14px;
+    cursor: pointer;
+  }
+
+  @media (max-width: 680px) {
     .form-linha {
-        display: flex;
-        gap: 20px;
-        align-items: flex-start;
-        flex-wrap: wrap;
+      flex-direction: column;
+      align-items: center;
     }
 
-    .col-esquerda {
-        display: flex;
-        flex-direction: column;
-        align-items: flex-start;
-        width: 180px;
-    }
-
-    .foto-container {
-        position: relative;
-        width: 130px;
-        height: 180px;
-    }
-
-    .foto-preview {
-        width: 130px;
-        height: 180px;
-        object-fit: cover;
-        border-radius: 10px;
-        border: 2px solid #ccc;
-        cursor: pointer;
-    }
-
-    .btn-remover-foto {
-        position: absolute;
-        top: 27px;
-        left: 140px;
-        background: #a00000;
-        color: white;
-        border: none;
-        padding: 4px 6px;
-        border-radius: 50%;
-        font-size: 10px;
-        cursor: pointer;
-        z-index: 10;
-    }
-
-    .pe-preferencial {
-        width: 100%;
-        padding: 10px;
-        border-radius: 6px;
-        border: 1px solid #ccc;
-        margin-top: 10px;
-    }
-
+    .col-esquerda,
     .col-direita {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-    }
-
-    input[type="text"],
-    select {
-        width: 100%;
-        padding: 10px;
-        border-radius: 6px;
-        border: 1px solid #ccc;
+      width: 100%;
     }
 
     .botoes-finais {
-        display: flex;
-        gap: 20px;
-        align-items: center;
-        margin-top: 10px;
+      flex-direction: column;
+      gap: 10px;
     }
-
-    .btn-salvar {
-        background-color: #a00000;
-        color: white;
-        border: none;
-        padding: 10px 20px;
-        border-radius: 6px;
-        font-weight: bold;
-        cursor: pointer;
-    }
-
-    .btn-salvar:hover {
-        background-color: #800000;
-    }
-
-    @media (max-width: 680px) {
-        .form-linha {
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .col-esquerda,
-        .col-direita {
-            width: 100%;
-        }
-
-        .pe-preferencial {
-            width: 100%;
-        }
-
-        .btn-remover-foto {
-            top: 10px;
-            left: auto;
-            right: 10px;
-        }
-    }
+  }
 </style>
-<script>
-    document.getElementById('foto-input').addEventListener('change', function (event) {
-        const preview = document.querySelector('.foto-preview');
-        const file = event.target.files[0];
 
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = function (e) {
-                preview.src = e.target.result;
-            }
-            reader.readAsDataURL(file);
-        }
-    });
+<script>
+  document.getElementById('foto-input').addEventListener('change', function (event) {
+    const preview = document.querySelector('.foto-preview');
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        preview.src = e.target.result;
+      }
+      reader.readAsDataURL(file);
+    }
+  });
 </script>
 
 {% endblock %}

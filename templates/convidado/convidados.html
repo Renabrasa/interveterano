@@ -1,8 +1,6 @@
 {% extends 'base.html' %}
-
 {% block content %}
 
-<!-- ALERTAS -->
 <!-- ALERTAS -->
 {% with messages = get_flashed_messages(with_categories=true) %}
 {% if messages %}
@@ -12,24 +10,22 @@
 {% endif %}
 {% endwith %}
 
-<h1>Cadastro de Convidados</h1>
+<h1 class="titulo-pagina">Cadastro de Convidados</h1>
 
 <div class="form-card">
-    <form action="{{ url_for('convidado.adicionar_convidado') }}" method="POST" enctype="multipart/form-data"
-        class="form-jogador">
+    <form action="{{ url_for('convidado.adicionar_convidado') }}" method="POST" enctype="multipart/form-data" class="form-jogador">
         <div class="form-linha">
-            <!-- COLUNA ESQUERDA -->
+            <!-- FOTO -->
             <div class="col-esquerda">
                 <div class="foto-container">
                     <label for="foto-input">
-                        <img src="{{ url_for('static', filename='img/avatar_padrao.png') }}" alt="Foto do Convidado"
-                            class="foto-preview">
+                        <img src="{{ url_for('static', filename='img/avatar_padrao.png') }}" alt="Foto do Convidado" class="foto-preview">
                     </label>
                     <input type="file" name="foto" id="foto-input" accept="image/*" style="display: none;">
                 </div>
             </div>
 
-            <!-- COLUNA DIREITA -->
+            <!-- CAMPOS -->
             <div class="col-direita">
                 <input type="text" name="nome" placeholder="Nome do Convidado" required>
 
@@ -62,8 +58,10 @@
     </form>
 </div>
 
-<h2>Convidados Cadastrados</h2>
-<table>
+<h2 class="titulo-tabela">Convidados Cadastrados</h2>
+
+<div class="tabela-container">
+<table class="tabela-jogadores">
     <thead>
         <tr>
             <th>Nome</th>
@@ -83,159 +81,188 @@
             <td>{{ convidado.pe_preferencial }}</td>
             <td>
                 {% if convidado.foto %}
-                <img src="data:image/jpeg;base64,{{ convidado.foto }}" width="50" height="50"
-                    style="object-fit: cover; border-radius: 5px;">
+                <img src="data:image/jpeg;base64,{{ convidado.foto }}" width="50" height="50" style="object-fit: cover; border-radius: 5px;">
                 {% else %}
                 Sem foto
                 {% endif %}
             </td>
             <td>
-                <a href="{{ url_for('convidado.editar_convidado', id=convidado.id) }}">Editar</a> |
-                <a href="{{ url_for('convidado.excluir_convidado', id=convidado.id) }}">Excluir</a>
+                <a href="{{ url_for('convidado.editar_convidado', id=convidado.id) }}">✏️</a>
+                <a href="{{ url_for('convidado.excluir_convidado', id=convidado.id) }}" onclick="return confirm('Deseja remover este convidado?')">🗑️</a>
             </td>
         </tr>
         {% endfor %}
     </tbody>
 </table>
+</div>
 
 <style>
-    .alerta {
-        padding: 10px;
-        margin: 10px;
-        border-radius: 5px;
-        color: white;
-        background-color: #28a745;
-        font-weight: bold;
-        text-align: center;
-    }
+  .titulo-pagina {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 24px;
+    color: #800000;
+  }
 
-    .alerta.erro {
-        background-color: #dc3545;
-    }
+  .form-card {
+    background: white;
+    padding: 25px;
+    border-radius: 12px;
+    max-width: 600px;
+    margin: 30px auto;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  }
 
-    .form-card {
-        background: white;
-        padding: 25px;
-        border-radius: 12px;
-        max-width: 800px;
-        margin: 30px auto;
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    }
+  .form-jogador {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
 
-    .form-jogador {
-        display: flex;
-        flex-direction: column;
-        gap: 20px;
-    }
+  .form-linha {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
 
+  .col-esquerda {
+    width: 150px;
+    display: flex;
+    justify-content: center;
+  }
+
+  .foto-container {
+    position: relative;
+    width: 130px;
+    height: 180px;
+  }
+
+  .foto-preview {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 10px;
+    border: 2px solid #ccc;
+    cursor: pointer;
+  }
+
+  .col-direita {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  input[type="text"],
+  select {
+    width: 100%;
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    font-size: 16px;
+  }
+
+  .pe-preferencial {
+    width: 100%;
+  }
+
+  .botoes-finais {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+  }
+
+  .btn-salvar {
+    background-color: #a00000;
+    color: white;
+    border: none;
+    padding: 10px 30px;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+  }
+
+  .btn-salvar:hover {
+    background-color: #800000;
+  }
+
+  .alerta {
+    padding: 10px;
+    margin: 10px auto;
+    border-radius: 5px;
+    color: white;
+    background-color: #28a745;
+    font-weight: bold;
+    text-align: center;
+    max-width: 600px;
+  }
+
+  .alerta.erro {
+    background-color: #dc3545;
+  }
+
+  .titulo-tabela {
+    text-align: center;
+    margin-top: 40px;
+    color: #800000;
+  }
+
+  .tabela-container {
+    overflow-x: auto;
+    margin: 0 auto;
+    max-width: 95%;
+  }
+
+  .tabela-jogadores {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+  }
+
+  .tabela-jogadores th, .tabela-jogadores td {
+    border: 1px solid #ccc;
+    padding: 8px;
+    text-align: center;
+  }
+
+  .tabela-jogadores th {
+    background-color: #a00000;
+    color: white;
+  }
+
+  @media (max-width: 680px) {
     .form-linha {
-        display: flex;
-        gap: 20px;
-        align-items: flex-start;
-        flex-wrap: wrap;
+      flex-direction: column;
+      align-items: center;
     }
 
-    .col-esquerda {
-        display: flex;
-        flex-direction: column;
-        align-items: flex-start;
-        width: 180px;
-    }
-
-    .foto-container {
-        position: relative;
-        width: 130px;
-        height: 180px;
-    }
-
-    .foto-preview {
-        width: 130px;
-        height: 180px;
-        object-fit: cover;
-        border-radius: 10px;
-        border: 2px solid #ccc;
-        cursor: pointer;
-    }
-
-    .pe-preferencial {
-        width: 100%;
-        padding: 10px;
-        border-radius: 6px;
-        border: 1px solid #ccc;
-        margin-top: 10px;
-    }
-
-    .col-direita {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-    }
-
-    input[type="text"],
-    select {
-        width: 100%;
-        padding: 10px;
-        border-radius: 6px;
-        border: 1px solid #ccc;
+    .col-esquerda, .col-direita {
+      width: 100%;
     }
 
     .botoes-finais {
-        display: flex;
-        gap: 20px;
-        align-items: center;
-        margin-top: 10px;
+      flex-direction: column;
     }
-
-    .btn-salvar {
-        background-color: #a00000;
-        color: white;
-        border: none;
-        padding: 10px 20px;
-        border-radius: 6px;
-        font-weight: bold;
-        cursor: pointer;
-    }
-
-    .btn-salvar:hover {
-        background-color: #800000;
-    }
-
-    @media (max-width: 680px) {
-        .form-linha {
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .col-esquerda,
-        .col-direita {
-            width: 100%;
-        }
-
-        .pe-preferencial {
-            width: 100%;
-        }
-    }
+  }
 </style>
 
 <script>
-    setTimeout(() => {
-        document.querySelectorAll('.alerta').forEach(el => el.style.display = 'none');
-    }, 4000);
-</script>
-<script>
-    document.getElementById('foto-input').addEventListener('change', function (event) {
-        const preview = document.querySelector('.foto-preview');
-        const file = event.target.files[0];
+  setTimeout(() => {
+    document.querySelectorAll('.alerta').forEach(el => el.style.display = 'none');
+  }, 4000);
 
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = function (e) {
-                preview.src = e.target.result;
-            }
-            reader.readAsDataURL(file);
-        }
-    });
+  document.getElementById('foto-input').addEventListener('change', function (event) {
+    const preview = document.querySelector('.foto-preview');
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        preview.src = e.target.result;
+      }
+      reader.readAsDataURL(file);
+    }
+  });
 </script>
 
 {% endblock %}
