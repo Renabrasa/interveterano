@@ -16,16 +16,21 @@ def login_obrigatorio():
         return redirect(url_for('auth.login'))
 
 
+from sqlalchemy.orm import joinedload
+
 @plantel_bp.route('/plantel')
 @login_required
 def exibir_plantel():
-    #retorno = login_obrigatorio()
-    #if retorno: return retorno
-    
-    jogadores = Jogador.query.filter_by(ativo=True).all()
+    jogadores = Jogador.query.options(joinedload(Jogador.categoria))\
+        .filter(
+            Jogador.ativo == True,
+            Categoria.nome.in_(['Jogador', 'Goleiro', 'Presidente','Treinador'])
+        ).join(Categoria).all()
+
     categorias = Categoria.query.all()
     posicoes = Posicao.query.all()
     return render_template('plantel.html', jogadores=jogadores, categorias=categorias, posicoes=posicoes)
+
 
 import base64
 
