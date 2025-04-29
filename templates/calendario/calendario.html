@@ -1,14 +1,20 @@
 {% extends 'base.html' %}
 {% block content %}
 
-<h1>Calendário de Jogos</h1>
+<h1 class="titulo-pagina">Calendário de Jogos</h1>
 
 <div style="text-align: right; margin-bottom: 10px;">
-    <a href="#" id="btn-exportar" class="botao">📤 Exportar Agenda</a>
+    <a href="#" id="btn-exportar" class="exportar-agenda">📤 Exportar Agenda</a>
 </div>
 
 <div id="calendar-container">
     <div id="calendar"></div>
+</div>
+
+<!-- 🔥 NOVO: Resumo Mensal dos Jogos -->
+<div id="resumo-mensal" class="resumo-mensal">
+    <h2>Jogos do Mês</h2>
+    <ul id="lista-jogos"></ul>
 </div>
 
 <!-- Modal de Jogo -->
@@ -47,9 +53,12 @@
     </div>
 </div>
 
+<!-- Scripts do FullCalendar -->
 <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.9/index.global.min.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.9/index.global.min.js"></script>
-
+<div class="resumo-topo">
+    <small><strong>Legenda:</strong> 🔴 Inter mandante | 🔵 Visitante</small>
+  </div>
 <script>
 let calendar;
 
@@ -76,21 +85,24 @@ document.addEventListener('DOMContentLoaded', function () {
         },
 
         eventDidMount: function(info) {
-        // Acessa a célula do dia correspondente ao evento
-        const dia = info.event.start;
-        const seletor = `.fc-daygrid-day[data-date="${dia.toISOString().slice(0, 10)}"]`;
+            const dia = info.event.start;
+            const seletor = `.fc-daygrid-day[data-date="${dia.toISOString().slice(0, 10)}"]`;
+            const celula = document.querySelector(seletor);
+            if (celula) {
+                celula.style.backgroundColor = '#ffe5e5';  // 🔴 Tom claro de vermelho
+                celula.style.borderRadius = '5px';
+            }
+        },
 
-        const celula = document.querySelector(seletor);
-        if (celula) {
-            celula.style.backgroundColor = '#ffe5e5';  // 🔴 tom claro de vermelho
-            celula.style.borderRadius = '5px';
+        // 🔥 NOVO: Sempre que mudar de mês, carregar resumo
+        datesSet: function(info) {
+            carregarResumoMes(info.startStr);
         }
-  },
-
 
     });
 
     calendar.render();
+    carregarResumoMes(calendar.view.currentStart.toISOString().slice(0, 10));
 
     document.getElementById('btn-exportar').addEventListener('click', function (e) {
         e.preventDefault();
@@ -99,6 +111,27 @@ document.addEventListener('DOMContentLoaded', function () {
         window.open(`/exportar/agenda?mes=${mes}`, '_blank');
     });
 });
+
+// Função para carregar resumo do mês
+function carregarResumoMes(dataReferencia) {
+    fetch(`/api/jogos/mes?data=${dataReferencia}`)
+        .then(res => res.json())
+        .then(jogos => {
+            const lista = document.getElementById('lista-jogos');
+            lista.innerHTML = '';
+
+            if (jogos.length === 0) {
+                lista.innerHTML = '<li>Não há jogos agendados para este mês.</li>';
+            } else {
+                jogos.forEach(jogo => {
+                    const item = document.createElement('li');
+                    const mandante = jogo.inter_mandante ? '🔴' : '🔵';
+                    item.innerHTML = `${mandante} <strong>${jogo.data_formatada}</strong> — ${jogo.titulo} (${jogo.local})`;
+                    lista.appendChild(item);
+                });
+            }
+        });
+}
 
 function abrirModal(jogo = null, dataPadrao = null) {
     document.getElementById('form-jogo').reset();
@@ -156,6 +189,7 @@ document.getElementById('form-jogo').addEventListener('submit', function (e) {
     }).then(() => {
         fecharModal();
         calendar.refetchEvents();
+        carregarResumoMes(calendar.view.currentStart.toISOString().slice(0, 10)); // Atualiza resumo
     });
 });
 
@@ -166,6 +200,7 @@ document.getElementById('btn-excluir')?.addEventListener('click', function () {
             .then(() => {
                 fecharModal();
                 calendar.refetchEvents();
+                carregarResumoMes(calendar.view.currentStart.toISOString().slice(0, 10)); // Atualiza resumo
             });
     }
 });

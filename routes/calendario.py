@@ -112,6 +112,7 @@ from datetime import date
 @calendario_bp.route('/api/jogos/mes')
 def jogos_do_mes():
     data_str = request.args.get('data')  # yyyy-mm-dd
+    data_str = data_str[:10]  # garante que só pegue 'yyyy-mm-dd'
     data_ref = datetime.strptime(data_str, '%Y-%m-%d')
     ano, mes = data_ref.year, data_ref.month
 

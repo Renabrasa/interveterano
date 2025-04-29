@@ -627,7 +627,10 @@ table th, table td {
 
 .fc-daygrid-day-frame {
     min-height: 70px;
-}
+    padding: 6px;
+    word-wrap: break-word;
+  }
+  
 
 .fc-toolbar {
     flex-wrap: wrap !important;
@@ -758,3 +761,143 @@ table th, table td {
     height: 300px;
 }
 
+/*Ajuste no CSS para calendário e outros*/
+
+/* 🔧 Ajuste do título encoberto pelo botão hambúrguer */
+@media (max-width: 768px) {
+    h1.titulo-pagina {
+      margin-left: 60px;
+    }
+  }
+  
+  /* 🎨 Estilo do link de exportar agenda */
+  .exportar-agenda {
+    color: #800000;
+    text-decoration: none;
+    font-weight: bold;
+  }
+  .exportar-agenda:hover {
+    text-decoration: underline;
+  }
+  
+  
+  /* 📆 Responsividade real para o calendário */
+  #calendar {
+    width: 100% !important;
+    max-width: 100%;
+    overflow-x: auto;
+  }
+  
+  /* 🧱 Espaçamento interno nas células do calendário */
+  .fc-daygrid-day-frame {
+    padding: 8px;
+  }
+  
+  /* 📦 Opcional: melhora visual no botão hambúrguer */
+  .menu-icon {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background-color: #800000;
+    color: white;
+    font-size: 24px;
+    padding: 8px 10px;
+    border-radius: 5px;
+    z-index: 999;
+  }
+  
+  @media (max-width: 768px) {
+    h1.titulo-pagina {
+      margin-left: 55px; /* espaço para não ser encoberto */
+    }
+  }
+  @media (max-width: 480px) {
+    .content {
+      padding: 10px;
+    }
+  
+    #calendar {
+      font-size: 0.7rem;
+    }
+  
+    .fc-toolbar-title {
+      font-size: 0.9rem !important;
+    }
+  }
+  
+  /*@media (max-width: 480px) {
+    #calendar {
+      min-height: 100vh;
+    }
+  }*/
+  
+
+
+
+
+
+ /* ajuste no calendário*/
+ 
+ /* 📱 EXPANSÃO VISUAL DO CALENDÁRIO EM TELAS PEQUENAS */
+
+@media (max-width: 768px) {
+    .content {
+      padding: 5px !important;  /* Reduz o padding da área principal */
+    }
+  
+    #calendar-container {
+      margin: 0;
+      padding: 0;
+      width: 100vw !important;
+    }
+  
+    #calendar {
+      width: 100vw !important;
+      max-width: 100vw !important;
+    }
+  
+    .fc {
+      width: 100vw !important;
+    }
+  
+    .fc-daygrid-day-frame {
+      min-height: 90px; /* Aumenta a altura das células */
+    }
+  
+    .fc-toolbar {
+      flex-direction: column;
+      align-items: stretch;
+    }
+  
+    .fc-toolbar-title {
+      font-size: 1.1rem !important;
+      text-align: center;
+    }
+  }
+  /* 🎯 Estilo do resumo mensal abaixo do calendário */
+.resumo-mensal {
+    margin-top: 30px;
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 8px rgba(0,0,0,0.05);
+  }
+  
+  .resumo-mensal h2 {
+    font-size: 20px;
+    margin-bottom: 15px;
+    color: #800000;
+    text-align: center;
+  }
+  
+  .resumo-mensal ul {
+    list-style: none;
+    padding: 0;
+    font-size: 15px;
+    color: #555;
+  }
+  
+  .resumo-mensal li {
+    margin-bottom: 8px;
+  }
+  
