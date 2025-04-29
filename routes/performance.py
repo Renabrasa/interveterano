@@ -234,11 +234,11 @@ def grafico_resultados():
 def ranking():
     jogadores_stats = db.session.query(
         Jogador.nome,
-        Jogador.posicao.has(),  # vai retornar True, mas precisamos acessar o nome depois
+        Jogador.foto,
+        Jogador.posicao_id,
         func.coalesce(func.sum(Performance.gols), 0),
         func.coalesce(func.sum(Performance.assistencias), 0),
-        func.count(Performance.id),
-        Jogador.posicao_id
+        func.count(Performance.id)
     ).join(Performance).group_by(Jogador.id).all()
 
     convidados_stats = db.session.query(
@@ -248,14 +248,14 @@ def ranking():
         func.count(Performance.id)
     ).join(Performance).group_by(Convidado.id).all()
 
-    # pegar todas posições de uma vez
     posicoes = {p.id: p.nome for p in db.session.query(Posicao).all()}
 
     ranking_total = []
 
-    for nome, _, gols, assist, part, posicao_id in jogadores_stats:
+    for nome, foto, posicao_id, gols, assist, part in jogadores_stats:
         ranking_total.append({
             'nome': nome,
+            'foto': foto,  # adicionando foto no dicionário
             'categoria': 'Jogador',
             'gols': gols,
             'assist': assist,
@@ -266,6 +266,7 @@ def ranking():
     for nome, gols, assist, part in convidados_stats:
         ranking_total.append({
             'nome': nome,
+            'foto': None,  # convidados não têm foto
             'categoria': 'Convidado',
             'gols': gols,
             'assist': assist,
@@ -276,4 +277,5 @@ def ranking():
     ranking_total.sort(key=lambda x: (x['gols'], x['assist'], x['part']), reverse=True)
 
     return render_template('performance/ranking.html', ranking=ranking_total)
+
 
