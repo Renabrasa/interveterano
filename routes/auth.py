@@ -11,6 +11,7 @@ def login():
 
         if usuario == 'interadmin' and senha == 'Intervet2025':
             session['logado'] = True
+            session['usuario'] = 'interadmin'  # ✅ Salvando também o usuário
             flash('Login realizado com sucesso!', 'sucesso')
 
             proxima_url = session.pop('proxima_url', None)
@@ -24,6 +25,7 @@ def login():
 @auth_bp.route('/logout')
 def logout():
     session.pop('logado', None)
+    session.pop('usuario', None)  # ✅ Removendo também o usuário
     flash('Logout realizado com sucesso!', 'sucesso')
     return redirect(url_for('home'))
 
@@ -37,6 +39,3 @@ def login_required(f):
             return redirect(url_for('auth.login'))
         return f(*args, **kwargs)
     return decorated_function
-
-
-

@@ -12,7 +12,7 @@ def login_obrigatorio():
 #
 # # Rota para exibir os convidados
 @convidado_bp.route('/convidados')
-@login_required
+#@login_required
 def exibir_convidados():
         
     convidados = Convidado.query.all()

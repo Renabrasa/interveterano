@@ -19,7 +19,7 @@ def login_obrigatorio():
 from sqlalchemy.orm import joinedload
 
 @plantel_bp.route('/plantel')
-@login_required
+#@login_required
 def exibir_plantel():
     jogadores = Jogador.query.options(joinedload(Jogador.categoria))\
         .filter(

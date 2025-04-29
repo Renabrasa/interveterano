@@ -12,6 +12,7 @@
 
 <h1 class="titulo-pagina">Cadastro de Convidados</h1>
 
+{% if 'usuario' in session %}
 <div class="form-card">
     <form action="{{ url_for('convidado.adicionar_convidado') }}" method="POST" enctype="multipart/form-data" class="form-jogador">
         <div class="form-linha">
@@ -57,8 +58,10 @@
         </div>
     </form>
 </div>
-
 <h2 class="titulo-tabela">Convidados Cadastrados</h2>
+{% endif %}
+
+
 
 <div class="tabela-container">
 <table class="tabela-jogadores">
@@ -69,7 +72,7 @@
             <th>Posição</th>
             <th>Pé</th>
             <th>Foto</th>
-            <th>Ações</th>
+            {% if 'usuario' in session %}<th>Ações</th>{% endif %}
         </tr>
     </thead>
     <tbody>
@@ -86,10 +89,12 @@
                 Sem foto
                 {% endif %}
             </td>
+            {% if 'usuario' in session %}
             <td>
                 <a href="{{ url_for('convidado.editar_convidado', id=convidado.id) }}">✏️</a>
                 <a href="{{ url_for('convidado.excluir_convidado', id=convidado.id) }}" onclick="return confirm('Deseja remover este convidado?')">🗑️</a>
             </td>
+            {% endif %}
         </tr>
         {% endfor %}
     </tbody>
@@ -252,7 +257,7 @@
     document.querySelectorAll('.alerta').forEach(el => el.style.display = 'none');
   }, 4000);
 
-  document.getElementById('foto-input').addEventListener('change', function (event) {
+  document.getElementById('foto-input')?.addEventListener('change', function (event) {
     const preview = document.querySelector('.foto-preview');
     const file = event.target.files[0];
     if (file) {

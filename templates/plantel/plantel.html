@@ -12,6 +12,7 @@
 
 <h1 class="titulo-pagina">Cadastro de Jogadores</h1>
 
+{% if 'usuario' in session %}
 <div class="form-card">
   <form action="{{ url_for('plantel.adicionar_jogador') }}" method="POST" enctype="multipart/form-data" class="form-jogador">
     <div class="form-linha">
@@ -57,8 +58,10 @@
     </div>
   </form>
 </div>
-
 <h2 class="titulo-tabela">Jogadores Cadastrados</h2>
+{% endif %}
+
+
 
 <!-- CAMPO DE PESQUISA -->
 <div class="pesquisa-container">
@@ -74,7 +77,7 @@
       <th>Posição</th>
       <th>Pé</th>
       <th>Foto</th>
-      <th>Ações</th>
+      {% if 'usuario' in session %}<th>Ações</th>{% endif %}
     </tr>
   </thead>
   <tbody>
@@ -91,10 +94,12 @@
         Sem foto
         {% endif %}
       </td>
+      {% if 'usuario' in session %}
       <td>
         <a href="{{ url_for('plantel.editar_jogador', id=jogador.id) }}">✏️</a>
         <a href="{{ url_for('plantel.excluir_jogador', id=jogador.id) }}" onclick="return confirm('Deseja remover este jogador do plantel?')">🗑️</a>
       </td>
+      {% endif %}
     </tr>
     {% endfor %}
   </tbody>
@@ -271,7 +276,7 @@
     document.querySelectorAll('.alerta').forEach(el => el.style.display = 'none');
   }, 4000);
 
-  document.getElementById('foto-input').addEventListener('change', function (event) {
+  document.getElementById('foto-input')?.addEventListener('change', function (event) {
     const preview = document.querySelector('.foto-preview');
     const file = event.target.files[0];
     if (file) {
@@ -283,7 +288,6 @@
     }
   });
 
-  // SCRIPT DE FILTRO GERAL
   document.getElementById('pesquisaJogador').addEventListener('keyup', function() {
     var input = this.value.toLowerCase();
     var linhas = document.querySelectorAll('#tabelaJogadores tbody tr');
@@ -294,6 +298,5 @@
     });
   });
 </script>
-
 
 {% endblock %}
