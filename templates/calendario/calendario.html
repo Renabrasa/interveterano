@@ -1,25 +1,27 @@
 {% extends 'base.html' %}
 {% block content %}
 
-<h1 class="titulo-pagina">Calendário de Jogos</h1>
+<h1 class="titulo-pagina" style="margin-top: 20px;">Calendário de Jogos</h1>
 
 <div style="text-align: right; margin-bottom: 10px;">
-    <a href="#" id="btn-exportar" class="exportar-agenda">📤 Exportar Agenda</a>
+    <a href="#" id="btn-exportar"
+        style="float: right; margin-right: 10px; margin-top: 10px; position: relative; z-index: 5;">📤 Exportar
+        Agenda</a>
 </div>
 
-<div id="calendar-container">
+<div id="calendar-container" style="overflow-x: auto;">
     <div id="calendar"></div>
 </div>
 
-<!-- 🔥 NOVO: Resumo Mensal dos Jogos -->
-<div id="resumo-mensal" class="resumo-mensal">
-    <h2>Jogos do Mês</h2>
-    <ul id="lista-jogos"></ul>
+<!-- 🔥 RESUMO DO MÊS -->
+<div id="resumo-mensal" style="margin-top: 20px; padding: 15px; background-color: #fff; border-radius: 8px;">
+    <h2 style="text-align: center; color: #b30000;">Jogos do Mês</h2>
+    <ul id="lista-jogos" style="list-style: none; padding-left: 0;"></ul>
 </div>
 
 <!-- Modal de Jogo -->
 <div id="jogo-modal" class="modal" style="display: none;">
-    <div class="modal-content">
+    <div class="modal-content" style="width: 90%; max-width: 500px; margin: auto;">
         <h2 id="modal-title">Detalhes do Jogo</h2>
         <form id="form-jogo">
             <input type="hidden" id="jogo-id">
@@ -42,10 +44,10 @@
                 <option value="derrota">Derrota</option>
             </select>
 
-            <div class="modal-buttons">
+            <div style="margin-top: 10px;">
                 {% if session.get('logado') %}
-                    <button type="submit">Salvar</button>
-                    <button type="button" id="btn-excluir" style="display: none;">Excluir</button>
+                <button type="submit">Salvar</button>
+                <button type="button" id="btn-excluir" style="display: none;">Excluir</button>
                 {% endif %}
                 <button type="button" id="btn-cancelar">Fechar</button>
             </div>
@@ -53,28 +55,57 @@
     </div>
 </div>
 
-<!-- Scripts do FullCalendar -->
+<!-- FULLCALENDAR -->
 <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.9/index.global.min.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.9/index.global.min.js"></script>
-<div class="resumo-topo">
-    <small><strong>Legenda:</strong> 🔴 Inter mandante | 🔵 Visitante</small>
-  </div>
-<script>
-let calendar;
 
-document.addEventListener('DOMContentLoaded', function () {
-    calendar = new FullCalendar.Calendar(document.getElementById('calendar'), {
-        initialView: 'dayGridMonth',
-        locale: 'pt-br',
-        selectable: {{ 'true' if session.get('logado') else 'false' }},
+<div class="resumo-legenda">
+    <small><strong>Legenda:</strong> 🔴 Inter mandante &nbsp; | &nbsp; 🔵 Visitante</small>
+</div>
+
+
+<script>
+    let calendar;
+
+    document.addEventListener('DOMContentLoaded', function () {
+        calendar = new FullCalendar.Calendar(document.getElementById('calendar'), {
+            initialView: 'dayGridMonth',
+            locale: 'pt-br',
+            selectable: {{ 'true' if session.get('logado') else 'false' }},
         editable: false,
         events: '/api/jogos',
 
+        // ✅ AJUSTE: mostra apenas o título formatado no backend (ex: Tabajara — 16h)
+        eventContent: function (arg) {
+            return {
+                ///html: `<div style="font-weight: bold; text-align: center; background-color: #f2f2f2; border-radius: 4px; padding: 2px 4px;">${arg.event.title}</div>`
+
+                html: `
+            <div style="
+                display: flex;
+                justify-content: left;
+                align-items: left;
+                text-align: left;
+                font-weight: bold;
+                font-size: 0.60rem;
+                color: #b30000;
+                white-space: normal;
+                overflow-wrap: break-word;
+                line-height: 1.1;
+                padding: 0 0px;
+            ">
+                ${arg.event.title}
+            </div>
+        `
+            };
+        },
+
+
         dateClick: function (info) {
             {% if session.get('logado') %}
-                abrirModal(null, info.dateStr);
+            abrirModal(null, info.dateStr);
             {% else %}
-                alert("É necessário login para adicionar um novo jogo.");
+            alert("É necessário login para adicionar um novo jogo.");
             {% endif %}
         },
 
@@ -84,25 +115,27 @@ document.addEventListener('DOMContentLoaded', function () {
                 .then(jogo => abrirModal(jogo));
         },
 
-        eventDidMount: function(info) {
+        eventDidMount: function (info) {
             const dia = info.event.start;
             const seletor = `.fc-daygrid-day[data-date="${dia.toISOString().slice(0, 10)}"]`;
             const celula = document.querySelector(seletor);
             if (celula) {
-                celula.style.backgroundColor = '#ffe5e5';  // 🔴 Tom claro de vermelho
+                celula.style.backgroundColor = '#ffe5e5';
                 celula.style.borderRadius = '5px';
             }
         },
 
-        // 🔥 NOVO: Sempre que mudar de mês, carregar resumo
-        datesSet: function(info) {
-            carregarResumoMes(info.startStr);
+        datesSet: function () {
+            const dataAtual = calendar.getCurrentData().currentDate;
+            carregarResumoMes(dataAtual.toISOString().slice(0, 10));
         }
 
     });
 
     calendar.render();
-    carregarResumoMes(calendar.view.currentStart.toISOString().slice(0, 10));
+    const dataAtual = calendar.getCurrentData().currentDate;
+    carregarResumoMes(dataAtual.toISOString().slice(0, 10));
+
 
     document.getElementById('btn-exportar').addEventListener('click', function (e) {
         e.preventDefault();
@@ -112,102 +145,165 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 
-// Função para carregar resumo do mês
-function carregarResumoMes(dataReferencia) {
-    fetch(`/api/jogos/mes?data=${dataReferencia}`)
-        .then(res => res.json())
-        .then(jogos => {
-            const lista = document.getElementById('lista-jogos');
-            lista.innerHTML = '';
+    function carregarResumoMes(dataReferencia) {
+        fetch(`/api/jogos/mes?data=${dataReferencia}`)
+            .then(res => res.json())
+            .then(jogos => {
+                const lista = document.getElementById('lista-jogos');
+                lista.innerHTML = '';
 
-            if (jogos.length === 0) {
-                lista.innerHTML = '<li>Não há jogos agendados para este mês.</li>';
-            } else {
-                jogos.forEach(jogo => {
-                    const item = document.createElement('li');
-                    const mandante = jogo.inter_mandante ? '🔴' : '🔵';
-                    item.innerHTML = `${mandante} <strong>${jogo.data_formatada}</strong> — ${jogo.titulo} (${jogo.local})`;
-                    lista.appendChild(item);
-                });
-            }
-        });
-}
-
-function abrirModal(jogo = null, dataPadrao = null) {
-    document.getElementById('form-jogo').reset();
-    document.getElementById('jogo-id').value = '';
-    {% if session.get('logado') %}
-        document.getElementById('btn-excluir').style.display = 'none';
-    {% endif %}
-
-    if (jogo) {
-        document.getElementById('modal-title').innerText = "Detalhes do Jogo";
-        document.getElementById('jogo-id').value = jogo.id;
-        document.getElementById('titulo').value = jogo.titulo;
-        document.getElementById('data').value = jogo.data.substring(0, 16);
-        document.getElementById('local').value = jogo.local || '';
-        document.getElementById('inter_mandante').value = jogo.inter_mandante ? 'true' : 'false';
-        document.getElementById('resultado').value = jogo.resultado || '';
-        {% if session.get('logado') %}
-            document.getElementById('btn-excluir').style.display = 'inline-block';
-        {% endif %}
-    } else {
-        document.getElementById('modal-title').innerText = "Novo Jogo";
-        document.getElementById('data').value = dataPadrao + 'T16:00';
-    }
-
-    document.getElementById('jogo-modal').style.display = 'flex';
-}
-
-function fecharModal() {
-    document.getElementById('jogo-modal').style.display = 'none';
-}
-
-document.getElementById('form-jogo').addEventListener('submit', function (e) {
-    e.preventDefault();
-    {% if not session.get('logado') %}
-        alert("Apenas usuários logados podem salvar jogos.");
-        return;
-    {% endif %}
-
-    const id = document.getElementById('jogo-id').value;
-    const payload = {
-        titulo: document.getElementById('titulo').value,
-        data: document.getElementById('data').value,
-        local: document.getElementById('local').value,
-        inter_mandante: document.getElementById('inter_mandante').value === 'true',
-        resultado: document.getElementById('resultado').value
-    };
-
-    const url = id ? `/api/jogos/${id}` : '/api/jogos';
-    const method = id ? 'PUT' : 'POST';
-
-    fetch(url, {
-        method: method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-    }).then(() => {
-        fecharModal();
-        calendar.refetchEvents();
-        carregarResumoMes(calendar.view.currentStart.toISOString().slice(0, 10)); // Atualiza resumo
-    });
-});
-
-document.getElementById('btn-excluir')?.addEventListener('click', function () {
-    const id = document.getElementById('jogo-id').value;
-    if (confirm("Deseja excluir este jogo?")) {
-        fetch(`/api/jogos/${id}`, { method: 'DELETE' })
-            .then(() => {
-                fecharModal();
-                calendar.refetchEvents();
-                carregarResumoMes(calendar.view.currentStart.toISOString().slice(0, 10)); // Atualiza resumo
+                if (jogos.length === 0) {
+                    lista.innerHTML = '<li style="text-align:center;">Não há jogos agendados para este mês.</li>';
+                } else {
+                    jogos.forEach(jogo => {
+                        const item = document.createElement('li');
+                        const mandante = jogo.inter_mandante ? '🔴' : '🔵';
+                        item.innerHTML = `${mandante} <strong>${jogo.data_formatada}</strong> — ${jogo.titulo} (${jogo.local})`;
+                        lista.appendChild(item);
+                    });
+                }
             });
     }
-});
 
-document.getElementById('btn-cancelar').addEventListener('click', function () {
-    fecharModal();
-});
+    function abrirModal(jogo = null, dataPadrao = null) {
+        document.getElementById('form-jogo').reset();
+        document.getElementById('jogo-id').value = '';
+        {% if session.get('logado') %}
+        document.getElementById('btn-excluir').style.display = 'none';
+        {% endif %}
+
+        if (jogo) {
+            document.getElementById('modal-title').innerText = "Detalhes do Jogo";
+            document.getElementById('jogo-id').value = jogo.id;
+            document.getElementById('titulo').value = jogo.titulo;
+            document.getElementById('data').value = jogo.data.substring(0, 16);
+            document.getElementById('local').value = jogo.local || '';
+            document.getElementById('inter_mandante').value = jogo.inter_mandante ? 'true' : 'false';
+            document.getElementById('resultado').value = jogo.resultado || '';
+            {% if session.get('logado') %}
+            document.getElementById('btn-excluir').style.display = 'inline-block';
+            {% endif %}
+        } else {
+            document.getElementById('modal-title').innerText = "Novo Jogo";
+            document.getElementById('data').value = dataPadrao + 'T16:00';
+        }
+
+        document.getElementById('jogo-modal').style.display = 'flex';
+    }
+
+    function fecharModal() {
+        document.getElementById('jogo-modal').style.display = 'none';
+    }
+
+    document.getElementById('form-jogo').addEventListener('submit', function (e) {
+        e.preventDefault();
+        {% if not session.get('logado') %}
+        alert("Apenas usuários logados podem salvar jogos.");
+        return;
+        {% endif %}
+
+        const id = document.getElementById('jogo-id').value;
+        const payload = {
+            titulo: document.getElementById('titulo').value,
+            data: document.getElementById('data').value,
+            local: document.getElementById('local').value,
+            inter_mandante: document.getElementById('inter_mandante').value === 'true',
+            resultado: document.getElementById('resultado').value
+        };
+
+        const url = id ? `/api/jogos/${id}` : '/api/jogos';
+        const method = id ? 'PUT' : 'POST';
+
+        fetch(url, {
+            method: method,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        }).then(() => {
+            fecharModal();
+            calendar.refetchEvents();
+            const dataAtual = calendar.getCurrentData().currentDate;
+            carregarResumoMes(dataAtual.toISOString().slice(0, 10));
+
+        });
+    });
+
+    document.getElementById('btn-excluir')?.addEventListener('click', function () {
+        const id = document.getElementById('jogo-id').value;
+        if (confirm("Deseja excluir este jogo?")) {
+            fetch(`/api/jogos/${id}`, { method: 'DELETE' })
+                .then(() => {
+                    fecharModal();
+                    calendar.refetchEvents();
+                    const dataAtual = calendar.getCurrentData().currentDate;
+                    carregarResumoMes(dataAtual.toISOString().slice(0, 10));
+
+                });
+        }
+    });
+
+    document.getElementById('btn-cancelar').addEventListener('click', function () {
+        fecharModal();
+    });
 </script>
+<style>
+    /* Estilo geral responsivo para mobile */
+    @media (max-width: 768px) {
+        .fc .fc-daygrid-event {
+            font-size: 0.75rem !important;
+            padding: 2px 4px !important;
+        }
+    
+        #btn-exportar {
+            display: block;
+            text-align: right;
+            margin-right: 15px;
+            margin-top: 10px;
+        }
+    
+        #resumo-mensal {
+            margin-top: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            padding: 12px;
+        }
+    
+        #resumo-mensal h2 {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            color: #b30000;
+        }
+    
+        #lista-jogos li {
+            padding: 8px 6px;
+            border-bottom: 1px dashed #ccc;
+            font-size: 0.9rem;
+        }
+    
+        .resumo-legenda {
+            margin-top: 10px;
+            text-align: center;
+            font-size: 0.8rem;
+        }
+    
+        .fc-toolbar-title {
+            font-size: 1rem !important;
+        }
+    
+        .fc-button {
+            font-size: 0.7rem !important;
+            padding: 4px 6px !important;
+        }
+    }
+    @media (max-width: 768px) {
+    .fc-event-title {
+        white-space: normal !important;
+    }
 
+    .fc-daygrid-event-harness {
+        min-height: 28px;
+    }
+}
+
+    </style>
+    
 {% endblock %}

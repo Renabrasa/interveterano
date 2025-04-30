@@ -18,12 +18,14 @@ def listar_jogos():
     jogos = Jogo.query.all()
     eventos = []
     for jogo in jogos:
+        hora = jogo.data.strftime('%Hh')
         eventos.append({
             'id': jogo.id,
-            'title': jogo.titulo,
+            'title': f"{jogo.titulo}",
             'start': jogo.data.strftime('%Y-%m-%dT%H:%M:%S'),
         })
     return jsonify(eventos)
+
 
 
 # Criar novo jogo
@@ -202,3 +204,17 @@ def proximo_jogo():
         'local': jogo.local,
         'inter_mandante': jogo.inter_mandante
     })
+
+
+
+@calendario_bp.route('/resumo-jogos')
+def resumo_jogos():
+    ano = int(request.args.get('ano'))
+    mes = int(request.args.get('mes'))
+
+    jogos = Jogo.query.filter(
+        extract('year', Jogo.data) == ano,
+        extract('month', Jogo.data) == mes
+    ).order_by(Jogo.data.asc()).all()
+
+    return render_template('partials/_resumo_jogos.html', jogos=jogos)
