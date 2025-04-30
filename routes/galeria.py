@@ -3,6 +3,7 @@ from models.models import db, Jogo, FotoJogo
 from werkzeug.utils import secure_filename
 import base64
 from io import BytesIO
+from datetime import datetime, date
 from PIL import Image, ImageDraw
 import random
 import os
@@ -11,8 +12,9 @@ galeria_bp = Blueprint('galeria', __name__, template_folder='../templates/galeri
 
 @galeria_bp.route('/galeria')
 def galeria():
-    jogos = Jogo.query.order_by(Jogo.data.desc()).all()
-    return render_template('galeria/galeria.html', jogos=jogos)
+    hoje = datetime.now().date()
+    jogos_passados = Jogo.query.filter(Jogo.data <= hoje).order_by(Jogo.data.desc()).all()
+    return render_template('galeria/galeria.html', jogos=jogos_passados)
 
 
 @galeria_bp.route('/galeria/<int:jogo_id>')
