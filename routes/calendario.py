@@ -188,3 +188,17 @@ def exportar_agenda_pdf():
     p.save()
     buffer.seek(0)
     return send_file(buffer, as_attachment=True, download_name=f'agenda_{mes_param}.pdf', mimetype='application/pdf')
+
+@calendario_bp.route('/api/proximo-jogo')
+def proximo_jogo():
+    agora = datetime.now()
+    jogo = Jogo.query.filter(Jogo.data >= agora).order_by(Jogo.data).first()
+    if not jogo:
+        return jsonify({})
+    return jsonify({
+        'id': jogo.id,
+        'titulo': jogo.titulo,
+        'data': jogo.data.isoformat(),
+        'local': jogo.local,
+        'inter_mandante': jogo.inter_mandante
+    })

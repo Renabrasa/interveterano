@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<h1 class="titulo-pagina">🎨 Colagem do Jogo</h1>
+
+<div style="text-align: center; margin-bottom: 20px;">
+    <a href="{{ url_for('galeria.exportar_colagem_canva', jogo_id=jogo_id) }}" class="botao-galeria">⬇ Baixar PNG</a>
+    <a href="{{ url_for('galeria.galeria') }}" class="botao-galeria">⬅ Voltar à Galeria</a>
+</div>
+
+<div style="text-align: center;">
+    <img src="{{ url_for('galeria.exportar_colagem_canva', jogo_id=jogo_id) }}" alt="Colagem Final"
+         style="max-width: 100%; border: 4px solid #800000; border-radius: 6px;">
+</div>
+
+{% endblock %}

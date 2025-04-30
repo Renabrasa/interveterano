@@ -1008,3 +1008,193 @@ body, html {
     margin: 0;
     padding: 0;
 }
+.proximo-jogo-box {
+    margin-top: 30px;
+    background: #fff;
+    color: #333;
+    padding: 15px 20px;
+    border-radius: 10px;
+    text-align: center;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+.proximo-jogo-box p {
+    margin: 5px 0;
+    font-size: 15px;
+}
+.foto-mosaico {
+    width: 140px;
+    height: auto;
+    object-fit: cover;
+    border: 2px solid #800000;
+    margin: 5px;
+    transition: transform 0.3s ease;
+}
+
+/* Estilos com rotações aleatórias */
+.rotate-neg10 { transform: rotate(-10deg); }
+.rotate-neg5 { transform: rotate(-5deg); }
+.rotate-0    { transform: rotate(0deg); }
+.rotate-5    { transform: rotate(5deg); }
+.rotate-10   { transform: rotate(10deg); }
+
+.galeria-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 20px;
+    justify-content: center;
+}
+.galeria-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    margin-top: 20px;
+  }
+  
+  .galeria-card {
+    background: #fff;
+    border-left: 5px solid #800000;
+    padding: 15px 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 5px rgba(0,0,0,0.05);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  
+  .galeria-info h3 {
+    margin: 0;
+    color: #800000;
+    font-size: 18px;
+  }
+  
+  .galeria-info p {
+    margin: 5px 0 0 0;
+    font-size: 14px;
+    color: #666;
+  }
+  
+  .galeria-botoes {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+    flex-wrap: wrap;
+  }
+  
+  .botao-galeria {
+    background-color: #800000;
+    color: white;
+    padding: 8px 16px;
+    text-decoration: none;
+    border-radius: 5px;
+    font-weight: bold;
+    font-size: 14px;
+    transition: background 0.2s ease;
+  }
+  
+  .botao-galeria:hover {
+    background-color: #a00000;
+  }
+ 
+  
+/* 🛠️ Ajustes finos da galeria responsiva */
+.galeria-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+    gap: 12px;
+    padding: 10px;
+    margin-top: 20px;
+    justify-items: center;
+  }
+  
+  .foto-wrapper {
+    position: relative;
+    width: 90px;
+    height: 90px;
+  }
+  
+  .foto-mosaico {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border: 2px solid #800000;
+    border-radius: 6px;
+    display: block;
+  }
+  
+  .btn-remover-foto {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    background: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    font-size: 12px;
+    cursor: pointer;
+    box-shadow: 0 0 4px rgba(0,0,0,0.2);
+    z-index: 2;
+  }
+  
+  .btn-remover-foto:hover {
+    background-color: #b02a37;
+  }
+  
+  .galeria-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    margin-top: 30px;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  .galeria-item {
+    background: #fff;
+    border-left: 5px solid #800000;
+    padding: 15px 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .galeria-item h3 {
+    margin: 0;
+    color: #800000;
+    font-size: 18px;
+  }
+  
+  .galeria-item p {
+    font-size: 14px;
+    color: #555;
+    margin: 5px 0 10px 0;
+  }
+  
+  .botoes-galeria {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  
+  .botao-galeria {
+    background-color: #800000;
+    color: white;
+    padding: 6px 14px;
+    border-radius: 5px;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: bold;
+    transition: 0.2s;
+  }
+  
+  .botao-galeria:hover {
+    background-color: #a00000;
+  }
+  

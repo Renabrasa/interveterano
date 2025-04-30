@@ -16,7 +16,42 @@
         </p>
 
         <a href="/calendario" class="botao-home">📅 Ver Agenda</a>
+        <div class="proximo-jogo-box" id="proximo-jogo">
+            <p><strong>Próximo jogo:</strong> carregando...</p>
+        </div>
     </div>
+    
+    
 </div>
-
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        fetch('/api/proximo-jogo')
+            .then(res => res.json())
+            .then(jogo => {
+                const box = document.getElementById('proximo-jogo');
+                if (!jogo || !jogo.titulo) {
+                    box.innerHTML = '<p><strong>Próximo jogo:</strong> Nenhum jogo agendado.</p>';
+                } else {
+                    const data = new Date(jogo.data);
+                    const dia = String(data.getDate()).padStart(2, '0');
+                    const mes = String(data.getMonth() + 1).padStart(2, '0');
+                    const hora = String(data.getHours()).padStart(2, '0');
+                    const minuto = String(data.getMinutes()).padStart(2, '0');
+                    const dataFormatada = `${dia}/${mes} às ${hora}h${minuto}`;
+    
+                    box.innerHTML = `
+                        <p><strong>Próximo jogo:</strong></p>
+                        <p>📍 <strong>${jogo.titulo}</strong></p>
+                        <p>🕒 ${dataFormatada}</p>
+                        <p>🏟️ ${jogo.local || 'Local não informado'}</p>
+                    `;
+                }
+            })
+            .catch(() => {
+                document.getElementById('proximo-jogo').innerHTML =
+                    '<p><strong>Próximo jogo:</strong> erro ao buscar dados.</p>';
+            });
+    });
+    </script>
+    
 {% endblock %}

@@ -82,7 +82,7 @@
 
                     <a href="{{ url_for('performance.graficos') }}">📈 Gráficos</a>
                     <a href="{{ url_for('performance.ranking') }}">🏅 Ranking</a>
-                    <!--<a href="{{ url_for('galeria.galeria') }}">📷 <span>Galeria</span></a> -->
+                    <a href="{{ url_for('galeria.galeria') }}">📷 <span>Galeria</span></a>
                     {% if 'usuario' in session %}
                     <a href="{{ url_for('auth.logout') }}">🔓 Sair</a>
                     {% else %}

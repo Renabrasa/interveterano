@@ -1,18 +1,33 @@
 {% extends 'base.html' %}
 {% block content %}
-<h1>📷 Galeria de Jogos</h1>
-{% if jogos %}
-    <ul>
-        {% for jogo in jogos %}
-        <li>
-            <strong>{{ jogo.titulo }}</strong> ({{ jogo.data.strftime('%d/%m/%Y') }})
-            — <a href="{{ url_for('galeria.detalhes_galeria', jogo_id=jogo.id) }}">Ver Fotos</a>
-            — <a href="{{ url_for('galeria.envio_fotos', jogo_id=jogo.id) }}">Enviar Fotos</a>
-            — <a href="{{ url_for('galeria.exportar_mosaico', jogo_id=jogo.id) }}">Exportar Mosaico</a>
-        </li>
-        {% endfor %}
-    </ul>
-{% else %}
-    <p>Nenhum jogo com fotos ainda. 😔</p>
+
+<h1 class="titulo-pagina">📷 Galeria de Jogos</h1>
+
+<div class="galeria-grid">
+    {% for jogo in jogos %}
+    <div class="galeria-item">
+        <h3>{{ jogo.titulo }}</h3>
+        <p>📅 {{ jogo.data.strftime('%d/%m/%Y') }}</p>
+        {% set total_fotos = jogo.fotos|length %}
+
+        <div class="botoes-galeria">
+            <a href="{{ url_for('galeria.detalhes_galeria', jogo_id=jogo.id) }}" class="botao-galeria">📸 Fotos</a>
+
+            {% if jogo.fotos|length > 0 %}
+            <!--<a href="{{ url_for('galeria.exportar_colagem_canva', jogo_id=jogo.id) }}" class="botao-galeria">🎨 Colagem
+                Canva</a>-->
+            <a href="{{ url_for('galeria.visualizar_colagem_canva', jogo_id=jogo.id) }}" class="botao-galeria">👁️ Ver
+                mosaico</a>
+
+            {% endif %}
+
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+{% if not jogos %}
+<p style="text-align: center;">Nenhum jogo cadastrado ainda. 😔</p>
 {% endif %}
+
 {% endblock %}

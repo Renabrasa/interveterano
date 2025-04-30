@@ -1,12 +1,33 @@
 {% extends 'base.html' %}
 {% block content %}
-<h1>📸 Fotos de {{ jogo.titulo }}</h1>
 
-<div style="display: flex; flex-wrap: wrap; gap: 10px;">
-  {% for foto in fotos %}
-    <img src="data:image/png;base64,{{ foto.imagem_base64 }}" style="width: 120px; height: auto; border-radius: 5px; box-shadow: 1px 1px 5px rgba(0,0,0,0.2);">
-  {% endfor %}
-</div>
+<h1 class="titulo-pagina">📸 Fotos - {{ jogo.titulo }}</h1>
 
-<a href="{{ url_for('galeria.galeria') }}" class="botao-voltar">← Voltar à Galeria</a>
-{% endblock %}
+<a href="{{ url_for('galeria.galeria') }}" class="botao-voltar">Voltar </a>
+
+
+{% if fotos|length < 11 %} <form action="{{ url_for('galeria.envio_fotos', jogo_id=jogo.id) }}" method="get"
+  style="margin-bottom: 18px;">
+  <button class="botao-galeria"> ➕ Add foto</button>
+  </form>
+  {% else %}
+  <div class="alerta erro" style="margin-bottom: 15px;">
+    Este jogo atingiu o limite de 11 fotos.
+  </div>
+  {% endif %}
+
+
+
+  <div class="galeria-container">
+    {% for foto in fotos %}
+    <div class="foto-wrapper">
+      <img src="data:image/png;base64,{{ foto.imagem_base64 }}" class="foto-mosaico">
+      <form action="{{ url_for('galeria.excluir_foto', foto_id=foto.id, jogo_id=jogo.id) }}" method="POST">
+        <button class="btn-remover-foto" onclick="return confirm('Remover esta foto?')">❌</button>
+      </form>
+    </div>
+    {% endfor %}
+  </div>
+
+  
+  {% endblock %}
