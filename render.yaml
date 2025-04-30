@@ -3,7 +3,8 @@ services:
     name: inter-veterano
     env: python
     buildCommand: ""
-    startCommand: gunicorn main:app
+    startCommand: |
+      python -c "from main import app; from models.models import db; with app.app_context(): db.create_all()" && gunicorn main:app
     envVars:
       - key: FLASK_ENV
         value: production
