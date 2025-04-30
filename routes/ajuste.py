@@ -1,14 +1,12 @@
 from flask import Blueprint
-from models.models import db
-from sqlalchemy import text
+from models.models import db, FotoJogo  # ✅ Importa o modelo necessário
 
-ajuste_bp = Blueprint('ajuste', __name__)
+ajuste_bp = Blueprint('ajuste_bp', __name__)
 
-@ajuste_bp.route('/ajustar-tabelas')
-def ajustar_tabelas():
+@ajuste_bp.route('/ajustar-galeria')
+def ajustar_galeria():
     try:
-        with db.engine.begin() as conn:
-            conn.execute(text("ALTER TABLE mensalidade ADD COLUMN isento_manual BOOLEAN DEFAULT FALSE"))
-        return "✅ Coluna isento_manual criada com sucesso no banco do Render."
+        db.create_all()  # Cria todas as tabelas pendentes, incluindo foto_jogo
+        return "✅ Tabela 'foto_jogo' criada com sucesso no banco do Render."
     except Exception as e:
-        return f"⚠️ Erro ou já existe: {str(e)}"
+        return f"⚠️ Erro ao criar tabela: {str(e)}"
