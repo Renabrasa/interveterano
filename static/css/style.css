@@ -901,3 +901,110 @@ table th, table td {
     margin-bottom: 8px;
   }
   
+
+  /*Estilo do novo home*/
+
+  /* 🏠 Estilo da tela inicial */
+
+.home-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 40px 20px;
+    min-height: 100vh;
+    background: url('/static/img/fundo_login.png') no-repeat center center;
+    background-size: cover;
+}
+
+.home-box {
+    background-color: rgba(0, 0, 0, 0.75);
+    color: white;
+    padding: 40px 30px;
+    max-width: 600px;
+    border-radius: 12px;
+    text-align: center;
+    box-shadow: 0 0 15px rgba(0,0,0,0.4);
+}
+
+.home-logo {
+    width: 120px;
+    margin-bottom: 20px;
+}
+
+.home-titulo {
+    font-size: 32px;
+    color: #fff;
+    margin-bottom: 5px;
+}
+
+.home-subtitulo {
+    font-size: 20px;
+    color: #ccc;
+    margin-bottom: 20px;
+}
+
+.home-frase {
+    font-style: italic;
+    font-size: 16px;
+    color: #ffd700;
+    margin-bottom: 20px;
+}
+
+.home-descricao {
+    font-size: 16px;
+    margin-bottom: 30px;
+    line-height: 1.6;
+}
+
+.botao-home {
+    display: inline-block;
+    background-color: #800000;
+    color: white;
+    padding: 12px 24px;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 8px;
+    text-decoration: none;
+    transition: background 0.2s ease;
+}
+
+.botao-home:hover {
+    background-color: #a00000;
+}
+
+@media (max-width: 600px) {
+    .home-box {
+        padding: 30px 20px;
+    }
+
+    .home-titulo {
+        font-size: 24px;
+    }
+
+    .home-subtitulo {
+        font-size: 16px;
+    }
+
+    .home-frase {
+        font-size: 14px;
+    }
+
+    .home-descricao {
+        font-size: 14px;
+    }
+}
+/* Remove margens e preenchimentos que causam bordas na home */
+body, html {
+    margin: 0;
+    padding: 0;
+}
+
+.content {
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+.home-container {
+    margin: 0;
+    padding: 0;
+}
