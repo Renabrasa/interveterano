@@ -1,29 +1,22 @@
 {% extends 'base.html' %}
 {% block content %}
-<style>
-    body, html {
-        margin: 0;
-        padding: 0;
-        height: 100%;
-        background-color: #800000;
-    }
 
-    .home-wrapper {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        height: calc(100vh - 40px); /* para compensar o menu lateral */
-        background-color: #800000;
-    }
+<div class="home-container">
+    <div class="home-box">
+        <img src="{{ url_for('static', filename='img/logoredondo.png') }}" alt="Escudo Inter Veterano" class="home-logo">
 
-    .home-wrapper img {
-        max-width: 90vw;
-        max-height: 90vh;
-        border-radius: 10px;
-    }
-</style>
+        <h1 class="home-titulo">INTER VETERANO</h1>
+        <h2 class="home-subtitulo">VILA EUGÊNIO FRANKLIN</h2>
 
-<div class="home-wrapper">
-    <img src="{{ url_for('static', filename='img/home_inter.png') }}" alt="Inter Veterano">
+        <p class="home-frase">"Aqui o passado é glória e o presente é luta!"</p>
+
+        <p class="home-descricao">
+            Seja bem-vindo ao sistema de gestão do Inter Veterano! Aqui você encontra controle de plantel,
+            calendários de jogos, desempenho da equipe, finanças do clube e relatórios gerenciais.
+        </p>
+
+        <a href="/calendario" class="botao-home">📅 Ver Agenda</a>
+    </div>
 </div>
+
 {% endblock %}
