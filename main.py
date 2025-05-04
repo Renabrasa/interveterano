@@ -10,7 +10,8 @@ import os
 from routes.galeria import galeria_bp
 from sqlalchemy import text
 from routes.ajuste import ajuste_bp
-
+from routes.pessoas import pessoa_bp
+from routes.backup import backup_bp
 
 app = Flask(__name__)
 app.secret_key = 'inter-veterano-super-segura-2025'
@@ -37,7 +38,8 @@ app.register_blueprint(financeiro_bp)
 app.register_blueprint(auth_bp)
 app.register_blueprint(galeria_bp)
 app.register_blueprint(ajuste_bp)
-
+app.register_blueprint(pessoa_bp)
+app.register_blueprint(backup_bp)
 
 @app.route('/')
 def home():
@@ -46,18 +48,6 @@ def home():
 @app.errorhandler(502)
 def erro_502(e):
     return render_template('erro502.html'), 502
-
-# ================================
-# EXECUÇÃO DO POPULATE
-# ================================
-# Executa no início para garantir que o campo exista no PostgreSQL
-#with app.app_context():
-#    with db.engine.begin() as conn:
-#        try:
-#            conn.execute(text("ALTER TABLE performance ADD COLUMN gols_sofridos INTEGER DEFAULT 0"))
-#            print("✅ Coluna gols_sofridos criada com sucesso.")
-#        except Exception as e:
-#            print("⚠️ Coluna já existe ou erro ao criar:", e)
 
 
 
