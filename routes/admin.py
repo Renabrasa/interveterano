@@ -12,7 +12,7 @@ def ferramentas():
 
 @admin_bp.route('/ferramentas/migrar_performance', methods=['POST'])
 def migrar_performance():
-    performances = Performance.query.filter(Performance.jogador_id != None).all()
+    performances = Performance.query.filter(Performance.pessoa_id != None).all()
     migrados = 0
     for p in performances:
         jogador = Jogador.query.get(p.jogador_id)
