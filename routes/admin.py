@@ -27,7 +27,7 @@ def migrar_performance():
 
 @admin_bp.route('/ferramentas/migrar_jogadores', methods=['POST'])
 def migrar_jogadores():
-    from models.models import Jogador, Pessoa
+    
     count = 0
     for j in Jogador.query.all():
         if not Pessoa.query.filter_by(nome=j.nome, tipo='jogador').first():
