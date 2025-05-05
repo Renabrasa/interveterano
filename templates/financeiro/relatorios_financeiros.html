@@ -46,7 +46,7 @@
             <h3>🧑 Relatório Individual</h3>
             <form method="GET" action="{{ url_for('financeiro.relatorio_individual') }}">
                 <label>Jogador:</label>
-                <select name="jogador_id" required>
+                <select name="pessoa_id" required>
                     {% for jogador in jogadores %}
                         <option value="{{ jogador.id }}">{{ jogador.nome }}</option>
                     {% endfor %}

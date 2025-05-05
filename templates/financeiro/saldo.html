@@ -10,65 +10,416 @@
 -->
 {% block content %}
 <div class="painel-container">
-    <h1>Financeiro - Resumo do Mês</h1>
+  <h1 class="titulo-pagina">Financeiro - Resumo do Mês</h1>
 
-    <div class="tabs">
-        <a href="{{ url_for('financeiro.exibir_entradas', mes=mes) }}" class="tab">Entradas</a>
-        <a href="{{ url_for('financeiro.exibir_saidas', mes=mes) }}" class="tab">Saídas</a>
-        <a href="{{ url_for('financeiro.exibir_saldo', mes=mes) }}" class="tab active">Resumo</a>
+  {% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+  <div class="mensagens-container">
+    {% for categoria, mensagem in messages %}
+    <div class="alerta {{ categoria }}">
+      <div class="alerta-conteudo">
+        <span class="alerta-icone">{% if categoria == 'sucesso' %}✅{% elif categoria == 'erro' %}❌{% else %}ℹ️{% endif %}</span>
+        <span class="alerta-texto">{{ mensagem }}</span>
+      </div>
+      <button class="alerta-fechar" onclick="this.parentElement.style.display='none'">×</button>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+  {% endwith %}
+
+  <div class="card-container">
+    <div class="card-header">
+      <div class="tabs">
+        <a href="{{ url_for('financeiro.exibir_entradas', mes=mes) }}" class="tab">
+          <i class="tab-icon">💰</i> Entradas
+        </a>
+        <a href="{{ url_for('financeiro.exibir_saidas', mes=mes) }}" class="tab">
+          <i class="tab-icon">📤</i> Saídas
+        </a>
+        <a href="{{ url_for('financeiro.exibir_saldo', mes=mes) }}" class="tab active">
+          <i class="tab-icon">📊</i> Resumo
+        </a>
+      </div>
+
+      <div class="controles-superiores">
+        <form method="GET" action="{{ url_for('financeiro.exibir_saldo') }}" class="filtro-mes">
+          <button type="button" class="btn-navegacao" onclick="mudarMes(-1)">◀</button>
+          <input type="month" name="mes" value="{{ mes }}" required class="seletor-mes">
+          <button type="button" class="btn-navegacao" onclick="mudarMes(1)">▶</button>
+        </form>
+      </div>
     </div>
 
-    <form method="GET" action="{{ url_for('financeiro.exibir_saldo') }}" class="filtro-mes">
-        <button type="button" onclick="mudarMes(-1)">◀</button>
-        <input type="month" name="mes" value="{{ mes }}" onchange="this.form.submit()">
-        <button type="button" onclick="mudarMes(1)">▶</button>
-    </form>
-
     {% if mes == mes_primeiro %}
-    <form method="POST" style="margin-top: 20px;">
-        <label><strong>Saldo inicial do sistema:</strong></label>
-        <input type="number" step="0.01" name="saldo_inicial" value="{{ saldo_inicial }}" required>
-        <button type="submit">Atualizar</button>
-    </form>
+    <div class="saldo-inicial-section">
+      <form method="POST" class="form-saldo-inicial">
+        <div class="saldo-inicial-header">
+          <i class="saldo-icon">🏦</i>
+          <span class="saldo-label">Saldo inicial do sistema</span>
+        </div>
+        <div class="saldo-inicial-input">
+          <div class="input-wrapper">
+            <span class="input-prefixo">R$</span>
+            <input type="number" step="0.01" name="saldo_inicial" value="{{ saldo_inicial }}" required>
+          </div>
+          <button type="submit" class="btn-principal">
+            <i class="btn-icone">💾</i> Atualizar
+          </button>
+        </div>
+      </form>
+    </div>
     {% else %}
-    <div style="margin-top: 20px;">
-        <strong>Saldo inicial do sistema:</strong> R$ {{ '%.2f'|format(saldo_inicial) }}
+    <div class="saldo-inicial-section">
+      <div class="saldo-inicial-display">
+        <div class="saldo-inicial-header">
+          <i class="saldo-icon">🏦</i>
+          <span class="saldo-label">Saldo inicial do sistema</span>
+        </div>
+        <div class="saldo-valor">
+          R$ {{ '%.2f'|format(saldo_inicial) }}
+        </div>
+      </div>
     </div>
     {% endif %}
 
-    <div class="cards-resumo">
+    <div class="resumo-section">
+      <div class="cards-resumo">
         <div class="card-resumo entrada">
+          <div class="card-resumo-icon">💹</div>
+          <div class="card-resumo-content">
             <h3>Entradas Acumuladas</h3>
-            <p>R$ {{ '%.2f'|format(entradas) }}</p>
+            <p class="valor-entrada">R$ {{ '%.2f'|format(entradas) }}</p>
+          </div>
         </div>
+        
         <div class="card-resumo saida">
+          <div class="card-resumo-icon">📉</div>
+          <div class="card-resumo-content">
             <h3>Saídas Acumuladas</h3>
-            <p>R$ {{ '%.2f'|format(saidas) }}</p>
+            <p class="valor-saida">R$ {{ '%.2f'|format(saidas) }}</p>
+          </div>
         </div>
+        
         <div class="card-resumo saldo">
+          <div class="card-resumo-icon">💼</div>
+          <div class="card-resumo-content">
             <h3>Saldo Atual</h3>
-            <p style="color: {{ 'green' if saldo >= 0 else 'red' }}">R$ {{ '%.2f'|format(saldo) }}</p>
+            <p class="valor-saldo {{ 'positivo' if saldo >= 0 else 'negativo' }}">R$ {{ '%.2f'|format(saldo) }}</p>
+          </div>
         </div>
+      </div>
     </div>
+  </div>
 </div>
+
 <script>
-    const inputMes = document.querySelector('input[name="mes"]');
+  const inputMes = document.querySelector('input[name="mes"]');
 
-    function mudarMes(offset) {
-        let [ano, mes] = inputMes.value.split('-').map(Number);
-        mes += offset;
+  function mudarMes(offset) {
+    if (!inputMes || !inputMes.value) return;
 
-        if (mes < 1) {
-            mes = 12;
-            ano -= 1;
-        } else if (mes > 12) {
-            mes = 1;
-            ano += 1;
-        }
+    let [ano, mes] = inputMes.value.split('-').map(Number);
+    mes += offset;
 
-        const novoMes = `${ano}-${mes.toString().padStart(2, '0')}`;
-        window.location.href = `?mes=${novoMes}`;
+    if (mes < 1) { mes = 12; ano -= 1; }
+    else if (mes > 12) { mes = 1; ano += 1; }
+
+    const novoMes = `${ano}-${mes.toString().padStart(2, '0')}`;
+    window.location.href = `?mes=${novoMes}`;
+  }
+  
+  inputMes?.addEventListener('blur', () => {
+    if (inputMes.value) {
+      window.location.href = `?mes=${inputMes.value}`;
     }
+  });
+
+  inputMes?.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && inputMes.value) {
+      e.preventDefault();
+      window.location.href = `?mes=${inputMes.value}`;
+    }
+  });
+
+  // Auto-ocultar alertas após 4 segundos
+  setTimeout(() => {
+    document.querySelectorAll('.alerta').forEach(el => {
+      el.style.opacity = '0';
+      setTimeout(() => { el.style.display = 'none'; }, 500);
+    });
+  }, 4000);
 </script>
+
+<style>
+  /* ESTILOS GERAIS */
+  .painel-container {
+    font-family: 'Roboto', 'Segoe UI', sans-serif;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+
+  .titulo-pagina {
+    color: #333;
+    text-align: center;
+    margin-bottom: 25px;
+    font-size: 28px;
+    font-weight: 700;
+    position: relative;
+    padding-bottom: 15px;
+  }
+
+  .titulo-pagina::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80px;
+    height: 4px;
+    background: linear-gradient(90deg, #a00000, #ff4d4d);
+    border-radius: 2px;
+  }
+
+  /* CARD CONTAINER */
+  .card-container {
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    margin-bottom: 30px;
+  }
+
+  .card-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #e9ecef;
+    padding: 15px 20px;
+  }
+
+  /* ALERTAS */
+  .mensagens-container {
+    margin-bottom: 20px;
+  }
+
+  .alerta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 15px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    animation: fadeIn 0.3s ease-in-out;
+
+}
+
+.alerta.sucesso { background-color: #28a745; color: #fff; }
+.alerta.erro { background-color: #dc3545; color: #fff; }
+
+.alerta-icone {
+  margin-right: 10px;
+  font-size: 20px;
+}
+
+.alerta-fechar {
+  background: none;
+  border: none;
+  font-size: 20px;
+  color: #fff;
+  cursor: pointer;
+}
+
+/* TABS */
+.tabs {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+}
+
+.tab {
+  text-decoration: none;
+  color: #555;
+  font-weight: 600;
+  padding: 10px 20px;
+  border-radius: 8px;
+  background-color: #eaeaea;
+  transition: all 0.2s ease;
+}
+
+.tab.active {
+  background-color: #a00000;
+  color: #fff;
+}
+
+.tab:hover {
+  background-color: #c62828;
+  color: white;
+}
+
+.tab-icon {
+  margin-right: 8px;
+}
+
+/* NAVEGAÇÃO MÊS */
+.controles-superiores {
+  margin-top: 15px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.filtro-mes {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.btn-navegacao {
+  font-size: 18px;
+  padding: 5px 10px;
+  background-color: #a00000;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.seletor-mes {
+  padding: 8px;
+  font-size: 15px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+/* SALDO INICIAL */
+.saldo-inicial-section {
+  padding: 20px;
+  background-color: #fffdf5;
+  border-top: 1px solid #eee;
+}
+
+.form-saldo-inicial {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.saldo-inicial-header {
+  display: flex;
+  align-items: center;
+  font-weight: bold;
+  font-size: 18px;
+  color: #555;
+  gap: 10px;
+}
+
+.input-wrapper {
+  display: flex;
+  align-items: center;
+  background-color: #fafafa;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  width: max-content;
+}
+
+.input-prefixo {
+  font-weight: bold;
+  color: #555;
+  margin-right: 5px;
+}
+
+.input-wrapper input {
+  border: none;
+  background: transparent;
+  font-size: 16px;
+  width: 120px;
+  outline: none;
+}
+
+.btn-principal {
+  background-color: #a00000;
+  color: #fff;
+  border: none;
+  padding: 10px 18px;
+  font-size: 15px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.btn-principal:hover {
+  background-color: #800000;
+}
+
+.saldo-valor {
+  margin-top: 10px;
+  font-size: 20px;
+  font-weight: 600;
+  color: #333;
+}
+
+/* RESUMO */
+.resumo-section {
+  padding: 30px;
+  background-color: #fafafa;
+}
+
+.cards-resumo {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: space-around;
+}
+
+.card-resumo {
+  flex: 1 1 200px;
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.card-resumo-icon {
+  font-size: 32px;
+}
+
+.card-resumo-content h3 {
+  font-size: 16px;
+  margin-bottom: 5px;
+  color: #555;
+}
+
+.valor-entrada { color: #28a745; font-weight: bold; }
+.valor-saida { color: #dc3545; font-weight: bold; }
+.valor-saldo.positivo { color: #2e7d32; }
+.valor-saldo.negativo { color: #b71c1c; }
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 768px) {
+  .cards-resumo {
+    flex-direction: column;
+  }
+
+  .form-saldo-inicial {
+    flex-direction: column;
+  }
+
+  .input-wrapper input {
+    width: 100%;
+  }
+
+  .filtro-mes {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+</style>
 
 {% endblock %}

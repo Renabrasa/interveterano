@@ -1,33 +1,226 @@
 {% extends 'base.html' %}
 {% block content %}
 
-<h1 class="titulo-pagina">📷 Galeria de Jogos</h1>
+<style>
+    :root {
+        --primary: #800000; /* Vermelho grená */
+        --primary-light: #a00000; /* Grená mais claro */
+        --primary-dark: #600000; /* Grená mais escuro */
+        --accent: #b22222; /* Vermelho secundário para contraste */
+        --background: #ffffff; /* Branco */
+        --card-bg: #ffffff; /* Branco para cartões */
+        --text: #333333; /* Cinza escuro para texto */
+        --text-light: #666666; /* Cinza claro para texto secundário */
+        --border: #e0e0e0; /* Cinza claro para bordas */
+        --shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        --radius: 8px;
+        --transition: all 0.2s ease-in-out;
+        --font-title: 'Poppins', sans-serif;
+        --font-body: 'Inter', sans-serif;
+    }
 
-<div class="galeria-grid">
-    {% for jogo in jogos %}
-    <div class="galeria-item">
-        <h3>{{ jogo.titulo }}</h3>
-        <p>📅 {{ jogo.data.strftime('%d/%m/%Y') }}</p>
-        {% set total_fotos = jogo.fotos|length %}
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
 
-        <div class="botoes-galeria">
-            <a href="{{ url_for('galeria.detalhes_galeria', jogo_id=jogo.id) }}" class="botao-galeria">📸 Fotos</a>
+    body {
+        font-family: var(--font-body);
+        color: var(--text);
+        background-color: var(--background);
+        line-height: 1.5;
+    }
 
-            {% if jogo.fotos|length > 0 %}
-            <!--<a href="{{ url_for('galeria.exportar_colagem_canva', jogo_id=jogo.id) }}" class="botao-galeria">🎨 Colagem
-                Canva</a>-->
-            <a href="{{ url_for('galeria.visualizar_colagem_canva', jogo_id=jogo.id) }}" class="botao-galeria">👁️ Ver
-                mosaico</a>
+    .container {
+        max-width: 1440px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
 
-            {% endif %}
+    /* Header */
+    .page-header {
+        background: linear-gradient(135deg, var(--primary), var(--primary-light));
+        padding: 2rem;
+        border-radius: var(--radius);
+        text-align: center;
+        margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
+    }
 
-        </div>
+    .page-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 70%);
+        opacity: 0.3;
+    }
+
+    .page-title {
+        font-family: var(--font-title);
+        font-size: 2.5rem;
+        font-weight: 600;
+        color: var(--background); /* Branco */
+        position: relative;
+        z-index: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
+    .page-title::after {
+        content: '';
+        position: absolute;
+        bottom: -10px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 80px;
+        height: 4px;
+        background-color: var(--background); /* Branco */
+        border-radius: 2px;
+    }
+
+    /* Gallery Grid */
+    .galeria-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+        padding: 1rem 0;
+    }
+
+    .galeria-card {
+        background: var(--card-bg);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        overflow: hidden;
+        transition: var(--transition);
+        display: flex;
+        flex-direction: column;
+        border: 1px solid var(--border);
+    }
+
+    .galeria-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    }
+
+    .galeria-info {
+        padding: 1.5rem;
+        flex-grow: 1;
+    }
+
+    .galeria-info h2 {
+        font-family: var(--font-title);
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: var(--text);
+        margin-bottom: 0.5rem;
+    }
+
+    .galeria-info p {
+        font-size: 1rem;
+        color: var(--text-light);
+    }
+
+    .galeria-botoes {
+        padding: 1rem 1.5rem;
+        background: #f5f5f5; /* Cinza claro */
+        border-top: 1px solid var(--border);
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .botao-galeria {
+        background: var(--primary);
+        color: var(--background); /* Branco */
+        padding: 0.75rem 1.5rem;
+        border-radius: var(--radius);
+        text-decoration: none;
+        font-weight: 500;
+        font-size: 0.9rem;
+        transition: var(--transition);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .botao-galeria:hover {
+        background: var(--primary-dark);
+        transform: translateY(-1px);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .galeria-grid {
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        }
+
+        .page-title {
+            font-size: 2rem;
+        }
+
+        .container {
+            padding: 1.5rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .galeria-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .botao-galeria {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .galeria-botoes {
+            flex-direction: column;
+        }
+
+        .page-title {
+            font-size: 1.8rem;
+        }
+
+        .container {
+            padding: 1rem;
+        }
+    }
+</style>
+
+<div class="container">
+    <!-- Header -->
+    <div class="page-header">
+        <h1 class="page-title">🖼️ Galeria de Jogos</h1>
     </div>
-    {% endfor %}
-</div>
 
-{% if not jogos %}
-<p style="text-align: center;">Nenhum jogo cadastrado ainda. 😔</p>
-{% endif %}
+    <!-- Gallery Grid -->
+    <div class="galeria-grid">
+        {% for jogo in jogos %}
+        <div class="galeria-card">
+            <div class="galeria-info">
+                <h2>{{ jogo.titulo }}</h2>
+                <p>{{ jogo.data.strftime('%d/%m/%Y') }}</p>
+            </div>
+            <div class="galeria-botoes">
+                {% if 'usuario' in session %}
+                <a href="{{ url_for('galeria.detalhes_galeria', jogo_id=jogo.id) }}" class="botao-galeria">
+                    <span>📂</span> Ver Fotos
+                </a>
+                {% endif %}
+                <a href="{{ url_for('galeria.visualizar_colagem_canva', jogo_id=jogo.id) }}" class="botao-galeria">
+                    <span>👁️</span> Ver Mosaico
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
 
 {% endblock %}

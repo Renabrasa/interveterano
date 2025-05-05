@@ -48,149 +48,635 @@
         </select>
       </div>
     </div>
-
+    
+  
     <div class="botoes-finais">
       <button type="submit" class="btn-salvar">Salvar Alterações</button>
       <a href="{{ url_for('convidado.exibir_convidados') }}" class="btn-cancelar">Cancelar</a>
     </div>
+    
   </form>
 </div>
 
 <style>
-  .titulo-pagina {
-    text-align: center;
-    margin-top: 20px;
-    font-size: 24px;
-    color: #800000;
+  /* === VARIÁVEIS === */
+  :root {
+    --cor-primaria: #a00000;
+    --cor-primaria-escura: #800000;
+    --cor-primaria-clara: #cc0000;
+    --cor-secundaria: #333;
+    --cor-fundo: #f5f5f5;
+    --cor-borda: #ddd;
+    --cor-texto: #333;
+    --cor-texto-claro: #666;
+    --borda-raio: 8px;
+    --sombra-padrao: 0 4px 12px rgba(0, 0, 0, 0.1);
+    --transicao: all 0.3s ease;
   }
 
-  .form-card {
-    background: white;
-    padding: 25px;
-    border-radius: 12px;
-    max-width: 600px;
-    margin: 30px auto;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  /* === GERAIS === */
+  .pagina-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+
+  .titulo-pagina {
+    text-align: center;
+    margin: 20px 0 30px;
+    font-size: 32px;
+    font-weight: bold;
+    color: var(--cor-primaria);
     position: relative;
+  }
+
+  .titulo-pagina::after {
+    content: '';
+    display: block;
+    width: 60px;
+    height: 4px;
+    background-color: var(--cor-primaria);
+    margin: 10px auto 0;
+    border-radius: 2px;
+  }
+
+  .painel-principal {
+    background: white;
+    border-radius: var(--borda-raio);
+    box-shadow: var(--sombra-padrao);
+    overflow: hidden;
+  }
+
+  /* === ALERTAS === */
+  .alertas-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    width: 300px;
+    z-index: 1000;
+  }
+
+  .alerta {
+    position: relative;
+    padding: 15px;
+    margin-bottom: 15px;
+    border-radius: var(--borda-raio);
+    color: white;
+    background-color: #28a745;
+    box-shadow: var(--sombra-padrao);
+    animation: slideIn 0.3s ease forwards;
+  }
+
+  @keyframes slideIn {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+
+  .alerta.erro {
+    background-color: #dc3545;
+  }
+
+  .alerta-conteudo {
+    display: flex;
+    align-items: center;
+  }
+
+  .alerta-icone {
+    margin-right: 10px;
+    font-size: 20px;
+  }
+
+  .alerta-fechar {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: none;
+    border: none;
+    color: white;
+    font-size: 20px;
+    cursor: pointer;
+  }
+
+  /* === ABAS === */
+  .abas-container {
+    display: flex;
+    background-color: #f0f0f0;
+    padding: 0;
+    overflow-x: auto;
+    border-bottom: 1px solid var(--cor-borda);
+  }
+
+  .aba-btn {
+    padding: 15px 25px;
+    background-color: transparent;
+    border: none;
+    color: var(--cor-texto-claro);
+    font-weight: 600;
+    font-size: 16px;
+    cursor: pointer;
+    transition: var(--transicao);
+    position: relative;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .aba-btn i {
+    font-size: 18px;
+  }
+
+  .aba-btn:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+    color: var(--cor-primaria);
+  }
+
+  .aba-btn.ativo {
+    color: var(--cor-primaria);
+    background-color: white;
+  }
+
+  .aba-btn.ativo::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background-color: var(--cor-primaria);
+  }
+
+  .aba-conteudo {
+    display: none;
+    padding: 30px;
+  }
+
+  .aba-conteudo.ativo {
+    display: block;
+    animation: fadeIn 0.3s ease;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  /* === FORMULÁRIO === */
+  .form-card {
+    border-radius: var(--borda-raio);
+    overflow: hidden;
   }
 
   .form-jogador {
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 25px;
   }
 
   .form-linha {
     display: flex;
-    gap: 20px;
-    align-items: center;
-    flex-wrap: wrap;
+    gap: 30px;
+    align-items: flex-start;
   }
 
   .col-esquerda {
-    width: 150px;
-    display: flex;
-    justify-content: center;
+    width: 180px;
   }
 
   .foto-container {
+    width: 100%;
+  }
+
+  .foto-wrapper {
     position: relative;
-    width: 130px;
-    height: 180px;
+    width: 100%;
+    height: 240px;
+    overflow: hidden;
+    border-radius: var(--borda-raio);
+    border: 2px solid var(--cor-borda);
+    cursor: pointer;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
   }
 
   .foto-preview {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    border-radius: 10px;
-    border: 2px solid #ccc;
-    cursor: pointer;
+    transition: var(--transicao);
+  }
+
+  .foto-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    opacity: 0;
+    transition: var(--transicao);
+  }
+
+  .foto-overlay i {
+    font-size: 40px;
+    margin-bottom: 10px;
+  }
+
+  .foto-wrapper:hover .foto-overlay {
+    opacity: 1;
+  }
+
+  .foto-wrapper:hover .foto-preview {
+    transform: scale(1.05);
+  }
+
+  #foto-input {
+    display: none;
   }
 
   .col-direita {
     flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 20px;
+  }
+
+  .linha-2-colunas {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+
+  .grupo-campo {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .grupo-campo label {
+    font-weight: 600;
+    color: var(--cor-texto);
+    font-size: 14px;
   }
 
   input[type="text"],
+  input[type="date"],
   select {
-    width: 100%;
-    padding: 10px;
-    border-radius: 6px;
-    border: 1px solid #ccc;
+    padding: 12px 15px;
+    border-radius: var(--borda-raio);
+    border: 1px solid var(--cor-borda);
     font-size: 16px;
+    transition: var(--transicao);
+    background-color: #f9f9f9;
   }
 
-  .pe-preferencial {
-    width: 100%;
+  input[type="text"]:focus,
+  input[type="date"]:focus,
+  select:focus {
+    border-color: var(--cor-primaria);
+    box-shadow: 0 0 0 2px rgba(160, 0, 0, 0.1);
+    outline: none;
   }
 
   .botoes-finais {
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-end;
+    gap: 15px;
     margin-top: 20px;
   }
 
-  .btn-salvar {
-    background-color: #a00000;
+  .btn-primario,
+  .btn-secundario {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 20px;
+    border-radius: var(--borda-raio);
+    font-weight: 600;
+    font-size: 16px;
+    cursor: pointer;
+    transition: var(--transicao);
+  }
+
+  .btn-primario {
+    background-color: var(--cor-primaria);
     color: white;
     border: none;
-    padding: 10px 20px;
-    border-radius: 6px;
-    font-weight: bold;
-    cursor: pointer;
-    flex: 1;
-    margin-right: 10px;
   }
 
-  .btn-cancelar {
-    background-color: #ccc;
-    color: black;
-    text-decoration: none;
-    padding: 10px 20px;
-    border-radius: 6px;
-    font-weight: bold;
-    flex: 1;
-    text-align: center;
+  .btn-primario:hover {
+    background-color: var(--cor-primaria-escura);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(160, 0, 0, 0.3);
   }
 
-  .btn-salvar:hover {
-    background-color: #800000;
+  .btn-secundario {
+    background-color: #f0f0f0;
+    color: var(--cor-texto);
+    border: 1px solid var(--cor-borda);
   }
 
-  .form-remover-foto {
+  .btn-secundario:hover {
+    background-color: #e0e0e0;
+  }
+
+  /* === PESQUISA === */
+  .pesquisa-container {
+    margin-bottom: 25px;
+  }
+
+  .campo-pesquisa-wrapper {
+    position: relative;
+    margin-bottom: 15px;
+  }
+
+  .campo-pesquisa {
+    width: 100%;
+    padding: 14px 40px;
+    border-radius: 30px;
+    border: 1px solid var(--cor-borda);
+    font-size: 16px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    transition: var(--transicao);
+  }
+
+  .campo-pesquisa:focus {
+    border-color: var(--cor-primaria);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    outline: none;
+  }
+
+  .icone-pesquisa {
     position: absolute;
-    top: 10px;
-    right: 10px;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #999;
+    font-size: 18px;
   }
 
-  .btn-remover-foto {
-    background: #a00000;
-    color: white;
+  .btn-limpar-pesquisa {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
     border: none;
-    padding: 6px 10px;
-    border-radius: 50%;
-    font-size: 14px;
+    color: #999;
+    font-size: 18px;
     cursor: pointer;
+    display: none;
   }
 
-  @media (max-width: 680px) {
+  .filtros-container {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+  }
+
+  .filtro-select {
+    flex: 1;
+    min-width: 150px;
+    padding: 10px 15px;
+    border-radius: var(--borda-raio);
+    border: 1px solid var(--cor-borda);
+    background-color: white;
+  }
+
+  /* === CARTÕES DE JOGADORES === */
+  .cartoes-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+  }
+
+  .cartao-jogador {
+    background-color: white;
+    border-radius: var(--borda-raio);
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: var(--transicao);
+    position: relative;
+  }
+
+  .cartao-jogador:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+  }
+
+  .cartao-cabecalho {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px;
+    background-color: #f9f9f9;
+    border-bottom: 1px solid var(--cor-borda);
+  }
+
+  .cartao-categoria, 
+  .cartao-posicao {
+    font-size: 12px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 12px;
+  }
+
+  .cartao-categoria {
+    background-color: var(--cor-primaria);
+    color: white;
+  }
+
+  .cartao-posicao {
+    background-color: #333;
+    color: white;
+  }
+
+  .cartao-foto {
+    height: 200px;
+    overflow: hidden;
+  }
+
+  .cartao-foto img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+  }
+
+  .cartao-jogador:hover .cartao-foto img {
+    transform: scale(1.05);
+  }
+
+  .cartao-info {
+    padding: 15px;
+  }
+
+  .cartao-nome {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--cor-secundaria);
+  }
+
+  .cartao-detalhes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    font-size: 14px;
+    color: var(--cor-texto-claro);
+  }
+
+  .detalhe-pe, 
+  .detalhe-idade {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .cartao-acoes {
+    display: flex;
+    justify-content: flex-end;
+    padding: 10px 15px;
+    background-color: #f9f9f9;
+    border-top: 1px solid var(--cor-borda);
+  }
+
+  .btn-acao {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 10px;
+    color: white;
+    cursor: pointer;
+    transition: var(--transicao);
+    border: none;
+  }
+
+  .btn-acao.editar {
+    background-color: #2196F3;
+  }
+
+  .btn-acao.desligar {
+    background-color: #ff9800;
+  }
+
+  .btn-acao.reintegrar {
+    background-color: #4CAF50;
+  }
+
+  .btn-acao:hover {
+    transform: scale(1.1);
+  }
+
+  /* === TABELA === */
+  .tabela-container {
+    overflow-x: auto;
+    border-radius: var(--borda-raio);
+    box-shadow: var(--sombra-padrao);
+  }
+
+  .tabela-jogadores {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .tabela-jogadores th,
+  .tabela-jogadores td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid var(--cor-borda);
+  }
+
+  .tabela-jogadores th {
+    background-color: var(--cor-primaria);
+    color: white;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  .tabela-jogadores tbody tr {
+    transition: var(--transicao);
+  }
+
+  .tabela-jogadores tbody tr:hover {
+    background-color: #f5f5f5;
+  }
+
+  /* === MENSAGEM SEM RESULTADOS === */
+  .sem-resultados {
+    text-align: center;
+    padding: 50px 20px;
+    color: var(--cor-texto-claro);
+  }
+
+  .sem-resultados i {
+    font-size: 50px;
+    margin-bottom: 15px;
+    opacity: 0.3;
+  }
+
+  .sem-resultados p {
+    font-size: 18px;
+  }
+
+  /* === RESPONSIVIDADE === */
+  @media (max-width: 768px) {
     .form-linha {
       flex-direction: column;
-      align-items: center;
     }
 
-    .col-esquerda,
+    .col-esquerda {
+      width: 100%;
+      max-width: 200px;
+      margin: 0 auto 20px;
+    }
+
     .col-direita {
       width: 100%;
     }
 
+    .linha-2-colunas {
+      grid-template-columns: 1fr;
+      gap: 15px;
+    }
+
     .botoes-finais {
-      flex-direction: column;
-      gap: 10px;
+      flex-direction: column-reverse;
+    }
+
+    .btn-primario, 
+    .btn-secundario {
+      width: 100%;
+      justify-content: center;
+    }
+
+    .cartoes-container {
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    }
+  }
+
+  @media (max-width: 480px) {
+    .aba-btn {
+      padding: 12px 15px;
+      font-size: 14px;
+    }
+
+    .aba-btn i {
+      font-size: 16px;
+    }
+
+    .aba-conteudo {
+      padding: 20px 15px;
+    }
+
+    .titulo-pagina {
+      font-size: 24px;
     }
   }
 </style>

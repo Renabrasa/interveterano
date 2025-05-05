@@ -4,299 +4,1034 @@
 <!-- ALERTAS -->
 {% with messages = get_flashed_messages(with_categories=true) %}
 {% if messages %}
-{% for categoria, mensagem in messages %}
-<div class="alerta {{ categoria }}">{{ mensagem }}</div>
-{% endfor %}
+<div class="alertas-container">
+  {% for categoria, mensagem in messages %}
+  <div class="alerta {{ categoria }}">
+    <div class="alerta-conteudo">
+      <i class="alerta-icone {{ 'fa-check-circle' if categoria == 'sucesso' else 'fa-exclamation-circle' }}"></i>
+      <span>{{ mensagem }}</span>
+    </div>
+    <button class="alerta-fechar">&times;</button>
+  </div>
+  {% endfor %}
+</div>
 {% endif %}
 {% endwith %}
 
-<h1 class="titulo-pagina">Cadastro de Jogadores</h1>
+<div class="pagina-container">
+  <h1 class="titulo-pagina">Cadastro de Jogadores</h1>
 
-{% if 'usuario' in session %}
-<div class="form-card">
-  <form action="{{ url_for('plantel.adicionar_jogador') }}" method="POST" enctype="multipart/form-data" class="form-jogador">
-    <div class="form-linha">
-      <!-- FOTO -->
-      <div class="col-esquerda">
-        <div class="foto-container">
-          <label for="foto-input">
-            <img src="{{ url_for('static', filename='img/avatar_padrao.png') }}" alt="Foto do Jogador" class="foto-preview">
-          </label>
-          <input type="file" name="foto" id="foto-input" accept="image/*" style="display: none;">
+  <div class="painel-principal">
+    <div class="abas-container">
+      {% if 'usuario' in session %}
+      <button class="aba-btn ativo" data-aba="formulario">
+        <i class="fas fa-user-plus"></i> Novo Jogador
+      </button>
+      <button class="aba-btn" data-aba="ativos">
+        <i class="fas fa-users"></i> Jogadores Ativos
+      </button>
+      <button class="aba-btn" data-aba="desligados">
+        <i class="fas fa-user-slash"></i> Desligados
+      </button>
+      {% else %}
+      <button class="aba-btn ativo" data-aba="ativos">
+        <i class="fas fa-users"></i> Jogadores Ativos
+      </button>
+      {% endif %}
+    </div>
+  
+
+    <!-- FORMULÁRIO DE CADASTRO -->
+    {% if 'usuario' in session %}
+    <div class="aba-conteudo ativo" id="aba-formulario">
+      <div class="form-card">
+        <form action="{{ url_for('plantel.adicionar_jogador') }}" method="POST" enctype="multipart/form-data"
+          class="form-jogador" id="formJogador">
+          
+          <div class="form-linha">
+            <!-- FOTO -->
+            <div class="col-esquerda">
+              <div class="foto-container">
+                <div class="foto-wrapper">
+                  <img src="{{ url_for('static', filename='img/avatar_padrao.png') }}" alt="Foto do Jogador"
+                    class="foto-preview" id="fotoPreview">
+                  <div class="foto-overlay">
+                    <i class="fas fa-camera"></i>
+                    <span>Adicionar foto</span>
+                  </div>
+                </div>
+                <input type="file" name="foto" id="foto-input" accept="image/*">
+              </div>
+            </div>
+
+            <!-- CAMPOS -->
+            <div class="col-direita">
+              <div class="grupo-campo">
+                <label for="nome-jogador">Nome do Jogador*</label>
+                <input type="text" name="nome" id="nome-jogador" required>
+              </div>
+
+              <div class="linha-2-colunas">
+                <div class="grupo-campo">
+                  <label for="categoria-jogador">Categoria*</label>
+                  <select name="categoria" id="categoria-jogador" required>
+                    <option value="">Selecione</option>
+                    {% for cat in categorias %}
+                    <option value="{{ cat.nome }}">{{ cat.nome }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+
+                <div class="grupo-campo">
+                  <label for="posicao-jogador">Posição*</label>
+                  <select name="posicao" id="posicao-jogador" required>
+                    <option value="">Selecione</option>
+                    {% for pos in posicoes %}
+                    <option value="{{ pos.nome }}">{{ pos.nome }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+              </div>
+
+              <div class="linha-2-colunas">
+                <div class="grupo-campo">
+                  <label for="pe-preferencial">Pé Preferencial*</label>
+                  <select name="pe_preferencial" id="pe-preferencial" required>
+                    <option value="">Selecione</option>
+                    <option value="Direito">Direito</option>
+                    <option value="Esquerdo">Esquerdo</option>
+                    <option value="Ambos">Ambos</option>
+                  </select>
+                </div>
+
+                <div class="grupo-campo">
+                  <label for="data_nascimento">Data de Nascimento</label>
+                  <input type="date" name="data_nascimento" id="data_nascimento">
+                </div>
+              </div>
+
+              <div class="grupo-campo">
+                <label for="data_inativacao">Data de desligamento (opcional)</label>
+                <input type="date" name="data_inativacao" id="data_inativacao">
+              </div>
+            </div>
+          </div>
+
+          <div class="botoes-finais">
+            <button type="reset" class="btn-secundario">
+              <i class="fas fa-undo"></i> Limpar
+            </button>
+            <button type="submit" class="btn-primario">
+              <i class="fas fa-save"></i> Salvar Jogador
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- JOGADORES ATIVOS -->
+    <div class="aba-conteudo" id="aba-ativos">
+      <div class="pesquisa-container">
+        <div class="campo-pesquisa-wrapper">
+          <i class="fas fa-search icone-pesquisa"></i>
+          <input type="text" id="pesquisaJogadorAtivo" placeholder="Pesquisar jogador..." class="campo-pesquisa">
+          <button id="limparPesquisaAtivos" class="btn-limpar-pesquisa" title="Limpar pesquisa">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="filtros-container">
+          <select id="filtroCategoriaAtivos" class="filtro-select">
+            <option value="">Todas as categorias</option>
+            {% for cat in categorias %}
+            <option value="{{ cat.nome }}">{{ cat.nome }}</option>
+            {% endfor %}
+          </select>
+          <select id="filtroPosicaoAtivos" class="filtro-select">
+            <option value="">Todas as posições</option>
+            {% for pos in posicoes %}
+            <option value="{{ pos.nome }}">{{ pos.nome }}</option>
+            {% endfor %}
+          </select>
         </div>
       </div>
 
-      <!-- CAMPOS -->
-      <div class="col-direita">
-        <input type="text" name="nome" placeholder="Nome do Jogador" required>
+      <div class="cartoes-container" id="cartoes-ativos">
+        {% for jogador in jogadores_ativos %}
+        <div class="cartao-jogador" data-categoria="{{ jogador.categoria }}" data-posicao="{{ jogador.posicao }}">
+          <div class="cartao-cabecalho">
+            <span class="cartao-categoria">{{ jogador.categoria }}</span>
+            <span class="cartao-posicao">{{ jogador.posicao }}</span>
+          </div>
+          <div class="cartao-foto">
+            {% if jogador.foto %}
+            <img src="data:image/jpeg;base64,{{ jogador.foto }}" alt="{{ jogador.nome }}">
+            {% else %}
+            <img src="{{ url_for('static', filename='img/avatar_padrao.png') }}" alt="Sem foto">
+            {% endif %}
+          </div>
+          <div class="cartao-info">
+            <h3 class="cartao-nome">{{ jogador.nome }}</h3>
+            <p class="cartao-detalhes">
+              <span class="detalhe-pe">
+                <i class="fas {{ 'fa-shoe-prints' if jogador.pe_preferencial == 'Direito' else 'fa-shoe-prints fa-flip-horizontal' }}"></i> 
+                {{ jogador.pe_preferencial }}
+              </span>
+              {% if jogador.data_nascimento %}
+              <span class="detalhe-idade">
+                <i class="fas fa-birthday-cake"></i> {{ calcular_idade(jogador.data_nascimento) }} anos
+              </span>
+              {% endif %}
+            </p>
+          </div>
+          {% if 'usuario' in session %}
+          <div class="cartao-acoes">
+            <a href="{{ url_for('plantel.editar_jogador', id=jogador.id) }}" class="btn-acao editar" title="Editar">
+              <i class="fas fa-edit"></i>
+            </a>
+            <form method="POST" action="{{ url_for('plantel.desligar_jogador', pessoa_id=jogador.id) }}" class="form-inline">
+              <button type="submit" class="btn-acao desligar" title="Desligar jogador">
+                <i class="fas fa-user-slash"></i>
+              </button>
+            </form>
+          </div>
+          {% endif %}
+        </div>
+        {% endfor %}
+      </div>
 
-        <select name="categoria" required>
-          <option value="">Selecione a Categoria</option>
-          {% for cat in categorias %}
-          <option value="{{ cat.id }}">{{ cat.nome }}</option>
-          {% endfor %}
-        </select>
-
-        <select name="posicao" required>
-          <option value="">Selecione a Posição</option>
-          {% for pos in posicoes %}
-          <option value="{{ pos.id }}">{{ pos.nome }}</option>
-          {% endfor %}
-        </select>
-
-        <select name="pe_preferencial" required class="pe-preferencial">
-          <option value="">Pé Preferencial</option>
-          <option value="Direito">Direito</option>
-          <option value="Esquerdo">Esquerdo</option>
-          <option value="Ambos">Ambos</option>
-        </select>
+      <div class="sem-resultados" id="sem-resultados-ativos" style="display: none;">
+        <i class="fas fa-search"></i>
+        <p>Nenhum jogador encontrado com esses critérios de busca.</p>
       </div>
     </div>
 
-    <div class="botoes-finais">
-      <button type="submit" class="btn-salvar">Salvar</button>
+    <!-- JOGADORES DESLIGADOS -->
+    <div class="aba-conteudo" id="aba-desligados">
+      <div class="pesquisa-container">
+        <div class="campo-pesquisa-wrapper">
+          <i class="fas fa-search icone-pesquisa"></i>
+          <input type="text" id="pesquisaJogadorDesligado" placeholder="Pesquisar jogador desligado..." class="campo-pesquisa">
+          <button id="limparPesquisaDesligados" class="btn-limpar-pesquisa" title="Limpar pesquisa">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="tabela-container">
+        <table class="tabela-jogadores" id="tabelaJogadoresDesligados">
+          <thead>
+            <tr>
+              <th>Nome</th>
+              <th>Foto</th>
+              <th>Categoria</th>
+              <th>Posição</th>
+              <th>Pé</th>
+              <th>Desligado em</th>
+              {% if 'usuario' in session %}
+              <th>Ações</th>
+              {% endif %}
+            </tr>
+          </thead>
+          <tbody>
+            {% for jogador in jogadores_desligados %}
+            <tr>
+              <td>{{ jogador.nome }}</td>
+              <td>
+                {% if jogador.foto %}
+                <img src="data:image/jpeg;base64,{{ jogador.foto }}" width="40" height="40"
+                  style="object-fit: cover; border-radius: 50%;">
+                {% else %}
+                <img src="{{ url_for('static', filename='img/avatar_padrao.png') }}" width="40" height="40"
+                  style="object-fit: cover; border-radius: 50%;">
+                {% endif %}
+              </td>
+              <td>{{ jogador.categoria }}</td>
+              <td>{{ jogador.posicao }}</td>
+              <td>{{ jogador.pe_preferencial }}</td>
+              <td>{{ jogador.data_inativacao.strftime('%d/%m/%Y') }}</td>
+              {% if 'usuario' in session %}
+              <td>
+                <form method="POST" action="{{ url_for('plantel.reintegrar_jogador', pessoa_id=jogador.id) }}">
+                  <button type="submit" class="btn-acao reintegrar" title="Reintegrar jogador">
+                    <i class="fas fa-user-plus"></i>
+                  </button>
+                </form>
+              </td>
+              {% endif %}
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="sem-resultados" id="sem-resultados-desligados" style="display: none;">
+        <i class="fas fa-user-slash"></i>
+        <p>Nenhum jogador desligado encontrado.</p>
+      </div>
     </div>
-  </form>
-</div>
-<h2 class="titulo-tabela">Jogadores Cadastrados</h2>
-{% endif %}
-
-
-
-<!-- CAMPO DE PESQUISA -->
-<div class="pesquisa-container">
-  <input type="text" id="pesquisaJogador" placeholder="Pesquisar jogador..." class="campo-pesquisa">
-</div>
-
-<div class="tabela-container">
-<table class="tabela-jogadores" id="tabelaJogadores">
-  <thead>
-    <tr>
-      <th>Nome</th>
-      <th>Categoria</th>
-      <th>Posição</th>
-      <th>Pé</th>
-      <th>Foto</th>
-      {% if 'usuario' in session %}<th>Ações</th>{% endif %}
-    </tr>
-  </thead>
-  <tbody>
-    {% for jogador in jogadores %}
-    <tr>
-      <td>{{ jogador.nome }}</td>
-      <td>{{ jogador.categoria.nome }}</td>
-      <td>{{ jogador.posicao.nome }}</td>
-      <td>{{ jogador.pe_preferencial }}</td>
-      <td>
-        {% if jogador.foto %}
-        <img src="data:image/jpeg;base64,{{ jogador.foto }}" width="50" height="50" style="object-fit: cover; border-radius: 5px;">
-        {% else %}
-        Sem foto
-        {% endif %}
-      </td>
-      {% if 'usuario' in session %}
-      <td>
-        <a href="{{ url_for('plantel.editar_jogador', id=jogador.id) }}">✏️</a>
-        <a href="{{ url_for('plantel.excluir_jogador', id=jogador.id) }}" onclick="return confirm('Deseja remover este jogador do plantel?')">🗑️</a>
-      </td>
-      {% endif %}
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>
+  </div>
 </div>
 
 <style>
+  /* === VARIÁVEIS === */
+  :root {
+    --cor-primaria: #a00000;
+    --cor-primaria-escura: #800000;
+    --cor-primaria-clara: #cc0000;
+    --cor-secundaria: #333;
+    --cor-fundo: #f5f5f5;
+    --cor-borda: #ddd;
+    --cor-texto: #333;
+    --cor-texto-claro: #666;
+    --borda-raio: 8px;
+    --sombra-padrao: 0 4px 12px rgba(0, 0, 0, 0.1);
+    --transicao: all 0.3s ease;
+  }
+
+  /* === GERAIS === */
+  .pagina-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+
   .titulo-pagina {
     text-align: center;
-    margin-top: 20px;
-    font-size: 24px;
-    color: #800000;
-  }
-
-  .form-card {
-    background: white;
-    padding: 25px;
-    border-radius: 12px;
-    max-width: 600px;
-    margin: 30px auto;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
-  }
-
-  .form-jogador {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-  }
-
-  .form-linha {
-    display: flex;
-    gap: 20px;
-    align-items: center;
-    flex-wrap: wrap;
-  }
-
-  .col-esquerda {
-    width: 150px;
-    display: flex;
-    justify-content: center;
-  }
-
-  .foto-container {
-    position: relative;
-    width: 130px;
-    height: 180px;
-  }
-
-  .foto-preview {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: 10px;
-    border: 2px solid #ccc;
-    cursor: pointer;
-  }
-
-  .col-direita {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-  }
-
-  input[type="text"],
-  select {
-    width: 100%;
-    padding: 10px;
-    border-radius: 6px;
-    border: 1px solid #ccc;
-    font-size: 16px;
-  }
-
-  .pe-preferencial {
-    width: 100%;
-  }
-
-  .botoes-finais {
-    display: flex;
-    justify-content: center;
-    margin-top: 20px;
-  }
-
-  .btn-salvar {
-    background-color: #a00000;
-    color: white;
-    border: none;
-    padding: 10px 30px;
-    border-radius: 6px;
+    margin: 20px 0 30px;
+    font-size: 32px;
     font-weight: bold;
-    cursor: pointer;
+    color: var(--cor-primaria);
+    position: relative;
   }
 
-  .btn-salvar:hover {
-    background-color: #800000;
+  .titulo-pagina::after {
+    content: '';
+    display: block;
+    width: 60px;
+    height: 4px;
+    background-color: var(--cor-primaria);
+    margin: 10px auto 0;
+    border-radius: 2px;
+  }
+
+  .painel-principal {
+    background: white;
+    border-radius: var(--borda-raio);
+    box-shadow: var(--sombra-padrao);
+    overflow: hidden;
+  }
+
+  /* === ALERTAS === */
+  .alertas-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    width: 300px;
+    z-index: 1000;
   }
 
   .alerta {
-    padding: 10px;
-    margin: 10px auto;
-    border-radius: 5px;
+    position: relative;
+    padding: 15px;
+    margin-bottom: 15px;
+    border-radius: var(--borda-raio);
     color: white;
     background-color: #28a745;
-    font-weight: bold;
-    text-align: center;
-    max-width: 600px;
+    box-shadow: var(--sombra-padrao);
+    animation: slideIn 0.3s ease forwards;
+  }
+
+  @keyframes slideIn {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
   }
 
   .alerta.erro {
     background-color: #dc3545;
   }
 
-  .titulo-tabela {
-    text-align: center;
-    margin-top: 40px;
-    color: #800000;
+  .alerta-conteudo {
+    display: flex;
+    align-items: center;
   }
 
+  .alerta-icone {
+    margin-right: 10px;
+    font-size: 20px;
+  }
+
+  .alerta-fechar {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: none;
+    border: none;
+    color: white;
+    font-size: 20px;
+    cursor: pointer;
+  }
+
+  /* === ABAS === */
+  .abas-container {
+    display: flex;
+    background-color: #f0f0f0;
+    padding: 0;
+    overflow-x: auto;
+    border-bottom: 1px solid var(--cor-borda);
+  }
+
+  .aba-btn {
+    padding: 15px 25px;
+    background-color: transparent;
+    border: none;
+    color: var(--cor-texto-claro);
+    font-weight: 600;
+    font-size: 16px;
+    cursor: pointer;
+    transition: var(--transicao);
+    position: relative;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .aba-btn i {
+    font-size: 18px;
+  }
+
+  .aba-btn:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+    color: var(--cor-primaria);
+  }
+
+  .aba-btn.ativo {
+    color: var(--cor-primaria);
+    background-color: white;
+  }
+
+  .aba-btn.ativo::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background-color: var(--cor-primaria);
+  }
+
+  .aba-conteudo {
+    display: none;
+    padding: 30px;
+  }
+
+  .aba-conteudo.ativo {
+    display: block;
+    animation: fadeIn 0.3s ease;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  /* === FORMULÁRIO === */
+  .form-card {
+    border-radius: var(--borda-raio);
+    overflow: hidden;
+  }
+
+  .form-jogador {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+  }
+
+  .form-linha {
+    display: flex;
+    gap: 30px;
+    align-items: flex-start;
+  }
+
+  .col-esquerda {
+    width: 180px;
+  }
+
+  .foto-container {
+    width: 100%;
+  }
+
+  .foto-wrapper {
+    position: relative;
+    width: 100%;
+    height: 240px;
+    overflow: hidden;
+    border-radius: var(--borda-raio);
+    border: 2px solid var(--cor-borda);
+    cursor: pointer;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  .foto-preview {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: var(--transicao);
+  }
+
+  .foto-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    opacity: 0;
+    transition: var(--transicao);
+  }
+
+  .foto-overlay i {
+    font-size: 40px;
+    margin-bottom: 10px;
+  }
+
+  .foto-wrapper:hover .foto-overlay {
+    opacity: 1;
+  }
+
+  .foto-wrapper:hover .foto-preview {
+    transform: scale(1.05);
+  }
+
+  #foto-input {
+    display: none;
+  }
+
+  .col-direita {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .linha-2-colunas {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+
+  .grupo-campo {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .grupo-campo label {
+    font-weight: 600;
+    color: var(--cor-texto);
+    font-size: 14px;
+  }
+
+  input[type="text"],
+  input[type="date"],
+  select {
+    padding: 12px 15px;
+    border-radius: var(--borda-raio);
+    border: 1px solid var(--cor-borda);
+    font-size: 16px;
+    transition: var(--transicao);
+    background-color: #f9f9f9;
+  }
+
+  input[type="text"]:focus,
+  input[type="date"]:focus,
+  select:focus {
+    border-color: var(--cor-primaria);
+    box-shadow: 0 0 0 2px rgba(160, 0, 0, 0.1);
+    outline: none;
+  }
+
+  .botoes-finais {
+    display: flex;
+    justify-content: flex-end;
+    gap: 15px;
+    margin-top: 20px;
+  }
+
+  .btn-primario,
+  .btn-secundario {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 20px;
+    border-radius: var(--borda-raio);
+    font-weight: 600;
+    font-size: 16px;
+    cursor: pointer;
+    transition: var(--transicao);
+  }
+
+  .btn-primario {
+    background-color: var(--cor-primaria);
+    color: white;
+    border: none;
+  }
+
+  .btn-primario:hover {
+    background-color: var(--cor-primaria-escura);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(160, 0, 0, 0.3);
+  }
+
+  .btn-secundario {
+    background-color: #f0f0f0;
+    color: var(--cor-texto);
+    border: 1px solid var(--cor-borda);
+  }
+
+  .btn-secundario:hover {
+    background-color: #e0e0e0;
+  }
+
+  /* === PESQUISA === */
   .pesquisa-container {
-    max-width: 600px;
-    margin: 20px auto;
-    text-align: center;
+    margin-bottom: 25px;
+  }
+
+  .campo-pesquisa-wrapper {
+    position: relative;
+    margin-bottom: 15px;
   }
 
   .campo-pesquisa {
     width: 100%;
-    padding: 10px;
-    border-radius: 6px;
-    border: 1px solid #ccc;
+    padding: 14px 40px;
+    border-radius: 30px;
+    border: 1px solid var(--cor-borda);
     font-size: 16px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    transition: var(--transicao);
   }
 
+  .campo-pesquisa:focus {
+    border-color: var(--cor-primaria);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    outline: none;
+  }
+
+  .icone-pesquisa {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #999;
+    font-size: 18px;
+  }
+
+  .btn-limpar-pesquisa {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: #999;
+    font-size: 18px;
+    cursor: pointer;
+    display: none;
+  }
+
+  .filtros-container {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+  }
+
+  .filtro-select {
+    flex: 1;
+    min-width: 150px;
+    padding: 10px 15px;
+    border-radius: var(--borda-raio);
+    border: 1px solid var(--cor-borda);
+    background-color: white;
+  }
+
+  /* === CARTÕES DE JOGADORES === */
+  .cartoes-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+  }
+
+  .cartao-jogador {
+    background-color: white;
+    border-radius: var(--borda-raio);
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: var(--transicao);
+    position: relative;
+  }
+
+  .cartao-jogador:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+  }
+
+  .cartao-cabecalho {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px;
+    background-color: #f9f9f9;
+    border-bottom: 1px solid var(--cor-borda);
+  }
+
+  .cartao-categoria, 
+  .cartao-posicao {
+    font-size: 12px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 12px;
+  }
+
+  .cartao-categoria {
+    background-color: var(--cor-primaria);
+    color: white;
+  }
+
+  .cartao-posicao {
+    background-color: #333;
+    color: white;
+  }
+
+  .cartao-foto {
+    height: 200px;
+    overflow: hidden;
+  }
+
+  .cartao-foto img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+  }
+
+  .cartao-jogador:hover .cartao-foto img {
+    transform: scale(1.05);
+  }
+
+  .cartao-info {
+    padding: 15px;
+  }
+
+  .cartao-nome {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--cor-secundaria);
+  }
+
+  .cartao-detalhes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    font-size: 14px;
+    color: var(--cor-texto-claro);
+  }
+
+  .detalhe-pe, 
+  .detalhe-idade {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .cartao-acoes {
+    display: flex;
+    justify-content: flex-end;
+    padding: 10px 15px;
+    background-color: #f9f9f9;
+    border-top: 1px solid var(--cor-borda);
+  }
+
+  .btn-acao {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 10px;
+    color: white;
+    cursor: pointer;
+    transition: var(--transicao);
+    border: none;
+  }
+
+  .btn-acao.editar {
+    background-color: #2196F3;
+  }
+
+  .btn-acao.desligar {
+    background-color: #ff9800;
+  }
+
+  .btn-acao.reintegrar {
+    background-color: #4CAF50;
+  }
+
+  .btn-acao:hover {
+    transform: scale(1.1);
+  }
+
+  /* === TABELA === */
   .tabela-container {
     overflow-x: auto;
-    margin: 0 auto;
-    max-width: 95%;
+    border-radius: var(--borda-raio);
+    box-shadow: var(--sombra-padrao);
   }
 
   .tabela-jogadores {
     width: 100%;
     border-collapse: collapse;
-    margin-top: 20px;
   }
 
-  .tabela-jogadores th, .tabela-jogadores td {
-    border: 1px solid #ccc;
-    padding: 8px;
-    text-align: center;
+  .tabela-jogadores th,
+  .tabela-jogadores td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid var(--cor-borda);
   }
 
   .tabela-jogadores th {
-    background-color: #a00000;
+    background-color: var(--cor-primaria);
     color: white;
+    font-weight: 600;
+    white-space: nowrap;
   }
 
-  @media (max-width: 680px) {
+  .tabela-jogadores tbody tr {
+    transition: var(--transicao);
+  }
+
+  .tabela-jogadores tbody tr:hover {
+    background-color: #f5f5f5;
+  }
+
+  /* === MENSAGEM SEM RESULTADOS === */
+  .sem-resultados {
+    text-align: center;
+    padding: 50px 20px;
+    color: var(--cor-texto-claro);
+  }
+
+  .sem-resultados i {
+    font-size: 50px;
+    margin-bottom: 15px;
+    opacity: 0.3;
+  }
+
+  .sem-resultados p {
+    font-size: 18px;
+  }
+
+  /* === RESPONSIVIDADE === */
+  @media (max-width: 768px) {
     .form-linha {
       flex-direction: column;
-      align-items: center;
     }
 
-    .col-esquerda, .col-direita {
+    .col-esquerda {
+      width: 100%;
+      max-width: 200px;
+      margin: 0 auto 20px;
+    }
+
+    .col-direita {
       width: 100%;
     }
 
+    .linha-2-colunas {
+      grid-template-columns: 1fr;
+      gap: 15px;
+    }
+
     .botoes-finais {
-      flex-direction: column;
+      flex-direction: column-reverse;
+    }
+
+    .btn-primario, 
+    .btn-secundario {
+      width: 100%;
+      justify-content: center;
+    }
+
+    .cartoes-container {
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    }
+  }
+
+  @media (max-width: 480px) {
+    .aba-btn {
+      padding: 12px 15px;
+      font-size: 14px;
+    }
+
+    .aba-btn i {
+      font-size: 16px;
+    }
+
+    .aba-conteudo {
+      padding: 20px 15px;
+    }
+
+    .titulo-pagina {
+      font-size: 24px;
     }
   }
 </style>
 
 <script>
-  setTimeout(() => {
-    document.querySelectorAll('.alerta').forEach(el => el.style.display = 'none');
-  }, 4000);
+  document.addEventListener('DOMContentLoaded', function() {
+    // Inicialização das abas
+    const abaBtns = document.querySelectorAll('.aba-btn');
+    abaBtns.forEach(btn => {
+      btn.addEventListener('click', function() {
+        const abaId = this.getAttribute('data-aba');
+        mostrarAba(abaId);
+      });
+    });
 
-  document.getElementById('foto-input')?.addEventListener('change', function (event) {
-    const preview = document.querySelector('.foto-preview');
-    const file = event.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = function (e) {
-        preview.src = e.target.result;
-      }
-      reader.readAsDataURL(file);
+    // Upload de foto
+    const fotoInput = document.getElementById('foto-input');
+    const fotoPreview = document.getElementById('fotoPreview');
+    const fotoWrapper = document.querySelector('.foto-wrapper');
+
+        if (fotoWrapper && fotoInput && fotoPreview) {
+      fotoWrapper.addEventListener('click', () => fotoInput.click());
+
+      fotoInput.addEventListener('change', function () {
+        const file = this.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = function (e) {
+            fotoPreview.src = e.target.result;
+          };
+          reader.readAsDataURL(file);
+        }
+      });
     }
-  });
 
-  document.getElementById('pesquisaJogador').addEventListener('keyup', function() {
-    var input = this.value.toLowerCase();
-    var linhas = document.querySelectorAll('#tabelaJogadores tbody tr');
+    // Pesquisa por nome nos jogadores ativos
+    const campoAtivos = document.getElementById('pesquisaJogadorAtivo');
+    const limparAtivos = document.getElementById('limparPesquisaAtivos');
+    const cartoesAtivos = document.querySelectorAll('#cartoes-ativos .cartao-jogador');
+    const semResultadosAtivos = document.getElementById('sem-resultados-ativos');
 
-    linhas.forEach(function(linha) {
-      var textoCompleto = linha.innerText.toLowerCase();
-      linha.style.display = textoCompleto.includes(input) ? '' : 'none';
+    campoAtivos.addEventListener('input', () => filtrarJogadores(campoAtivos.value, cartoesAtivos, semResultadosAtivos));
+    limparAtivos.addEventListener('click', () => {
+      campoAtivos.value = '';
+      filtrarJogadores('', cartoesAtivos, semResultadosAtivos);
+    });
+
+    // Pesquisa por nome nos jogadores desligados
+    const campoDesligados = document.getElementById('pesquisaJogadorDesligado');
+    const limparDesligados = document.getElementById('limparPesquisaDesligados');
+    const linhasDesligados = document.querySelectorAll('#tabelaJogadoresDesligados tbody tr');
+    const semResultadosDesligados = document.getElementById('sem-resultados-desligados');
+
+    campoDesligados.addEventListener('input', () => filtrarTabela(campoDesligados.value, linhasDesligados, semResultadosDesligados));
+    limparDesligados.addEventListener('click', () => {
+      campoDesligados.value = '';
+      filtrarTabela('', linhasDesligados, semResultadosDesligados);
+    });
+
+    // Fechar alertas
+    document.querySelectorAll('.alerta-fechar').forEach(btn => {
+      btn.addEventListener('click', () => btn.parentElement.remove());
     });
   });
+
+  function mostrarAba(abaId) {
+    document.querySelectorAll('.aba-btn').forEach(btn => btn.classList.remove('ativo'));
+    document.querySelector(`.aba-btn[data-aba="${abaId}"]`).classList.add('ativo');
+
+    document.querySelectorAll('.aba-conteudo').forEach(conteudo => conteudo.classList.remove('ativo'));
+    document.getElementById(`aba-${abaId}`).classList.add('ativo');
+  }
+
+  function filtrarJogadores(filtro, elementos, aviso) {
+    let encontrados = 0;
+    const termo = filtro.trim().toLowerCase();
+
+    elementos.forEach(el => {
+      const nome = el.querySelector('.cartao-nome').textContent.toLowerCase();
+      const visivel = nome.includes(termo);
+      el.style.display = visivel ? 'block' : 'none';
+      if (visivel) encontrados++;
+    });
+
+    aviso.style.display = encontrados === 0 ? 'block' : 'none';
+  }
+
+  function filtrarTabela(filtro, linhas, aviso) {
+    let encontrados = 0;
+    const termo = filtro.trim().toLowerCase();
+
+    linhas.forEach(linha => {
+      const nome = linha.querySelector('td').textContent.toLowerCase();
+      const visivel = nome.includes(termo);
+      linha.style.display = visivel ? '' : 'none';
+      if (visivel) encontrados++;
+    });
+
+    aviso.style.display = encontrados === 0 ? 'block' : 'none';
+  }
+</script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    // Filtros dropdown para jogadores ativos
+    const filtroCategoria = document.getElementById('filtroCategoriaAtivos');
+    const filtroPosicao = document.getElementById('filtroPosicaoAtivos');
+    const cartoes = document.querySelectorAll('#cartoes-ativos .cartao-jogador');
+    const aviso = document.getElementById('sem-resultados-ativos');
+
+    function aplicarFiltros() {
+      const categoria = filtroCategoria.value;
+      const posicao = filtroPosicao.value;
+      let visiveis = 0;
+
+      cartoes.forEach(card => {
+        const cardCategoria = card.getAttribute('data-categoria');
+        const cardPosicao = card.getAttribute('data-posicao');
+        const correspondeCategoria = !categoria || cardCategoria === categoria;
+        const correspondePosicao = !posicao || cardPosicao === posicao;
+
+        if (correspondeCategoria && correspondePosicao) {
+          card.style.display = 'block';
+          visiveis++;
+        } else {
+          card.style.display = 'none';
+        }
+      });
+
+      aviso.style.display = visiveis === 0 ? 'block' : 'none';
+    }
+
+    filtroCategoria.addEventListener('change', aplicarFiltros);
+    filtroPosicao.addEventListener('change', aplicarFiltros);
+  });
+  {% if not 'usuario' in session %}
+document.addEventListener('DOMContentLoaded', function() {
+  mostrarAba('ativos');
+});
+{% endif %}
+
 </script>
 
 {% endblock %}

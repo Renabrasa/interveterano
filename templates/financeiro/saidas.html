@@ -10,73 +10,633 @@
 
 {% block content %}
 <div class="painel-container">
-    <h1>Financeiro - Saídas</h1>
+  <h1 class="titulo-pagina">Financeiro - Saídas</h1>
 
-    <div class="tabs">
-        <a href="{{ url_for('financeiro.exibir_entradas', mes=mes) }}" class="tab">Entradas</a>
-        <a href="{{ url_for('financeiro.exibir_saidas', mes=mes) }}" class="tab active">Saídas</a>
-        <a href="{{ url_for('financeiro.exibir_saldo', mes=mes) }}" class="tab">Resumo</a>
+  {% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+  <div class="mensagens-container">
+    {% for categoria, mensagem in messages %}
+    <div class="alerta {{ categoria }}">
+      <div class="alerta-conteudo">
+        <span class="alerta-icone">{% if categoria == 'sucesso' %}✅{% elif categoria == 'erro' %}❌{% else %}ℹ️{% endif %}</span>
+        <span class="alerta-texto">{{ mensagem }}</span>
+      </div>
+      <button class="alerta-fechar" onclick="this.parentElement.style.display='none'">×</button>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+  {% endwith %}
+
+  <div class="card-container">
+    <div class="card-header">
+      <div class="tabs">
+        <a href="{{ url_for('financeiro.exibir_entradas', mes=mes) }}" class="tab">
+          <i class="tab-icon">💰</i> Entradas
+        </a>
+        <a href="{{ url_for('financeiro.exibir_saidas', mes=mes) }}" class="tab active">
+          <i class="tab-icon">📤</i> Saídas
+        </a>
+        <a href="{{ url_for('financeiro.exibir_saldo', mes=mes) }}" class="tab">
+          <i class="tab-icon">📊</i> Resumo
+        </a>
+      </div>
+
+      <div class="controles-superiores">
+        <form method="GET" action="{{ url_for('financeiro.exibir_saidas') }}" class="filtro-mes">
+          <button type="button" class="btn-navegacao" onclick="mudarMes(-1)">◀</button>
+          <input type="month" name="mes" value="{{ mes }}" required class="seletor-mes">
+          <button type="button" class="btn-navegacao" onclick="mudarMes(1)">▶</button>
+        </form>
+      </div>
     </div>
 
-    <form method="GET" action="{{ url_for('financeiro.exibir_saidas') }}" class="filtro-mes">
-        <button type="button" onclick="mudarMes(-1)">◀</button>
-        <input type="month" name="mes" value="{{ mes }}" onchange="this.form.submit()">
-        <button type="button" onclick="mudarMes(1)">▶</button>
-    </form>
+    <div class="form-section">
+      <h2 class="section-title">Nova Saída</h2>
+      <form method="POST" action="{{ url_for('financeiro.exibir_saidas', mes=mes) }}" class="form-saida">
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="descricao">Descrição</label>
+            <input type="text" name="descricao" id="descricao" placeholder="Ex: Material de escritório" required>
+          </div>
+          <div class="form-group">
+            <label for="categoria">Categoria</label>
+            <input type="text" name="categoria" id="categoria" placeholder="Ex: Materiais" required>
+          </div>
+          <div class="form-group">
+            <label for="valor">Valor</label>
+            <div class="input-wrapper">
+              <span class="input-prefixo">R$</span>
+              <input type="number" step="0.01" name="valor" id="valor" placeholder="0,00" required>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="data">Data</label>
+            <input type="date" name="data" id="data" required>
+          </div>
+          <div class="form-group submit-group">
+            <button type="submit" class="btn-principal">
+              <i class="btn-icone">💾</i> Salvar
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
 
-    <h3>Nova Saída</h3>
-    <form method="POST" action="{{ url_for('financeiro.exibir_saidas', mes=mes) }}">
-        <input type="text" name="descricao" placeholder="Descrição" required>
-        <input type="text" name="categoria" placeholder="Categoria" required>
-        <input type="number" step="0.01" name="valor" placeholder="Valor" required>
-        <input type="date" name="data" required>
-        <button type="submit">Salvar</button>
-    </form>
-
-    <h3>Saídas registradas</h3>
-    <table class="tabela-financeira">
-        <thead>
+    <div class="tabela-section">
+      <h2 class="section-title">Saídas Registradas</h2>
+      <div class="tabela-container">
+        <table class="tabela-financeira">
+          <thead>
             <tr>
-                <th>Data</th>
-                <th>Descrição</th>
-                <th>Categoria</th>
-                <th>Valor</th>
-                <th>Ações</th>
+              <th class="col-data"><i class="header-icon">📅</i> Data</th>
+              <th class="col-descricao"><i class="header-icon">📝</i> Descrição</th>
+              <th class="col-categoria"><i class="header-icon">🏷️</i> Categoria</th>
+              <th class="col-valor"><i class="header-icon">💰</i> Valor</th>
+              <th class="col-acoes"><i class="header-icon">⚙️</i> Ações</th>
             </tr>
-        </thead>
-        <tbody>
+          </thead>
+          <tbody>
             {% for s in saidas %}
             <tr>
-                <td>{{ s.data.strftime('%d/%m/%Y') }}</td>
-                <td>{{ s.descricao }}</td>
-                <td>{{ s.categoria }}</td>
-                <td style="color:red;">R$ {{ '%.2f'|format(s.valor) }}</td>
-                <td>
-                    <a href="{{ url_for('financeiro.excluir_saida', id=s.id) }}" onclick="return confirm('Excluir saída?')">🗑️</a>
-                </td>
+              <td class="col-data">{{ s.data.strftime('%d/%m/%Y') }}</td>
+              <td class="col-descricao">{{ s.descricao }}</td>
+              <td class="col-categoria">{{ s.categoria }}</td>
+              <td class="col-valor negativo">R$ {{ '%.2f'|format(s.valor) }}</td>
+              <td class="col-acoes">
+                <div class="acoes-grupo">
+                  <a href="{{ url_for('financeiro.excluir_saida', id=s.id) }}" 
+                     onclick="return confirm('Tem certeza que deseja excluir esta saída?')" 
+                     class="btn-acao vermelho" title="Excluir saída">
+                    🗑️
+                  </a>
+                </div>
+              </td>
             </tr>
             {% endfor %}
-        </tbody>
-    </table>
+            {% if not saidas %}
+            <tr>
+              <td colspan="5" class="sem-registros">Nenhuma saída registrada para este mês.</td>
+            </tr>
+            {% endif %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
 </div>
+
 <script>
-    const inputMes = document.querySelector('input[name="mes"]');
+  const inputMes = document.querySelector('input[name="mes"]');
 
-    function mudarMes(offset) {
-        let [ano, mes] = inputMes.value.split('-').map(Number);
-        mes += offset;
+  function mudarMes(offset) {
+    if (!inputMes || !inputMes.value) return;
 
-        if (mes < 1) {
-            mes = 12;
-            ano -= 1;
-        } else if (mes > 12) {
-            mes = 1;
-            ano += 1;
-        }
+    let [ano, mes] = inputMes.value.split('-').map(Number);
+    mes += offset;
 
-        const novoMes = `${ano}-${mes.toString().padStart(2, '0')}`;
-        window.location.href = `?mes=${novoMes}`;
+    if (mes < 1) { mes = 12; ano -= 1; }
+    else if (mes > 12) { mes = 1; ano += 1; }
+
+    const novoMes = `${ano}-${mes.toString().padStart(2, '0')}`;
+    window.location.href = `?mes=${novoMes}`;
+  }
+  
+  inputMes?.addEventListener('blur', () => {
+    if (inputMes.value) {
+      window.location.href = `?mes=${inputMes.value}`;
     }
+  });
+
+  inputMes?.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && inputMes.value) {
+      e.preventDefault();
+      window.location.href = `?mes=${inputMes.value}`;
+    }
+  });
+
+  // Auto-ocultar alertas após 4 segundos
+  setTimeout(() => {
+    document.querySelectorAll('.alerta').forEach(el => {
+      el.style.opacity = '0';
+      setTimeout(() => { el.style.display = 'none'; }, 500);
+    });
+  }, 4000);
 </script>
+
+<style>
+  /* ESTILOS GERAIS */
+  .painel-container {
+    font-family: 'Roboto', 'Segoe UI', sans-serif;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+
+  .titulo-pagina {
+    color: #333;
+    text-align: center;
+    margin-bottom: 25px;
+    font-size: 28px;
+    font-weight: 700;
+    position: relative;
+    padding-bottom: 15px;
+  }
+
+  .titulo-pagina::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80px;
+    height: 4px;
+    background: linear-gradient(90deg, #a00000, #ff4d4d);
+    border-radius: 2px;
+  }
+
+  /* CARD CONTAINER */
+  .card-container {
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    margin-bottom: 30px;
+  }
+
+  .card-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #e9ecef;
+    padding: 15px 20px;
+  }
+
+  /* ALERTAS */
+  .mensagens-container {
+    margin-bottom: 20px;
+  }
+
+  .alerta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 15px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    animation: fadeIn 0.3s ease-in-out;
+    transition: opacity 0.5s ease;
+  }
+
+  .alerta-conteudo {
+    display: flex;
+    align-items: center;
+  }
+
+  .alerta-icone {
+    margin-right: 10px;
+    font-size: 18px;
+  }
+
+  .alerta-texto {
+    font-weight: 500;
+  }
+
+  .alerta-fechar {
+    border: none;
+    background: none;
+    font-size: 20px;
+    cursor: pointer;
+    opacity: 0.7;
+    padding: 0 5px;
+  }
+
+  .alerta-fechar:hover {
+    opacity: 1;
+  }
+
+  .alerta.sucesso {
+    background-color: #d4edda;
+    color: #155724;
+    border-left: 4px solid #28a745;
+  }
+
+  .alerta.erro {
+    background-color: #f8d7da;
+    color: #721c24;
+    border-left: 4px solid #dc3545;
+  }
+
+  .alerta.info {
+    background-color: #d1ecf1;
+    color: #0c5460;
+    border-left: 4px solid #17a2b8;
+  }
+
+  .alerta.aviso {
+    background-color: #fff3cd;
+    color: #856404;
+    border-left: 4px solid #ffc107;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* TABS */
+  .tabs {
+    display: flex;
+    border-bottom: 1px solid #e9ecef;
+    margin-bottom: 15px;
+  }
+
+  .tab {
+    padding: 12px 25px;
+    color: #495057;
+    text-decoration: none;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    position: relative;
+    transition: all 0.2s ease;
+    border-bottom: 3px solid transparent;
+  }
+
+  .tab:hover {
+    color: #a00000;
+    background-color: rgba(160, 0, 0, 0.05);
+  }
+
+  .tab.active {
+    color: #a00000;
+    border-bottom: 3px solid #a00000;
+  }
+
+  .tab-icon {
+    margin-right: 8px;
+    font-style: normal;
+  }
+
+  /* CONTROLES SUPERIORES */
+  .controles-superiores {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 15px;
+    flex-wrap: wrap;
+    gap: 15px;
+  }
+
+  .filtro-mes {
+    display: flex;
+    align-items: center;
+    background-color: #fff;
+    border-radius: 8px;
+    padding: 5px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    border: 1px solid #e0e0e0;
+  }
+
+  .seletor-mes {
+    border: none;
+    padding: 8px 10px;
+    font-size: 15px;
+    font-weight: 500;
+    color: #333;
+    text-align: center;
+    outline: none;
+    background: transparent;
+  }
+
+  .btn-navegacao {
+    border: none;
+    background-color: #f3f3f3;
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 14px;
+    color: #555;
+    transition: all 0.2s ease;
+  }
+
+  .btn-navegacao:hover {
+    background-color: #e0e0e0;
+    color: #333;
+  }
+
+  /* SEÇÃO FORMULÁRIO */
+  .form-section {
+    padding: 20px;
+    border-bottom: 1px solid #e9ecef;
+  }
+
+  .section-title {
+    font-size: 18px;
+    color: #333;
+    margin-bottom: 15px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+  }
+
+  .section-title::before {
+    content: '📝';
+    margin-right: 8px;
+    font-size: 20px;
+  }
+
+  .form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+  }
+
+  .form-group {
+    margin-bottom: 15px;
+  }
+
+  .form-group label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 500;
+    color: #495057;
+  }
+
+  .form-group input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    font-size: 15px;
+    transition: border-color 0.2s ease;
+    outline: none;
+  }
+
+  .form-group input:focus {
+    border-color: #a00000;
+    box-shadow: 0 0 0 3px rgba(160, 0, 0, 0.1);
+  }
+
+  .input-wrapper {
+    display: flex;
+    align-items: center;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    overflow: hidden;
+    background-color: #fff;
+  }
+
+  .input-prefixo {
+    background-color: #f5f5f5;
+    padding: 10px 12px;
+    color: #555;
+    font-weight: 500;
+    border-right: 1px solid #ddd;
+  }
+
+  .input-wrapper input {
+    border: none;
+    padding: 10px 12px;
+    width: 100%;
+    outline: none;
+    font-size: 15px;
+  }
+
+  .submit-group {
+    display: flex;
+    align-items: flex-end;
+  }
+
+  .btn-principal {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background-color: #a00000;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+
+  .btn-principal:hover {
+    background-color: #800000;
+  }
+
+  .btn-icone {
+    font-style: normal;
+  }
+
+  /* TABELA */
+  .tabela-section {
+    padding: 20px;
+  }
+
+  .tabela-container {
+    overflow-x: auto;
+  }
+
+  .tabela-financeira {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin-top: 10px;
+  }
+
+  .tabela-financeira th {
+    background: linear-gradient(to bottom, #b00000, #8a0000);
+    color: white;
+    padding: 15px 12px;
+    text-align: left;
+    font-weight: 600;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+
+  .tabela-financeira th:first-child {
+    border-top-left-radius: 8px;
+  }
+
+  .tabela-financeira th:last-child {
+    border-top-right-radius: 8px;
+  }
+
+  .header-icon {
+    margin-right: 8px;
+    font-style: normal;
+  }
+
+  .tabela-financeira td {
+    padding: 14px 12px;
+    border-bottom: 1px solid #e9ecef;
+  }
+
+  .tabela-financeira tr:last-child td {
+    border-bottom: none;
+  }
+
+  .tabela-financeira tr:hover {
+    background-color: rgba(0, 0, 0, 0.02);
+  }
+
+  .col-data, .col-categoria {
+    white-space: nowrap;
+  }
+
+  .col-descricao {
+    min-width: 250px;
+  }
+
+  .col-valor {
+    font-weight: 600;
+    text-align: right;
+  }
+
+  .col-valor.negativo {
+    color: #dc3545;
+  }
+
+  .col-acoes {
+    width: 100px;
+    text-align: center;
+  }
+
+  .acoes-grupo {
+    display: flex;
+    justify-content: center;
+  }
+
+  .btn-acao {
+    border: none;
+    background-color: #f8f9fa;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 16px;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    text-decoration: none;
+  }
+
+  .btn-acao:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  }
+
+  .btn-acao.vermelho {
+    background-color: #dc3545;
+    color: white;
+  }
+
+  .btn-acao.vermelho:hover {
+    background-color: #c82333;
+  }
+
+  .sem-registros {
+    text-align: center;
+    color: #6c757d;
+    padding: 30px 0;
+    font-style: italic;
+  }
+
+  /* RESPONSIVIDADE */
+  @media (max-width: 768px) {
+    .painel-container {
+      padding: 15px 10px;
+    }
+
+    .form-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .controles-superiores {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .filtro-mes {
+      width: 100%;
+      justify-content: center;
+    }
+
+    .tabela-financeira th,
+    .tabela-financeira td {
+      padding: 10px 8px;
+      font-size: 14px;
+    }
+
+    .btn-acao {
+      width: 32px;
+      height: 32px;
+      font-size: 14px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .tab {
+      padding: 10px 15px;
+      font-size: 14px;
+    }
+
+    .tab-icon {
+      margin-right: 5px;
+    }
+
+    .section-title {
+      font-size: 16px;
+    }
+  }
+</style>
 
 {% endblock %}

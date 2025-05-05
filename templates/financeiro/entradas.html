@@ -1,125 +1,712 @@
 {% extends 'base.html' %}
-<!--{% set ano, mes_num = mes.split('-')|map('int') %}
-{% set data_atual = namespace() %}
-{% set data_atual.anterior = (mes_num - 1) if mes_num > 1 else 12 %}
-{% set data_atual.proximo = (mes_num + 1) if mes_num < 12 else 1 %}
-{% set data_atual.ano_ant = (ano - 1) if mes_num == 1 else ano %}
-{% set data_atual.ano_prox = (ano + 1) if mes_num == 12 else ano %}
-{% set mes_anterior = "{}-{:02d}".format(data_atual.ano_ant, data_atual.anterior) %}
-{% set mes_proximo = "{}-{:02d}".format(data_atual.ano_prox, data_atual.proximo) %}
--->
-
 {% block content %}
 <div class="painel-container">
-    <h1>Financeiro - Entradas (Mensalidades)</h1>
-    {% with messages = get_flashed_messages(with_categories=true) %}
-  {% if messages %}
-    {% for categoria, mensagem in messages %}
-      <div class="alerta {{ categoria }}">{{ mensagem }}</div>
-    {% endfor %}
-  {% endif %}
-{% endwith %}
+  <h1 class="titulo-pagina">Financeiro - Entradas (Mensalidades)</h1>
 
-       
-    <div class="tabs">
-        <a href="{{ url_for('financeiro.exibir_entradas', mes=mes) }}" class="tab active">Entradas</a>
-        <a href="{{ url_for('financeiro.exibir_saidas', mes=mes) }}" class="tab">Saídas</a>
-        <a href="{{ url_for('financeiro.exibir_saldo', mes=mes) }}" class="tab">Resumo</a>
+  {% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+  <div class="mensagens-container">
+    {% for categoria, mensagem in messages %}
+    <div class="alerta {{ categoria }}">
+      <div class="alerta-conteudo">
+        <span class="alerta-icone">{% if categoria == 'sucesso' %}✅{% elif categoria == 'erro' %}❌{% else %}ℹ️{% endif
+          %}</span>
+        <span class="alerta-texto">{{ mensagem }}</span>
+      </div>
+      <button class="alerta-fechar" onclick="this.parentElement.style.display='none'">×</button>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+  {% endwith %}
+
+  <div class="card-container">
+    <div class="card-header">
+      <div class="tabs">
+        <a href="{{ url_for('financeiro.exibir_entradas', mes=mes) }}" class="tab active">
+          <i class="tab-icon">💰</i> Entradas
+        </a>
+        <a href="{{ url_for('financeiro.exibir_saidas', mes=mes) }}" class="tab">
+          <i class="tab-icon">📤</i> Saídas
+        </a>
+        <a href="{{ url_for('financeiro.exibir_saldo', mes=mes) }}" class="tab">
+          <i class="tab-icon">📊</i> Resumo
+        </a>
+      </div>
+
+      <div class="controles-superiores">
+        <form method="GET" action="{{ url_for('financeiro.exibir_entradas') }}" class="filtro-mes">
+          <button type="button" class="btn-navegacao" onclick="mudarMes(-1)">◀</button>
+          <input type="month" name="mes" value="{{ mes }}" required class="seletor-mes">
+          <button type="button" class="btn-navegacao" onclick="mudarMes(1)">▶</button>
+        </form>
+
+        <form method="POST" action="{{ url_for('financeiro.aplicar_novo_valor') }}" class="form-mensalidade-valores">
+          <div class="input-grupo">
+            <label for="valor"><strong>Valor:</strong></label>
+            <div class="input-wrapper">
+              <span class="input-prefixo">R$</span>
+              <input type="number" step="0.01" name="valor" id="valor" placeholder="0,00"
+                value="{{ config.valor_mensalidade if config else '' }}" required>
+            </div>
+          </div>
+          <input type="hidden" name="mes" value="{{ mes }}">
+          <button type="submit" class="btn-principal">
+            <i class="btn-icone">💾</i> Aplicar
+          </button>
+        </form>
+      </div>
     </div>
 
-    <form method="GET" action="{{ url_for('financeiro.exibir_entradas') }}" class="filtro-mes">
-        <button type="button" onclick="mudarMes(-1)">◀</button>
-        <input type="month" name="mes" value="{{ mes }}" onchange="this.form.submit()">
-        <button type="button" onclick="mudarMes(1)">▶</button>
-    </form>
-    <form method="POST" action="{{ url_for('financeiro.gerar_mensalidades') }}" class="form-mensalidade-valores">
-        <label for="valor_mensalidade"><strong>Valor:</strong></label>
-        <input type="number" step="0.01" name="valor_mensalidade" id="valor_mensalidade" placeholder="R$" required>
-        <input type="hidden" name="mes" value="{{ mes }}">
-        <button type="submit">💾 Aplicar</button>
-    </form>
-
-    
-    <table class="tabela-financeira">
+    <div class="tabela-container">
+      <table class="tabela-financeira">
         <thead>
-            <tr>
-                <th>Jogador</th>
-                <th>Valor</th>
-                <th>Status</th>
-                <th>Ações</th>
-            </tr>
+          <tr>
+            <th class="col-jogador"><i class="header-icon">🧑</i> Jogador</th>
+            <th class="col-valor"><i class="header-icon">💰</i> Valor</th>
+            <th class="col-status"><i class="header-icon">📌</i> Status</th>
+            <th class="col-acoes"><i class="header-icon">⚙️</i> Ações</th>
+          </tr>
         </thead>
         <tbody>
-            {% for j in jogadores %}
-            {% set m = mensalidades|selectattr("jogador_id", "equalto", j.id)|first %}
-            <tr>
-                <td>{{ j.nome }}</td>
-                <td>
-                    {% if m %}
-                        R$ {{ '%.2f'|format(m.valor) }}
-                    {% else %}
-                        -
-                    {% endif %}
-                </td>
-                <td>
-                    {% if m %}
-                        {% if m.valor == 0 %}
-                            <span class="badge-isento">Isento</span>
-                        {% else %}
-                            {{ "✅ Pago" if m.pago else "❌ Pendente"  }}
-                        {% endif %}
-                    {% else %}
-                        Sem registro
-                    {% endif %}
-                </td>
-                <td>
-                    {% if m %}
-                        {% if not m.pago %}
-                        <form action="{{ url_for('financeiro.registrar_pagamento_mensalidade', mensalidade_id=m.id) }}" method="GET" style="display:inline;">
-                            <button type="submit" title="Registrar pagamento">✅</button>
-                        </form>
-                        <form action="{{ url_for('financeiro.isentar_mensalidade', mensalidade_id=m.id) }}" method="POST" style="display:inline;">
-                            <button type="submit" title="Isentar mensalidade">🆓</button>
-                        </form>
-                        
-                        {% else %}
-                            <form action="{{ url_for('financeiro.cancelar_baixa_mensalidade', id=m.id) }}" method="POST" style="display:inline;">
-                                <button type="submit" title="Cancelar baixa">↩️</button>
-                            </form>
-                        {% endif %}
-                    {% else %}
-                        <span style="color: gray;">-</span>
-                    {% endif %}
-                </td>
-            </tr>
-            {% endfor %}
+          {% for jogador in jogadores %}
+          {% set m = mensalidade_map.get(jogador.id) %}
+          <tr
+            class="{% if m and m.pago %}linha-pago{% elif m and not m.pago and m.valor > 0 %}linha-pendente{% endif %}">
+            <td class="col-jogador">{{ jogador.nome }}</td>
+            <td class="col-valor">
+              {% if m %}
+              R$ {{ "%.2f"|format(m.valor) }}
+              {% else %}
+              -
+              {% endif %}
+            </td>
+            <td class="col-status">
+              {% if m %}
+              {% if m.valor == 0 %}
+              <span class="status isento">🟢 Isento</span>
+              {% elif m.pago %}
+              <span class="status pago">🟢 Pago</span>
+              {% else %}
+              <span class="status pendente">🔴 Pendente</span>
+              {% endif %}
+              {% else %}
+              <span class="status vazio">—</span>
+              {% endif %}
+            </td>
+            <td class="col-acoes">
+              <div class="acoes-grupo">
+                {% if m %}
+                {% if not m.pago and m.valor > 0 %}
+                <!-- Botões: Baixar ou Isentar -->
+                <form method="POST"
+                  action="{{ url_for('financeiro.baixar_mensalidade', mensalidade_id=m.id, mes=mes) }}"
+                  class="form-acao">
+                  <button class="btn-acao verde" title="Dar baixa">✅</button>
+                </form>
+                <form method="POST"
+                  action="{{ url_for('financeiro.isentar_mensalidade', mensalidade_id=m.id, mes=mes) }}"
+                  class="form-acao">
+                  <button class="btn-acao azul" title="Isentar">❌</button>
+                </form>
+                {% elif not m.pago and m.valor == 0 %}
+                <!-- Botão: Cancelar Isenção -->
+                <form method="POST" action="{{ url_for('financeiro.cancelar_isencao', mensalidade_id=m.id, mes=mes) }}" style="display:inline;">
+                  <button class="btn-acao isento" title="Cancelar isenção">↩️</button>
+                </form>
+                
+                {% endif %}
+
+                <!-- Botão: Ver Extrato (sempre visível) -->
+                <a href="{{ url_for('financeiro.relatorio_individual', pessoa_id=jogador.id) }}"
+                  class="btn-acao amarelo" title="Ver extrato">📄</a>
+
+                {% if m.pago %}
+                <!-- Botão: Cancelar Baixa -->
+                <form method="POST" action="{{ url_for('financeiro.cancelar_baixa', mensalidade_id=m.id, mes=mes) }}"
+                  class="form-acao">
+                  <button class="btn-acao vermelho" title="Cancelar baixa">❎</button>
+                </form>
+                {% endif %}
+                {% else %}
+                <span class="acao-vazia">—</span>
+                {% endif %}
+              </div>
+            </td>
+
+          </tr>
+          {% endfor %}
         </tbody>
-        
-    </table>
+      </table>
+    </div>
+  </div>
 </div>
+
 <script>
-    const inputMes = document.querySelector('input[name="mes"]');
+  const inputMes = document.querySelector('input[name="mes"]');
 
-    function mudarMes(offset) {
-        let [ano, mes] = inputMes.value.split('-').map(Number);
-        mes += offset;
+  function mudarMes(offset) {
+    if (!inputMes || !inputMes.value) return;
 
-        if (mes < 1) {
-            mes = 12;
-            ano -= 1;
-        } else if (mes > 12) {
-            mes = 1;
-            ano += 1;
-        }
+    let [ano, mes] = inputMes.value.split('-').map(Number);
+    mes += offset;
 
-        const novoMes = `${ano}-${mes.toString().padStart(2, '0')}`;
-        window.location.href = `?mes=${novoMes}`;
+    if (mes < 1) { mes = 12; ano -= 1; }
+    else if (mes > 12) { mes = 1; ano += 1; }
+
+    const novoMes = `${ano}-${mes.toString().padStart(2, '0')}`;
+    window.location.href = `?mes=${novoMes}`;
+  }
+
+  inputMes?.addEventListener('blur', () => {
+    if (inputMes.value) {
+      window.location.href = `?mes=${inputMes.value}`;
     }
+  });
+
+  inputMes?.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && inputMes.value) {
+      e.preventDefault();
+      window.location.href = `?mes=${inputMes.value}`;
+    }
+  });
+
+  // Auto-ocultar alertas após 4 segundos
+  setTimeout(() => {
+    document.querySelectorAll('.alerta').forEach(el => {
+      el.style.opacity = '0';
+      setTimeout(() => { el.style.display = 'none'; }, 500);
+    });
+  }, 4000);
 </script>
-  <script>
-    setTimeout(() => {
-        document.querySelectorAll('.alerta').forEach(el => el.style.display = 'none');
-    }, 4000); // desaparece em 4 segundos
-  </script>
-  
+
+<style>
+  /* ESTILOS GERAIS */
+  .painel-container {
+    font-family: 'Roboto', 'Segoe UI', sans-serif;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+
+  .titulo-pagina {
+    color: #333;
+    text-align: center;
+    margin-bottom: 25px;
+    font-size: 28px;
+    font-weight: 700;
+    position: relative;
+    padding-bottom: 15px;
+  }
+
+  .titulo-pagina::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80px;
+    height: 4px;
+    background: linear-gradient(90deg, #a00000, #ff4d4d);
+    border-radius: 2px;
+  }
+
+  /* CARD CONTAINER */
+  .card-container {
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+  }
+
+  .card-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #e9ecef;
+    padding: 15px 20px;
+  }
+
+  /* ALERTAS */
+  .mensagens-container {
+    margin-bottom: 20px;
+  }
+
+  .alerta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 15px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    animation: fadeIn 0.3s ease-in-out;
+    transition: opacity 0.5s ease;
+  }
+
+  .alerta-conteudo {
+    display: flex;
+    align-items: center;
+  }
+
+  .alerta-icone {
+    margin-right: 10px;
+    font-size: 18px;
+  }
+
+  .alerta-texto {
+    font-weight: 500;
+  }
+
+  .alerta-fechar {
+    border: none;
+    background: none;
+    font-size: 20px;
+    cursor: pointer;
+    opacity: 0.7;
+    padding: 0 5px;
+  }
+
+  .alerta-fechar:hover {
+    opacity: 1;
+  }
+
+  .alerta.sucesso {
+    background-color: #d4edda;
+    color: #155724;
+    border-left: 4px solid #28a745;
+  }
+
+  .alerta.erro {
+    background-color: #f8d7da;
+    color: #721c24;
+    border-left: 4px solid #dc3545;
+  }
+
+  .alerta.info {
+    background-color: #d1ecf1;
+    color: #0c5460;
+    border-left: 4px solid #17a2b8;
+  }
+
+  .alerta.aviso {
+    background-color: #fff3cd;
+    color: #856404;
+    border-left: 4px solid #ffc107;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* TABS */
+  .tabs {
+    display: flex;
+    border-bottom: 1px solid #e9ecef;
+    margin-bottom: 15px;
+  }
+
+  .tab {
+    padding: 12px 25px;
+    color: #495057;
+    text-decoration: none;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    position: relative;
+    transition: all 0.2s ease;
+    border-bottom: 3px solid transparent;
+  }
+
+  .tab:hover {
+    color: #a00000;
+    background-color: rgba(160, 0, 0, 0.05);
+  }
+
+  .tab.active {
+    color: #a00000;
+    border-bottom: 3px solid #a00000;
+  }
+
+  .tab-icon {
+    margin-right: 8px;
+    font-style: normal;
+  }
+
+  /* CONTROLES SUPERIORES */
+  .controles-superiores {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 15px;
+    flex-wrap: wrap;
+    gap: 15px;
+  }
+
+  .filtro-mes {
+    display: flex;
+    align-items: center;
+    background-color: #fff;
+    border-radius: 8px;
+    padding: 5px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    border: 1px solid #e0e0e0;
+  }
+
+  .seletor-mes {
+    border: none;
+    padding: 8px 10px;
+    font-size: 15px;
+    font-weight: 500;
+    color: #333;
+    text-align: center;
+    outline: none;
+    background: transparent;
+  }
+
+  .btn-navegacao {
+    border: none;
+    background-color: #f3f3f3;
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 14px;
+    color: #555;
+    transition: all 0.2s ease;
+  }
+
+  .btn-navegacao:hover {
+    background-color: #e0e0e0;
+    color: #333;
+  }
+
+  .form-mensalidade-valores {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+  }
+
+  .input-grupo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .input-wrapper {
+    display: flex;
+    align-items: center;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    overflow: hidden;
+    background-color: #fff;
+  }
+
+  .input-prefixo {
+    background-color: #f5f5f5;
+    padding: 8px 12px;
+    color: #555;
+    font-weight: 500;
+    border-right: 1px solid #ddd;
+  }
+
+  .input-wrapper input {
+    border: none;
+    padding: 8px 12px;
+    width: 100px;
+    outline: none;
+    font-size: 15px;
+  }
+
+  .btn-principal {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background-color: #a00000;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+
+  .btn-principal:hover {
+    background-color: #800000;
+  }
+
+  .btn-icone {
+    font-style: normal;
+  }
+
+  /* TABELA */
+  .tabela-container {
+    overflow-x: auto;
+    padding: 20px;
+  }
+
+  .tabela-financeira {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin-top: 10px;
+  }
+
+  .tabela-financeira th {
+    background: linear-gradient(to bottom, #b00000, #8a0000);
+    color: white;
+    padding: 15px 12px;
+    text-align: left;
+    font-weight: 600;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+
+  .tabela-financeira th:first-child {
+    border-top-left-radius: 8px;
+  }
+
+  .tabela-financeira th:last-child {
+    border-top-right-radius: 8px;
+  }
+
+  .header-icon {
+    margin-right: 8px;
+    font-style: normal;
+  }
+
+  .tabela-financeira td {
+    padding: 14px 12px;
+    border-bottom: 1px solid #e9ecef;
+  }
+
+  .tabela-financeira tr:last-child td {
+    border-bottom: none;
+  }
+
+  .tabela-financeira tr:hover {
+    background-color: rgba(0, 0, 0, 0.02);
+  }
+
+  .linha-pago {
+    background-color: rgba(40, 167, 69, 0.05);
+  }
+
+  .linha-pendente {
+    background-color: rgba(255, 193, 7, 0.05);
+  }
+
+  .col-jogador {
+    min-width: 200px;
+    text-align: left;
+  }
+
+  .col-valor {
+    min-width: 100px;
+    text-align: center;
+    font-weight: 600;
+  }
+
+  .col-status {
+    min-width: 120px;
+    text-align: center;
+  }
+
+  .col-acoes {
+    min-width: 150px;
+    text-align: center;
+  }
+
+  /* STATUS */
+  .status {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 14px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  .status.pago {
+    background-color: #d4edda;
+    color: #155724;
+  }
+
+  .status.pendente {
+    background-color: #f8d7da;
+    color: #721c24;
+  }
+
+  .status.isento {
+    background-color: #d1ecf1;
+    color: #0c5460;
+  }
+
+  .status.vazio {
+    color: #6c757d;
+    background: none;
+    box-shadow: none;
+  }
+
+  /* AÇÕES */
+  .acoes-grupo {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .form-acao {
+    margin: 0;
+    padding: 0;
+  }
+
+  .btn-acao {
+    border: none;
+    background-color: #f8f9fa;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 16px;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    padding: 0;
+    text-decoration: none;
+  }
+
+  .btn-acao:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  }
+
+  .btn-acao.verde {
+    background-color: #28a745;
+    color: white;
+  }
+
+  .btn-acao.verde:hover {
+    background-color: #218838;
+  }
+
+  .btn-acao.vermelho {
+    background-color: #dc3545;
+    color: white;
+  }
+
+  .btn-acao.vermelho:hover {
+    background-color: #c82333;
+  }
+
+  .btn-acao.azul {
+    background-color: #007bff;
+    color: white;
+  }
+
+  .btn-acao.azul:hover {
+    background-color: #0069d9;
+  }
+
+  .btn-acao.amarelo {
+    background-color: #ffc107;
+    color: #212529;
+  }
+
+  .btn-acao.amarelo:hover {
+    background-color: #e0a800;
+  }
+
+  .acao-vazia {
+    color: #adb5bd;
+    display: inline-block;
+    width: 36px;
+    text-align: center;
+  }
+
+  /* RESPONSIVIDADE */
+  @media (max-width: 768px) {
+    .painel-container {
+      padding: 15px 10px;
+    }
+
+    .controles-superiores {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .filtro-mes,
+    .form-mensalidade-valores {
+      width: 100%;
+      justify-content: center;
+    }
+
+    .form-mensalidade-valores {
+      flex-wrap: wrap;
+    }
+
+    .tabela-financeira th,
+    .tabela-financeira td {
+      padding: 10px 8px;
+      font-size: 14px;
+    }
+
+    .status {
+      padding: 4px 8px;
+      font-size: 12px;
+    }
+
+    .btn-acao {
+      width: 32px;
+      height: 32px;
+      font-size: 14px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .tab {
+      padding: 10px 15px;
+      font-size: 14px;
+    }
+
+    .tab-icon {
+      margin-right: 5px;
+    }
+
+    .acoes-grupo {
+      flex-wrap: wrap;
+      gap: 5px;
+    }
+
+    .btn-acao {
+      width: 28px;
+      height: 28px;
+      font-size: 12px;
+    }
+  }
+
+  .btn-acao.isento {
+    background-color: #9e9e9e;
+    color: white;
+  }
+
+  .btn-acao.isento:hover {
+    background-color: #757575;
+  }
+</style>
+
 {% endblock %}

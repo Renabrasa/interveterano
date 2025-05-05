@@ -1,68 +1,87 @@
 {% extends 'base.html' %}
 {% block content %}
 
-<h1 class="titulo-pagina" style="margin-top: 20px;">Calendário de Jogos</h1>
+<div class="calendar-page">
+    <!-- Header Section -->
+    <div class="page-header">
+        <h1 class="page-title">Calendário de Jogos</h1>
+        <a href="#" id="btn-exportar" class="export-btn">
+            <span class="export-icon">📤</span> Exportar Agenda
+        </a>
+    </div>
 
-<div style="text-align: right; margin-bottom: 10px;">
-    <a href="#" id="btn-exportar"
-        style="float: right; margin-right: 10px; margin-top: 10px; position: relative; z-index: 5;">📤 Exportar
-        Agenda</a>
-</div>
+    <!-- Calendar Container -->
+    <div class="calendar-wrapper">
+        <div id="calendar"></div>
+    </div>
 
-<div id="calendar-container" style="overflow-x: auto;">
-    <div id="calendar"></div>
-</div>
+    <!-- Monthly Summary Section -->
+    <div class="monthly-summary">
+        <h2 class="summary-title">Jogos do Mês</h2>
+        <ul id="lista-jogos" class="games-list"></ul>
+    </div>
 
-<!-- 🔥 RESUMO DO MÊS -->
-<div id="resumo-mensal" style="margin-top: 20px; padding: 15px; background-color: #fff; border-radius: 8px;">
-    <h2 style="text-align: center; color: #b30000;">Jogos do Mês</h2>
-    <ul id="lista-jogos" style="list-style: none; padding-left: 0;"></ul>
-</div>
+    <!-- Game Modal -->
+    <div id="jogo-modal" class="modal">
+        <div class="modal-content">
+            <h2 id="modal-title" class="modal-heading">Detalhes do Jogo</h2>
+            <form id="form-jogo" class="game-form">
+                <input type="hidden" id="jogo-id">
+                
+                <div class="form-group">
+                    <label for="titulo">Título:</label>
+                    <input type="text" id="titulo" required {{ '' if session.get('logado') else 'readonly' }}>
+                </div>
+                
+                <div class="form-group">
+                    <label for="data">Data e Hora:</label>
+                    <input type="datetime-local" id="data" required {{ '' if session.get('logado') else 'readonly' }}>
+                </div>
+                
+                <div class="form-group">
+                    <label for="local">Local:</label>
+                    <input type="text" id="local" {{ '' if session.get('logado') else 'readonly' }}>
+                </div>
+                
+                <div class="form-group">
+                    <label for="inter_mandante">Inter manda o jogo?</label>
+                    <select id="inter_mandante" {{ '' if session.get('logado') else 'disabled' }}>
+                        <option value="true">Sim</option>
+                        <option value="false">Não</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="resultado">Resultado do jogo:</label>
+                    <select id="resultado" {{ '' if session.get('logado') else 'disabled' }}>
+                        <option value="">(Não informado)</option>
+                        <option value="vitória">Vitória</option>
+                        <option value="empate">Empate</option>
+                        <option value="derrota">Derrota</option>
+                    </select>
+                </div>
 
-<!-- Modal de Jogo -->
-<div id="jogo-modal" class="modal" style="display: none;">
-    <div class="modal-content" style="width: 90%; max-width: 500px; margin: auto;">
-        <h2 id="modal-title">Detalhes do Jogo</h2>
-        <form id="form-jogo">
-            <input type="hidden" id="jogo-id">
-            <label>Título:</label>
-            <input type="text" id="titulo" required {{ '' if session.get('logado') else 'readonly' }}>
-            <label>Data e Hora:</label>
-            <input type="datetime-local" id="data" required {{ '' if session.get('logado') else 'readonly' }}>
-            <label>Local:</label>
-            <input type="text" id="local" {{ '' if session.get('logado') else 'readonly' }}>
-            <label>Inter manda o jogo?</label>
-            <select id="inter_mandante" {{ '' if session.get('logado') else 'disabled' }}>
-                <option value="true">Sim</option>
-                <option value="false">Não</option>
-            </select>
-            <label>Resultado do jogo:</label>
-            <select id="resultado" {{ '' if session.get('logado') else 'disabled' }}>
-                <option value="">(Não informado)</option>
-                <option value="vitória">Vitória</option>
-                <option value="empate">Empate</option>
-                <option value="derrota">Derrota</option>
-            </select>
+                <div class="form-actions">
+                    {% if session.get('logado') %}
+                    <button type="submit" class="btn btn-save">Salvar</button>
+                    <button type="button" id="btn-excluir" class="btn btn-delete">Excluir</button>
+                    {% endif %}
+                    <button type="button" id="btn-cancelar" class="btn btn-cancel">Fechar</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
-            <div style="margin-top: 10px;">
-                {% if session.get('logado') %}
-                <button type="submit">Salvar</button>
-                <button type="button" id="btn-excluir" style="display: none;">Excluir</button>
-                {% endif %}
-                <button type="button" id="btn-cancelar">Fechar</button>
-            </div>
-        </form>
+    <div class="legend">
+        <span class="legend-item"><span class="legend-icon home">🔴</span> Inter mandante</span>
+        <span class="legend-separator">|</span>
+        <span class="legend-item"><span class="legend-icon away">🔵</span> Visitante</span>
     </div>
 </div>
 
-<!-- FULLCALENDAR -->
+<!-- FullCalendar -->
 <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.9/index.global.min.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.9/index.global.min.js"></script>
-
-<div class="resumo-legenda">
-    <small><strong>Legenda:</strong> 🔴 Inter mandante &nbsp; | &nbsp; 🔵 Visitante</small>
-</div>
-
 
 <script>
     let calendar;
@@ -72,78 +91,67 @@
             initialView: 'dayGridMonth',
             locale: 'pt-br',
             selectable: {{ 'true' if session.get('logado') else 'false' }},
-        editable: false,
-        events: '/api/jogos',
+            editable: false,
+            events: '/api/jogos',
+            headerToolbar: {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'dayGridMonth,dayGridWeek'
+            },
+            eventContent: function (arg) {
+                // Verifica se é um evento de jogo com Inter mandante
+                const isInterHome = arg.event.extendedProps && arg.event.extendedProps.inter_mandante;
+                
+                return {
+                    html: `
+                    <div class="calendar-event ${isInterHome ? 'event-home' : 'event-away'}">
+                        <span class="event-indicator">${isInterHome ? '🔴' : '🔵'}</span>
+                        <span class="event-title">${arg.event.title}</span>
+                    </div>
+                    `
+                };
+            },
 
-        // ✅ AJUSTE: mostra apenas o título formatado no backend (ex: Tabajara — 16h)
-        eventContent: function (arg) {
-            return {
-                ///html: `<div style="font-weight: bold; text-align: center; background-color: #f2f2f2; border-radius: 4px; padding: 2px 4px;">${arg.event.title}</div>`
+            dateClick: function (info) {
+                {% if session.get('logado') %}
+                abrirModal(null, info.dateStr);
+                {% else %}
+                alert("É necessário login para adicionar um novo jogo.");
+                {% endif %}
+            },
 
-                html: `
-            <div style="
-                display: flex;
-                justify-content: left;
-                align-items: left;
-                text-align: left;
-                font-weight: bold;
-                font-size: 0.60rem;
-                color: #b30000;
-                white-space: normal;
-                overflow-wrap: break-word;
-                line-height: 1.1;
-                padding: 0 0px;
-            ">
-                ${arg.event.title}
-            </div>
-        `
-            };
-        },
+            eventClick: function (info) {
+                fetch(`/api/jogos/${info.event.id}`)
+                    .then(res => res.json())
+                    .then(jogo => abrirModal(jogo));
+            },
 
+            eventDidMount: function (info) {
+                const dia = info.event.start;
+                const seletor = `.fc-daygrid-day[data-date="${dia.toISOString().slice(0, 10)}"]`;
+                const celula = document.querySelector(seletor);
+                if (celula) {
+                    celula.classList.add('game-day');
+                }
+            },
 
-        dateClick: function (info) {
-            {% if session.get('logado') %}
-            abrirModal(null, info.dateStr);
-            {% else %}
-            alert("É necessário login para adicionar um novo jogo.");
-            {% endif %}
-        },
-
-        eventClick: function (info) {
-            fetch(`/api/jogos/${info.event.id}`)
-                .then(res => res.json())
-                .then(jogo => abrirModal(jogo));
-        },
-
-        eventDidMount: function (info) {
-            const dia = info.event.start;
-            const seletor = `.fc-daygrid-day[data-date="${dia.toISOString().slice(0, 10)}"]`;
-            const celula = document.querySelector(seletor);
-            if (celula) {
-                celula.style.backgroundColor = '#ffe5e5';
-                celula.style.borderRadius = '5px';
+            datesSet: function () {
+                const dataAtual = calendar.getCurrentData().currentDate;
+                carregarResumoMes(dataAtual.toISOString().slice(0, 10));
             }
-        },
+        });
 
-        datesSet: function () {
-            const dataAtual = calendar.getCurrentData().currentDate;
-            carregarResumoMes(dataAtual.toISOString().slice(0, 10));
-        }
+        calendar.render();
+        const dataAtual = calendar.getCurrentData().currentDate;
+        carregarResumoMes(dataAtual.toISOString().slice(0, 10));
 
+        document.getElementById('btn-exportar').addEventListener('click', function (e) {
+            e.preventDefault();
+            const dataAtual = calendar.view.currentStart;
+            const mes = dataAtual.toISOString().slice(0, 7);
+            window.open(`/exportar/agenda?mes=${mes}`, '_blank');
+        });
     });
-
-    calendar.render();
-    const dataAtual = calendar.getCurrentData().currentDate;
-    carregarResumoMes(dataAtual.toISOString().slice(0, 10));
-
-
-    document.getElementById('btn-exportar').addEventListener('click', function (e) {
-        e.preventDefault();
-        const dataAtual = calendar.view.currentStart;
-        const mes = dataAtual.toISOString().slice(0, 7);
-        window.open(`/exportar/agenda?mes=${mes}`, '_blank');
-    });
-});
 
     function carregarResumoMes(dataReferencia) {
         fetch(`/api/jogos/mes?data=${dataReferencia}`)
@@ -151,16 +159,70 @@
             .then(jogos => {
                 const lista = document.getElementById('lista-jogos');
                 lista.innerHTML = '';
+                
+                // Obter mês e ano da data de referência
+                const data = new Date(dataReferencia);
+                const mesAno = data.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+                const tituloMes = document.querySelector('.summary-title');
+                tituloMes.innerHTML = `Jogos de <span style="color: #b30000;">${mesAno}</span>`;
 
                 if (jogos.length === 0) {
-                    lista.innerHTML = '<li style="text-align:center;">Não há jogos agendados para este mês.</li>';
+                    lista.innerHTML = '<li class="no-games">Não há jogos agendados para este mês.</li>';
                 } else {
+                    // Agrupar jogos por semana para melhor visualização
+                    let semanaAtual = null;
+                    let listaAgrupada = document.createDocumentFragment();
+                    
                     jogos.forEach(jogo => {
+                        // Obter semana do jogo (simples, apenas para agrupar visualmente)
+                        const dataJogo = new Date(jogo.data);
+                        const semanaJogo = Math.floor(dataJogo.getDate() / 7);
+                        
+                        // Se mudou de semana, adiciona separador
+                        if (semanaJogo !== semanaAtual && semanaAtual !== null) {
+                            const separador = document.createElement('div');
+                            separador.className = 'week-separator';
+                            listaAgrupada.appendChild(separador);
+                        }
+                        semanaAtual = semanaJogo;
+                        
                         const item = document.createElement('li');
-                        const mandante = jogo.inter_mandante ? '🔴' : '🔵';
-                        item.innerHTML = `${mandante} <strong>${jogo.data_formatada}</strong> — ${jogo.titulo} (${jogo.local})`;
-                        lista.appendChild(item);
+                        item.className = 'game-item';
+                        if (jogo.resultado) {
+                            item.classList.add(`result-${jogo.resultado}`);
+                        }
+                        
+                        const mandante = jogo.inter_mandante ? 
+                            '<span class="home-indicator" title="Inter mandante">🔴</span>' : 
+                            '<span class="away-indicator" title="Inter visitante">🔵</span>';
+                            
+                        const resultadoIcon = jogo.resultado ? 
+                            `<span class="result-icon result-${jogo.resultado}" title="${jogo.resultado}">${
+                                jogo.resultado === 'vitória' ? '✅' : 
+                                jogo.resultado === 'empate' ? '🟡' : 
+                                jogo.resultado === 'derrota' ? '❌' : ''
+                            }</span>` : '';
+                            
+                        item.innerHTML = `
+                            <div class="game-header">
+                                ${mandante}
+                                <span class="game-date">${jogo.data_formatada}</span>
+                                ${resultadoIcon}
+                            </div>
+                            <span class="game-title">${jogo.titulo}</span>
+                            <span class="game-venue">${jogo.local}</span>
+                        `;
+                        
+                        item.addEventListener('click', () => {
+                            fetch(`/api/jogos/${jogo.id}`)
+                                .then(res => res.json())
+                                .then(jogoCompleto => abrirModal(jogoCompleto));
+                        });
+                        
+                        listaAgrupada.appendChild(item);
                     });
+                    
+                    lista.appendChild(listaAgrupada);
                 }
             });
     }
@@ -223,7 +285,6 @@
             calendar.refetchEvents();
             const dataAtual = calendar.getCurrentData().currentDate;
             carregarResumoMes(dataAtual.toISOString().slice(0, 10));
-
         });
     });
 
@@ -236,7 +297,6 @@
                     calendar.refetchEvents();
                     const dataAtual = calendar.getCurrentData().currentDate;
                     carregarResumoMes(dataAtual.toISOString().slice(0, 10));
-
                 });
         }
     });
@@ -245,65 +305,634 @@
         fecharModal();
     });
 </script>
+
 <style>
-    /* Estilo geral responsivo para mobile */
+    /* Main Styles */
+    .calendar-page {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        color: #333;
+        line-height: 1.6;
+    }
+
+    /* Header Styles */
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #b30000;
+    }
+
+    .page-title {
+        color: #b30000;
+        font-size: 2rem;
+        font-weight: 700;
+        margin: 0;
+    }
+
+    .export-btn {
+        background-color: #f8f8f8;
+        color: #b30000;
+        padding: 8px 12px;
+        border-radius: 6px;
+        text-decoration: none;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        transition: all 0.3s ease;
+        border: 1px solid #ddd;
+    }
+
+    .export-btn:hover {
+        background-color: #ebebeb;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    .export-icon {
+        margin-right: 5px;
+    }
+
+    /* Calendar Wrapper */
+    .calendar-wrapper {
+        background-color: #fff;
+        border-radius: 10px;
+        padding: 15px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        margin-bottom: 25px;
+        overflow-x: auto;
+    }
+
+    /* Monthly Summary */
+    .monthly-summary {
+        background-color: #fff;
+        border-radius: 10px;
+        padding: 20px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        margin-bottom: 20px;
+    }
+
+    .summary-title {
+        color: #b30000;
+        text-align: center;
+        font-size: 1.5rem;
+        margin-top: 0;
+        margin-bottom: 15px;
+        position: relative;
+        padding-bottom: 10px;
+    }
+
+    .summary-title::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 80px;
+        height: 3px;
+        background-color: #b30000;
+    }
+
+    .games-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .game-item {
+        padding: 12px 10px;
+        border-bottom: 1px solid #eee;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        transition: all 0.2s;
+        cursor: pointer;
+        border-radius: 6px;
+        margin-bottom: 5px;
+    }
+
+    .game-item:last-child {
+        border-bottom: none;
+    }
+
+    .game-item:hover {
+        background-color: #f9f9f9;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
+    
+    .game-header {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .home-indicator, .away-indicator {
+        font-size: 1.1rem;
+    }
+
+    .game-date {
+        font-weight: 700;
+        color: #333;
+        flex-grow: 1;
+    }
+    
+    .result-icon {
+        font-size: 0.9rem;
+    }
+
+    .game-title {
+        font-weight: 600;
+        color: #b30000;
+        margin: 3px 0 3px 25px;
+    }
+
+    .game-venue {
+        color: #666;
+        font-style: italic;
+        font-size: 0.9rem;
+        margin-left: 25px;
+    }
+    
+    .week-separator {
+        height: 1px;
+        background: linear-gradient(to right, transparent, #ddd, transparent);
+        margin: 10px 0;
+    }
+    
+    .result-vitória {
+        border-left: 3px solid #17a450;
+    }
+    
+    .result-empate {
+        border-left: 3px solid #ffc107;
+    }
+    
+    .result-derrota {
+        border-left: 3px solid #dc3545;
+    }
+
+    .no-games {
+        text-align: center;
+        padding: 15px;
+        color: #777;
+        font-style: italic;
+    }
+
+    /* Legend */
+    .legend {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        margin-top: 20px;
+        font-size: 0.9rem;
+        color: #666;
+    }
+
+    .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .legend-icon {
+        font-size: 1.1rem;
+    }
+
+    .legend-separator {
+        color: #ccc;
+    }
+
+    /* Modal Styles */
+    .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.6);
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+    }
+
+    .modal-content {
+        background-color: white;
+        width: 90%;
+        max-width: 500px;
+        border-radius: 10px;
+        padding: 25px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        animation: modalFade 0.3s ease;
+    }
+
+    @keyframes modalFade {
+        from { opacity: 0; transform: translateY(-20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .modal-heading {
+        color: #b30000;
+        margin-top: 0;
+        border-bottom: 2px solid #eee;
+        padding-bottom: 10px;
+        margin-bottom: 20px;
+    }
+
+    .form-group {
+        margin-bottom: 15px;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: 600;
+        color: #333;
+    }
+
+    .form-group input,
+    .form-group select {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        font-size: 1rem;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus {
+        border-color: #b30000;
+        outline: none;
+        box-shadow: 0 0 0 2px rgba(179, 0, 0, 0.1);
+    }
+
+    .form-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        margin-top: 20px;
+    }
+
+    .btn {
+        padding: 10px 15px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: all 0.2s;
+    }
+
+    .btn-save {
+        background-color: #b30000;
+        color: white;
+    }
+
+    .btn-save:hover {
+        background-color: #8a0000;
+    }
+
+    .btn-delete {
+        background-color: #ff3b30;
+        color: white;
+    }
+
+    .btn-delete:hover {
+        background-color: #d63530;
+    }
+
+    .btn-cancel {
+        background-color: #f2f2f2;
+        color: #333;
+    }
+
+    .btn-cancel:hover {
+        background-color: #e0e0e0;
+    }
+
+    /* Calendar Event Styling */
+    .calendar-event {
+        display: flex;
+        align-items: center;
+        gap: 3px;
+        font-weight: 600;
+        font-size: 0.75rem;
+        color: #b30000;
+        white-space: normal;
+        overflow-wrap: break-word;
+        line-height: 1.2;
+        padding: 3px 4px;
+        border-radius: 4px;
+        background-color: rgba(255, 240, 240, 0.8);
+        box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    }
+    
+    .event-home {
+        border-left: 3px solid #b30000;
+    }
+    
+    .event-away {
+        border-left: 3px solid #0066cc;
+    }
+    
+    .event-indicator {
+        font-size: 0.7rem;
+        margin-right: 2px;
+    }
+    
+    .event-title {
+        flex: 1;
+        font-size: 0.7rem;
+    }
+
+    .game-day {
+        background-color: #ffe5e5 !important;
+        border-radius: 5px;
+    }
+
+    /* FullCalendar Overrides */
+    .fc .fc-toolbar-title {
+        font-size: 1.4rem;
+        color: #b30000;
+    }
+
+    .fc .fc-button-primary {
+        background-color: #b30000;
+        border-color: #b30000;
+    }
+
+    .fc .fc-button-primary:hover {
+        background-color: #8a0000;
+        border-color: #8a0000;
+    }
+
+    .fc .fc-daygrid-day.fc-day-today {
+        background-color: #fff3e0;
+    }
+
+    /* Responsive Styles */
     @media (max-width: 768px) {
-        .fc .fc-daygrid-event {
-            font-size: 0.75rem !important;
-            padding: 2px 4px !important;
+        .calendar-page {
+            padding: 15px 10px;
         }
-    
-        #btn-exportar {
-            display: block;
-            text-align: right;
-            margin-right: 15px;
-            margin-top: 10px;
+
+        .page-header {
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            gap: 12px;
+            margin-bottom: 15px;
         }
-    
-        #resumo-mensal {
+
+        .export-btn {
+            width: 100%;
+            justify-content: center;
+            margin-top: 5px;
+            padding: 10px;
+            font-size: 0.95rem;
+        }
+
+        .page-title {
+            font-size: 1.7rem;
+            width: 100%;
+            text-align: center;
+        }
+
+        /* Calendar adjustments */
+        .fc .fc-toolbar {
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+
+        .fc .fc-toolbar-title {
+            font-size: 1.3rem;
+            text-align: center;
+            margin: 0 !important;
+        }
+
+        .fc .fc-toolbar-chunk {
+            display: flex;
+            justify-content: center;
+            width: 100%;
+        }
+
+        .fc .fc-button-group {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .fc .fc-button {
+            font-size: 0.85rem;
+            padding: 8px 10px;
+            flex-grow: 1;
+            margin: 0 2px !important;
+        }
+
+        .fc .fc-daygrid-day-number {
+            font-size: 0.85rem;
+            padding: 4px;
+        }
+
+        .fc .fc-col-header-cell-cushion {
+            font-size: 0.8rem;
+            padding: 6px 4px;
+        }
+
+        .fc-day-sat, .fc-day-sun {
+            background-color: #fcfcfc;
+        }
+
+        /* Monthly summary improvements */
+        .monthly-summary {
+            padding: 15px;
             margin-top: 20px;
-            background-color: #fff;
-            border-radius: 8px;
+        }
+
+        .summary-title {
+            font-size: 1.4rem;
+            padding-bottom: 8px;
+        }
+
+        .game-item {
+            padding: 12px 8px;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .game-date {
+            font-size: 0.95rem;
+            margin-right: 5px;
+        }
+
+        .game-title {
+            width: 100%;
+            margin-top: 4px;
+            font-size: 0.95rem;
+        }
+
+        .game-venue {
+            font-size: 0.85rem;
+            opacity: 0.8;
+            width: 100%;
+        }
+
+        /* Form and modal improvements */
+        .modal-content {
+            padding: 18px;
+            width: 95%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-heading {
+            font-size: 1.3rem;
+        }
+
+        .form-group {
+            margin-bottom: 12px;
+        }
+
+        .form-group label {
+            font-size: 0.95rem;
+        }
+
+        .form-group input,
+        .form-group select {
+            padding: 12px 10px;
+            font-size: 16px; /* Prevents iOS zoom on focus */
+        }
+
+        .form-actions {
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .btn {
+            width: 100%;
             padding: 12px;
+            font-size: 1rem;
         }
-    
-        #resumo-mensal h2 {
-            font-size: 1.2rem;
-            margin-bottom: 10px;
-            color: #b30000;
+
+        /* Calendar event display */
+        .calendar-event {
+            font-size: 0.65rem;
+            line-height: 1.1;
         }
-    
-        #lista-jogos li {
-            padding: 8px 6px;
-            border-bottom: 1px dashed #ccc;
+
+        /* Legend display */
+        .legend {
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 15px;
+            border-top: 1px solid #eee;
+            padding-top: 15px;
+        }
+
+        .legend-item {
+            margin: 0 8px;
+        }
+
+        .legend-separator {
+            display: none;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .calendar-page {
+            padding: 10px 8px;
+        }
+
+        .page-title {
+            font-size: 1.5rem;
+        }
+
+        .calendar-wrapper {
+            padding: 8px 3px;
+            border-radius: 8px;
+            margin-bottom: 18px;
+        }
+
+        .monthly-summary {
+            padding: 15px 10px;
+            border-radius: 8px;
+        }
+
+        .summary-title {
+            font-size: 1.3rem;
+        }
+
+        .fc .fc-toolbar-title {
+            font-size: 1.1rem;
+        }
+
+        .fc .fc-button {
+            font-size: 0.75rem;
+            padding: 6px 8px;
+        }
+
+        .fc .fc-col-header-cell-cushion {
+            font-size: 0.7rem;
+            padding: 4px 2px;
+        }
+
+        .fc .fc-daygrid-day-number {
+            font-size: 0.75rem;
+            padding: 3px;
+        }
+
+        .game-item {
+            padding: 10px 6px;
+        }
+
+        .home-indicator, .away-indicator {
+            font-size: 1rem;
+        }
+
+        .game-date {
             font-size: 0.9rem;
         }
-    
-        .resumo-legenda {
-            margin-top: 10px;
-            text-align: center;
+        
+        .game-title {
+            font-size: 0.9rem;
+        }
+        
+        .game-venue {
             font-size: 0.8rem;
         }
-    
-        .fc-toolbar-title {
-            font-size: 1rem !important;
-        }
-    
-        .fc-button {
-            font-size: 0.7rem !important;
-            padding: 4px 6px !important;
-        }
-    }
-    @media (max-width: 768px) {
-    .fc-event-title {
-        white-space: normal !important;
-    }
 
-    .fc-daygrid-event-harness {
-        min-height: 28px;
-    }
-}
+        .modal-content {
+            padding: 15px 12px;
+        }
 
-    </style>
+        .modal-heading {
+            font-size: 1.2rem;
+            padding-bottom: 8px;
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            font-size: 0.9rem;
+        }
+
+        .btn {
+            padding: 10px;
+            font-size: 0.95rem;
+        }
+    }
     
+    /* Fix for iOS Safari input zoom issue */
+    @media screen and (max-width: 768px) {
+        input[type="text"],
+        input[type="datetime-local"],
+        select {
+            font-size: 16px;
+        }
+    }
+</style>
 {% endblock %}

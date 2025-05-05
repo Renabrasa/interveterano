@@ -1,151 +1,554 @@
 {% extends 'base.html' %}
-
 {% block content %}
 
-<!-- ALERTAS -->
-{% with messages = get_flashed_messages(with_categories=true) %}
-  {% if messages %}
-    {% for categoria, msg in messages %}
-      <div class="alerta {{ categoria }}">{{ msg }}</div>
-    {% endfor %}
-  {% endif %}
-{% endwith %}
-
-<h1>Controle de Performance</h1>
-
-<form method="POST" action="{{ url_for('performance.adicionar_performance') }}" class="form-jogador">
-    <label>Tipo:</label>
-    <select name="tipo" id="tipo" required onchange="trocarParticipante()">
-        <option value="jogador">Jogador</option>
-        <option value="convidado">Convidado</option>
-    </select>
-
-    <label>Participante:</label>
-    <select name="participante_id" id="participante_id" required></select>
-
-    <label>Jogo:</label>
-    <select name="jogo_id" required>
-        {% for jogo in jogos %}
-            <option value="{{ jogo.id }}">{{ jogo.data.strftime('%d/%m %H:%Mh') }} - {{ jogo.titulo }}</option>
-        {% endfor %}
-    </select>
-
-    <label>Gols:</label>
-    <input type="number" name="gols" value="0" min="0">
-
-    <div id="campo-gols-sofridos" style="visibility: hidden; height: 0; overflow: hidden;">
-        <label>Gols Sofridos:</label>
-        <input type="number" name="gols_sofridos" value="0" min="0">
-    </div>
-
-    <label>Assistências:</label>
-    <input type="number" name="assistencias" value="0" min="0">
-
-    <label>
-        <input type="checkbox" name="participou" checked>
-        Participou do jogo
-    </label>
-
-    <button type="submit">Registrar</button>
-</form>
-
-<hr>
-
-<h2>Histórico de Performance</h2>
-
-<!-- FILTROS -->
-<div class="filtros-performance" style="margin-bottom: 20px;">
-    <input type="text" id="filtro-texto" placeholder="Buscar por nome, jogo ou data..." style="padding: 10px; width: 100%; margin-bottom: 10px; border-radius: 5px; border: 1px solid #ccc;">
-
-    <select id="filtro-jogo" style="padding: 10px; border-radius: 5px; margin-right: 10px;">
-        <option value="">Todos os Jogos</option>
-        {% for jogo in jogos %}
-            <option value="{{ jogo.titulo }}">{{ jogo.data.strftime('%d/%m') }} - {{ jogo.titulo }}</option>
-        {% endfor %}
-    </select>
-
-    <select id="filtro-participante" style="padding: 10px; border-radius: 5px; margin-right: 10px;">
-        <option value="">Todos os Participantes</option>
-        {% for j in jogadores %}
-            <option value="{{ j.nome }}">{{ j.nome }} (Jogador)</option>
-        {% endfor %}
-        {% for c in convidados %}
-            <option value="{{ c.nome }}">{{ c.nome }} (Convidado)</option>
-        {% endfor %}
-    </select>
-
-    <input type="date" id="filtro-data" style="padding: 10px; border-radius: 5px;">
-</div>
-
-<table>
-    <thead>
-        <tr>
-            <th>Data</th>
-            <th>Jogo</th>
-            <th>Participante</th>
-            <th>Gols</th>
-            <th>Gols Sofridos</th>
-            <th>Assistências</th>
-            <th>Participou</th>
-            <th>Ações</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for p in performances %}
-        <tr>
-            <td>{{ p.jogo.data.strftime('%Y-%m-%d') }}</td>
-            <td>{{ p.jogo.titulo }}</td>
-            <td>
-                {% if p.jogador %}{{ p.jogador.nome }}{% else %}{{ p.convidado.nome }}{% endif %}
-            </td>
-            <td>{{ p.gols }}</td>
-            <td>{{ p.gols_sofridos if p.gols_sofridos is not none else '-' }}</td>
-            <td>{{ p.assistencias }}</td>
-            <td>{{ 'Sim' if p.participou else 'Não' }}</td>
-            <td>
-                <form action="{{ url_for('performance.excluir_performance', id=p.id) }}" method="POST" style="display:inline;">
-                    <button type="submit" onclick="return confirm('Deseja excluir esta performance?')">Excluir</button>
-                </form>
-            </td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
-
-<script>
-    const jogadores = {{ jogadores_json | tojson }};
-    const convidados = {{ convidados_json | tojson }};
-
-    document.addEventListener('DOMContentLoaded', () => {
-        trocarParticipante();
-        document.getElementById('participante_id').addEventListener('change', atualizarVisibilidadeGols);
-    });
-
-    function trocarParticipante() {
-        const tipo = document.getElementById('tipo').value;
-        const select = document.getElementById('participante_id');
-        select.innerHTML = '';
-
-        const lista = tipo === 'jogador' ? jogadores : convidados;
-
-        lista.forEach(p => {
-            const opt = document.createElement('option');
-            opt.value = p.id;
-            opt.textContent = `${p.nome} (${tipo === 'jogador' ? 'Jogador' : 'Convidado'})`;
-            select.appendChild(opt);
-        });
-
-        atualizarVisibilidadeGols();
+<style>
+    :root {
+        --primary: #a71611;
+        --primary-light: #a01a08;
+        --primary-dark: #ac0a0a;
+        --accent: #ff6b6b;
+        --background: #f4f7fa;
+        --card-bg: #ffffff;
+        --text: #1a202c;
+        --text-light: #718096;
+        --border: #e2e8f0;
+        --shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        --radius: 8px;
+        --transition: all 0.2s ease-in-out;
+        --font-title: 'Poppins', sans-serif;
+        --font-body: 'Inter', sans-serif;
     }
 
-    function atualizarVisibilidadeGols() {
-        const tipo = document.getElementById('tipo').value;
-        const participanteId = document.getElementById('participante_id').value;
-        const campoGolsSofridos = document.getElementById('campo-gols-sofridos');
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
 
-        if (tipo === 'jogador') {
-            const jogador = jogadores.find(j => j.id == participanteId);
-            if (jogador && (jogador.posicao === 'Goleiro' || jogador.categoria === 'Goleiro')) {
+    body {
+        font-family: var(--font-body);
+        color: var(--text);
+        background-color: var(--background);
+        line-height: 1.5;
+    }
+
+    .container {
+        max-width: 1440px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    /* Header */
+    .page-header {
+        background: linear-gradient(135deg, var(--primary), var(--primary-light));
+        padding: 2rem;
+        border-radius: var(--radius);
+        text-align: center;
+        margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .page-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 70%);
+        opacity: 0.3;
+    }
+
+    .page-title {
+        font-family: var(--font-title);
+        font-size: 2.5rem;
+        font-weight: 600;
+        color: white;
+        position: relative;
+        z-index: 1;
+    }
+
+    /* Form Card */
+    .form-card {
+        background: var(--card-bg);
+        border-radius: var(--radius);
+        padding: 1.5rem;
+        box-shadow: var(--shadow);
+        margin-bottom: 2rem;
+    }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 1rem;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    label {
+        font-size: 0.9rem;
+        font-weight: 500;
+        color: var(--text);
+    }
+
+    input[type="number"],
+    select {
+        padding: 0.75rem;
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        font-size: 1rem;
+        background: #fff;
+        transition: var(--transition);
+    }
+
+    input:focus,
+    select:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+    }
+
+    .checkbox-group {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-top: 0.5rem;
+    }
+
+    .btn-registrar {
+        background: var(--primary);
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: var(--radius);
+        font-weight: 500;
+        cursor: pointer;
+        transition: var(--transition);
+    }
+
+    .btn-registrar:hover {
+        background: var(--primary-dark);
+        transform: translateY(-1px);
+    }
+
+    /* Filters */
+    .filtros-container {
+        background: var(--card-bg);
+        border-radius: var(--radius);
+        padding: 1.5rem;
+        box-shadow: var(--shadow);
+        margin: 2rem 0;
+    }
+
+    .filtros-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+    }
+
+    .filtro-input {
+        padding: 0.75rem;
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        font-size: 0.9rem;
+        width: 100%;
+    }
+
+    /* Table */
+    .tabela-container {
+        background: var(--card-bg);
+        border-radius: var(--radius);
+        padding: 1.5rem;
+        box-shadow: var(--shadow);
+        overflow-x: auto;
+    }
+
+    .tabela-performances {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+    .tabela-performances th,
+    .tabela-performances td {
+        padding: 1rem;
+        text-align: left;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .tabela-performances th {
+        background: var(--primary);
+        color: white;
+        font-weight: 600;
+        position: sticky;
+        top: 0;
+        z-index: 1;
+    }
+
+    .tabela-performances tr {
+        transition: var(--transition);
+    }
+
+    .tabela-performances tr:hover {
+        background-color: rgba(0, 123, 255, 0.05);
+    }
+
+    .acoes-cell {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .btn-acao {
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: var(--radius);
+        border: none;
+        cursor: pointer;
+        transition: var(--transition);
+    }
+
+    .btn-editar {
+        background: var(--primary);
+        color: white;
+    }
+
+    .btn-editar:hover {
+        background: var(--primary-dark);
+    }
+
+    .btn-excluir {
+        background: var(--accent);
+        color: white;
+    }
+
+    .btn-excluir:hover {
+        background: #e63946;
+    }
+
+    /* Modal */
+    .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 1000;
+        background: rgba(0, 0, 0, 0.7);
+        align-items: center;
+        justify-content: center;
+    }
+
+    .modal-content {
+        background: var(--card-bg);
+        padding: 2rem;
+        border-radius: var(--radius);
+        width: 90%;
+        max-width: 600px;
+        box-shadow: var(--shadow);
+        animation: slideIn 0.3s ease-out;
+    }
+
+    @keyframes slideIn {
+        from { transform: translateY(-20px); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
+    }
+
+    .close-modal {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        font-size: 1.5rem;
+        cursor: pointer;
+        color: var(--text-light);
+    }
+
+    .close-modal:hover {
+        color: var(--text);
+    }
+
+    /* Alerts */
+    .alerta-sucesso {
+        background: #e6ffed;
+        color: #065f46;
+        padding: 0.75rem 1rem;
+        border-radius: var(--radius);
+        border-left: 4px solid #10b981;
+        margin: 1rem 0;
+    }
+
+    .alerta-erro {
+        background: #fff1f2;
+        color: #991b1b;
+        padding: 0.75rem 1rem;
+        border-radius: var(--radius);
+        border-left: 4px solid #ef4444;
+        margin: 1rem 0;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .form-grid,
+        .filtros-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .page-title {
+            font-size: 2rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .container {
+            padding: 1rem;
+        }
+
+        .btn-acao {
+            width: 32px;
+            height: 32px;
+        }
+
+        .tabela-performances {
+            font-size: 0.9rem;
+        }
+    }
+</style>
+
+<div class="container">
+    <!-- Alerts -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="alertas-container">
+                {% for categoria, msg in messages %}
+                    <div class="alerta alerta-{{ categoria }}">
+                        {{ msg }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <!-- Header -->
+    <div class="page-header">
+        <h1 class="page-title">Controle de Performance</h1>
+    </div>
+
+    <!-- Form -->
+    {% if 'usuario' in session %}
+    <div class="form-card">
+        <form method="POST" action="{{ url_for('performance.adicionar_performance') }}" class="form-jogador">
+            <input type="hidden" id="tipo" value="pessoa">
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="participante_id">Participante:</label>
+                    <select name="participante_id" id="participante_id" required>
+                        {% for pessoa in pessoas %}
+                            <option value="{{ pessoa.id }}">{{ pessoa.nome }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="jogo_id">Jogo:</label>
+                    <select name="jogo_id" required>
+                        {% for jogo in jogos %}
+                            <option value="{{ jogo.id }}">{{ jogo.data.strftime('%d/%m %H:%Mh') }} - {{ jogo.titulo }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="gols">Gols:</label>
+                    <input type="number" name="gols" value="0" min="0">
+                </div>
+                
+                <div class="form-group" id="campo-gols-sofridos" style="visibility: hidden; height: 0; overflow: hidden;">
+                    <label for="gols_sofridos">Gols Sofridos:</label>
+                    <input type="number" name="gols_sofridos" value="0" min="0">
+                </div>
+                
+                <div class="form-group">
+                    <label for="assistencias">Assistências:</label>
+                    <input type="number" name="assistencias" value="0" min="0">
+                </div>
+                
+                <div class="form-group checkbox-group">
+                    <label>
+                        <input type="checkbox" name="participou" checked> 
+                        Participou
+                    </label>
+                </div>
+            </div>
+            
+            <div style="text-align: right;">
+                <button type="submit" class="btn-registrar">Registrar Performance</button>
+            </div>
+        </form>
+    </div>
+    {% endif %}
+
+    <!-- Filters -->
+    <div class="filtros-container">
+        <h2 style="font-family: var(--font-title); font-size: 1.5rem; margin-bottom: 1rem;">Filtrar Performances</h2>
+        <div class="filtros-grid">
+            <input type="text" id="filtro-texto" class="filtro-input" placeholder="Buscar por nome, jogo ou data...">
+            <select id="filtro-jogo" class="filtro-input">
+                <option value="">Todos os Jogos</option>
+                {% for jogo in jogos %}
+                    <option value="{{ jogo.titulo }}">{{ jogo.data.strftime('%d/%m') }} - {{ jogo.titulo }}</option>
+                {% endfor %}
+            </select>
+            <select id="filtro-participante" class="filtro-input">
+                <option value="">Todos os Participantes</option>
+                {% for p in pessoas %}
+                    <option value="{{ p.nome }}">{{ p.nome }}</option>
+                {% endfor %}
+            </select>
+            <input type="date" id="filtro-data" class="filtro-input">
+        </div>
+    </div>
+
+    <!-- Table -->
+    <div class="tabela-container">
+        <table class="tabela-performances">
+            <thead>
+                <tr>
+                    <th>Data</th>
+                    <th>Jogo</th>
+                    <th>Participante</th>
+                    <th>Gols</th>
+                    <th>Gols Sofridos</th>
+                    <th>Assistências</th>
+                    <th>Participou</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in performances %}
+                <tr>
+                    <td>{{ p.jogo.data.strftime('%Y-%m-%d') }}</td>
+                    <td>{{ p.jogo.titulo }}</td>
+                    <td>{{ p.pessoa.nome }}</td>
+                    <td>{{ p.gols }}</td>
+                    <td>{{ p.gols_sofridos if p.gols_sofridos is not none else '-' }}</td>
+                    <td>{{ p.assistencias }}</td>
+                    <td>{{ 'Sim' if p.participou else 'Não' }}</td>
+                    <td class="acoes-cell">
+                        <button type="button" class="btn-acao btn-editar" onclick="abrirEdicao({{ p.id }}, '{{ p.jogo.data.strftime('%Y-%m-%d') }}', '{{ p.jogo.titulo }}', {{ p.pessoa.id }}, {{ p.gols }}, {{ p.gols_sofridos or 0 }}, {{ p.assistencias }}, {{ 'true' if p.participou else 'false' }})">
+                            ✏️
+                        </button>
+                        <form action="{{ url_for('performance.excluir_performance', id=p.id) }}" method="POST" style="display:inline;">
+                            <button type="submit" class="btn-acao btn-excluir" onclick="return confirm('Deseja excluir esta performance?')">
+                                🗑️
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Modal -->
+    <div id="modal-edicao" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" id="btn-fechar">×</span>
+            <h2 style="font-family: var(--font-title); margin-bottom: 1.5rem;">Editar Performance</h2>
+            <form id="form-edicao" method="POST">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Participante:</label>
+                        <select name="participante_id" id="editar_participante" required>
+                            {% for pessoa in pessoas %}
+                                <option value="{{ pessoa.id }}">{{ pessoa.nome }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Jogo:</label>
+                        <select name="jogo_id" id="editar_jogo" required>
+                            {% for jogo in jogos %}
+                                <option value="{{ jogo.id }}">{{ jogo.data.strftime('%d/%m %H:%Mh') }} - {{ jogo.titulo }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Gols:</label>
+                        <input type="number" name="gols" id="editar_gols" min="0">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Gols Sofridos:</label>
+                        <input type="number" name="gols_sofridos" id="editar_gols_sofridos" min="0">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Assistências:</label>
+                        <input type="number" name="assistencias" id="editar_assistencias" min="0">
+                    </div>
+                    
+                    <div class="form-group checkbox-group">
+                        <label>
+                            <input type="checkbox" name="participou" id="editar_participou">
+                            Participou
+                        </label>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 1.5rem; display: flex; gap: 1rem; justify-content: flex-end;">
+                    <button type="submit" class="btn-registrar">Salvar</button>
+                    <button type="button" style="background: var(--text-light); color: white; padding: 0.75rem 1.5rem; border: none; border-radius: var(--radius);" onclick="fecharModal()">
+                        Cancelar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Carregar participantes no formulário
+    document.addEventListener('DOMContentLoaded', function () {
+        let pessoas;
+        try {
+            pessoas = {{ pessoas_json | tojson | safe }};
+            if (!Array.isArray(pessoas)) {
+                console.error('pessoas_json não é um array válido:', pessoas);
+                pessoas = [];
+            }
+        } catch (e) {
+            console.error('Erro ao parsear pessoas_json:', e);
+            pessoas = [];
+        }
+
+        const select = document.getElementById('participante_id');
+
+        // Preencher o select com opções de participantes
+        pessoas.forEach(pessoa => {
+            const option = document.createElement('option');
+            option.value = pessoa.id;
+            option.textContent = pessoa.nome;
+            select.appendChild(option);
+        });
+
+        // Mostrar/ocultar campo de gols sofridos
+        select.addEventListener('change', function () {
+            const idSelecionado = this.value;
+            const participante = pessoas.find(p => p.id == idSelecionado);
+            const campoGolsSofridos = document.getElementById('campo-gols-sofridos');
+            
+            if (participante && (participante.posicao?.toLowerCase() === 'goleiro' || participante.categoria?.toLowerCase() === 'goleiro')) {
                 campoGolsSofridos.style.visibility = 'visible';
                 campoGolsSofridos.style.height = 'auto';
                 campoGolsSofridos.style.overflow = 'visible';
@@ -154,45 +557,80 @@
                 campoGolsSofridos.style.height = '0';
                 campoGolsSofridos.style.overflow = 'hidden';
             }
-        } else {
-            campoGolsSofridos.style.visibility = 'hidden';
-            campoGolsSofridos.style.height = '0';
-            campoGolsSofridos.style.overflow = 'hidden';
+        });
+
+        // Fechar alertas após 5 segundos
+        setTimeout(() => {
+            document.querySelectorAll('.alerta').forEach(el => el.remove());
+        }, 5000);
+
+        // Aplicar filtros
+        const inputTexto = document.getElementById('filtro-texto');
+        const inputJogo = document.getElementById('filtro-jogo');
+        const inputPart = document.getElementById('filtro-participante');
+        const inputData = document.getElementById('filtro-data');
+
+        [inputTexto, inputJogo, inputPart, inputData].forEach(input => {
+            input.addEventListener('input', aplicarFiltro);
+        });
+
+        function aplicarFiltro() {
+            const termo = inputTexto.value.toLowerCase();
+            const jogo = inputJogo.value.toLowerCase();
+            const participante = inputPart.value.toLowerCase();
+            const data = inputData.value;
+            
+            document.querySelectorAll('table tbody tr').forEach(linha => {
+                const texto = linha.innerText.toLowerCase();
+                const colunas = linha.getElementsByTagName('td');
+                const dataLinha = colunas[0]?.textContent;
+                
+                const matchTexto = texto.includes(termo);
+                const matchJogo = jogo === '' || colunas[1]?.textContent.toLowerCase().includes(jogo);
+                const matchPart = participante === '' || colunas[2]?.textContent.toLowerCase().includes(participante);
+                const matchData = data === '' || dataLinha === data;
+                
+                linha.style.display = (matchTexto && matchJogo && matchPart && matchData) ? '' : 'none';
+            });
         }
-    }
 
-    setTimeout(() => {
-        document.querySelectorAll('.alerta').forEach(el => el.style.display = 'none');
-    }, 5000);
+        // Abrir modal de edição
+        window.abrirEdicao = function(id, data, titulo, pessoa_id, gols, gols_sofridos, assistencias, participou) {
+            const form = document.getElementById('form-edicao');
+            form.action = `/performance/editar/${id}`;
+            
+            document.getElementById('editar_participante').value = pessoa_id;
+            document.getElementById('editar_jogo').value = obterIdJogo(titulo, data);
+            document.getElementById('editar_gols').value = gols;
+            document.getElementById('editar_gols_sofridos').value = gols_sofridos;
+            document.getElementById('editar_assistencias').value = assistencias;
+            document.getElementById('editar_participou').checked = (participou === true || participou === 'true');
+            document.getElementById('modal-edicao').style.display = 'flex';
+        };
 
-    const inputTexto = document.getElementById('filtro-texto');
-    const inputJogo = document.getElementById('filtro-jogo');
-    const inputPart = document.getElementById('filtro-participante');
-    const inputData = document.getElementById('filtro-data');
+        // Fechar modal
+        document.getElementById('btn-fechar')?.addEventListener('click', fecharModal);
+        document.querySelector('.modal')?.addEventListener('click', function(e) {
+            if (e.target === this) fecharModal();
+        });
 
-    [inputTexto, inputJogo, inputPart, inputData].forEach(input => {
-        input.addEventListener('input', aplicarFiltro);
+        // Função auxiliar para obter ID do jogo
+        function obterIdJogo(titulo, data) {
+            const dataFormatada = new Date(data).toISOString().split('T')[0];
+            const options = document.querySelectorAll('#editar_jogo option');
+            for (let option of options) {
+                const value = option.value;
+                const text = option.text;
+                if (text.includes(dataFormatada) && text.includes(titulo)) {
+                    return value;
+                }
+            }
+            return '';
+        }
     });
 
-    function aplicarFiltro() {
-        const termo = inputTexto.value.toLowerCase();
-        const jogo = inputJogo.value.toLowerCase();
-        const participante = inputPart.value.toLowerCase();
-        const data = inputData.value;
-
-        document.querySelectorAll('table tbody tr').forEach(linha => {
-            const texto = linha.innerText.toLowerCase();
-            const colunas = linha.getElementsByTagName('td');
-            const dataLinha = colunas[0].textContent;
-
-            const matchTexto = texto.includes(termo);
-            const matchJogo = jogo === '' || colunas[1].textContent.toLowerCase().includes(jogo);
-            const matchPart = participante === '' || colunas[2].textContent.toLowerCase().includes(participante);
-            const matchData = data === '' || dataLinha === data;
-
-            linha.style.display = (matchTexto && matchJogo && matchPart && matchData) ? '' : 'none';
-        });
+    function fecharModal() {
+        document.getElementById('modal-edicao').style.display = 'none';
     }
 </script>
-
 {% endblock %}

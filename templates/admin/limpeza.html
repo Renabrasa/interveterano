@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<h1 style="text-align: center;">🧼 Limpeza de Código – Referências Encontradas</h1>
+
+{% if referencias %}
+  <div style="max-width: 90%; margin: 20px auto; overflow-x: auto;">
+    <table style="width: 100%; border-collapse: collapse;">
+      <thead>
+        <tr style="background-color: #a00000; color: white;">
+          <th style="padding: 10px;">Arquivo</th>
+          <th>Linha</th>
+          <th>Conteúdo</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for ref in referencias %}
+        <tr style="border-bottom: 1px solid #ccc;">
+          <td style="padding: 8px;">{{ ref.arquivo }}</td>
+          <td style="text-align: center;">{{ ref.linha }}</td>
+          <td><code>{{ ref.conteudo }}</code></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% else %}
+  <p style="text-align: center; font-weight: bold; color: green;">✅ Nenhuma referência encontrada!</p>
+{% endif %}
+
+{% endblock %}

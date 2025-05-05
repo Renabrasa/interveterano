@@ -1,146 +1,510 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h1 class="titulo-pagina">Desempenho da Equipe</h1>
+<div class="dashboard-container">
+    <header class="dashboard-header">
+        <h1 class="dashboard-title">Desempenho da Equipe</h1>
+        <p class="dashboard-subtitle">Estatísticas atualizadas da temporada</p>
+    </header>
 
-<div class="grafico-container">
-    <h2>⚽ Artilharia ⚽</h2>
-    <canvas id="grafico-gols"></canvas>
+    <div class="dashboard-grid">
+        <!-- Seção principal - Resultados -->
+        <div class="chart-panel chart-panel-large">
+            <div class="chart-header">
+                <h2><i class="fas fa-chart-pie"></i> Resultados da Equipe</h2>
+                <div class="chart-actions">
+                    <button class="btn-action" title="Baixar dados"><i class="fas fa-download"></i></button>
+                    <button class="btn-action" title="Expandir"><i class="fas fa-expand"></i></button>
+                </div>
+            </div>
+            <div class="chart-body">
+                <canvas id="grafico-resultados"></canvas>
+            </div>
+        </div>
+
+        <!-- Primeiro par de gráficos -->
+        <div class="chart-panel">
+            <div class="chart-header">
+                <h2><i class="fas fa-futbol"></i> Artilharia</h2>
+                <div class="chart-actions">
+                    <button class="btn-action" title="Baixar dados"><i class="fas fa-download"></i></button>
+                    <button class="btn-action" title="Expandir"><i class="fas fa-expand"></i></button>
+                </div>
+            </div>
+            <div class="chart-body">
+                <canvas id="grafico-gols"></canvas>
+            </div>
+        </div>
+        
+        <div class="chart-panel">
+            <div class="chart-header">
+                <h2><i class="fas fa-share-alt"></i> Assistências</h2>
+                <div class="chart-actions">
+                    <button class="btn-action" title="Baixar dados"><i class="fas fa-download"></i></button>
+                    <button class="btn-action" title="Expandir"><i class="fas fa-expand"></i></button>
+                </div>
+            </div>
+            <div class="chart-body">
+                <canvas id="grafico-assistencias"></canvas>
+            </div>
+        </div>
+
+        <!-- Segundo par de gráficos -->
+        <div class="chart-panel">
+            <div class="chart-header">
+                <h2><i class="fas fa-users"></i> Participações em Jogos</h2>
+                <div class="chart-actions">
+                    <button class="btn-action" title="Baixar dados"><i class="fas fa-download"></i></button>
+                    <button class="btn-action" title="Expandir"><i class="fas fa-expand"></i></button>
+                </div>
+            </div>
+            <div class="chart-body">
+                <canvas id="grafico-participacoes"></canvas>
+            </div>
+        </div>
+
+        <div class="chart-panel">
+            <div class="chart-header">
+                <h2><i class="fas fa-hands"></i> Gols Sofridos</h2>
+                <div class="chart-actions">
+                    <button class="btn-action" title="Baixar dados"><i class="fas fa-download"></i></button>
+                    <button class="btn-action" title="Expandir"><i class="fas fa-expand"></i></button>
+                </div>
+            </div>
+            <div class="chart-body">
+                <canvas id="grafico-goleiros"></canvas>
+            </div>
+        </div>
+    </div>
 </div>
 
-<div class="grafico-container">
-    <h2>🏃‍➡️Assistências🏃‍➡️</h2>
-    <canvas id="grafico-assistencias"></canvas>
-</div>
-
-<div class="grafico-container">
-    <h2>🙋 Participações em jogos 🙋</h2>
-    <canvas id="grafico-participacoes"></canvas>
-</div>
-
-<div class="grafico-container">
-    <h2>📈 Resultados da Equipe 📉</h2>
-    <canvas id="grafico-resultados"></canvas>
-</div>
-
-<div class="grafico-container">
-    <h2>🥅 Gols Sofridos 🥅</h2>
-    <canvas id="grafico-goleiros"></canvas>
-</div>
+<!-- Font Awesome para ícones -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
 <!-- Chart.js CDN -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
+<!-- Animações para gráficos -->
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+
+<style>
+    .dashboard-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+        font-family: 'Roboto', Arial, sans-serif;
+    }
+    
+    .dashboard-header {
+        text-align: center;
+        margin-bottom: 30px;
+        padding-bottom: 20px;
+        border-bottom: 2px solid #f0f0f0;
+    }
+    
+    .dashboard-title {
+        color: #1a3a5f;
+        font-size: 36px;
+        font-weight: 700;
+        margin-bottom: 5px;
+    }
+    
+    .dashboard-subtitle {
+        color: #6c757d;
+        font-size: 18px;
+        margin-top: 0;
+    }
+    
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+    }
+    
+    .chart-panel {
+        background-color: #fff;
+        border-radius: 10px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        overflow: hidden;
+        transition: transform 0.3s, box-shadow 0.3s;
+    }
+    
+    .chart-panel:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    }
+    
+    .chart-panel-large {
+        grid-column: span 2;
+    }
+    
+    .chart-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px 20px;
+        border-bottom: 1px solid #f0f0f0;
+    }
+    
+    .chart-header h2 {
+        margin: 0;
+        font-size: 20px;
+        color: #1a3a5f;
+        display: flex;
+        align-items: center;
+    }
+    
+    .chart-header h2 i {
+        margin-right: 10px;
+        color: #3498db;
+    }
+    
+    .chart-actions {
+        display: flex;
+        gap: 8px;
+    }
+    
+    .btn-action {
+        border: none;
+        background: none;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #6c757d;
+        cursor: pointer;
+        transition: background-color 0.2s, color 0.2s;
+    }
+    
+    .btn-action:hover {
+        background-color: #f8f9fa;
+        color: #3498db;
+    }
+    
+    .chart-body {
+        padding: 20px;
+        height: 300px;
+        position: relative;
+    }
+    
+    /* Responsividade */
+    @media (max-width: 768px) {
+        .dashboard-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .chart-panel-large {
+            grid-column: span 1;
+        }
+        
+        .chart-body {
+            height: 250px;
+        }
+    }
+</style>
+
 <script>
-    fetch('/api/performance/graficos')
-        .then(res => res.json())
-        .then(dados => {
-            const escalaInteira = {
-                beginAtZero: true,
-                ticks: {
-                    stepSize: 1,
-                    callback: function(value) {
-                        if (Number.isInteger(value)) return value;
-                    }
-                }
-            };
-
-            new Chart(document.getElementById('grafico-gols'), {
-                type: 'bar',
-                data: {
-                    labels: dados.gols.labels,
-                    datasets: [{
-                        label: 'Gols',
-                        data: dados.gols.valores,
-                        backgroundColor: 'rgba(200, 0, 0, 0.7)'
-                    }]
-                },
-                options: {
-                    scales: {
-                        y: escalaInteira
-                    }
-                }
-            });
-
-            new Chart(document.getElementById('grafico-assistencias'), {
-                type: 'bar',
-                data: {
-                    labels: dados.assistencias.labels,
-                    datasets: [{
-                        label: 'Assistências',
-                        data: dados.assistencias.valores,
-                        backgroundColor: 'rgba(0, 100, 200, 0.7)'
-                    }]
-                },
-                options: {
-                    scales: {
-                        y: escalaInteira
-                    }
-                }
-            });
-
-            new Chart(document.getElementById('grafico-participacoes'), {
-                type: 'pie',
-                data: {
-                    labels: dados.participacoes.labels,
-                    datasets: [{
-                        label: 'Participações',
-                        data: dados.participacoes.valores,
-                        backgroundColor: [
-                            '#990000', '#cc0000', '#e60000', '#ff4d4d', '#ff9999',
-                            '#1f77b4', '#aec7e8', '#c5d7f2'
-                        ]
-                    }]
-                }
-            });
-
-            new Chart(document.getElementById('grafico-resultados'), {
-                type: 'pie',
-                data: {
-                    labels: dados.resultados.labels,
-                    datasets: [{
-                        data: dados.resultados.valores,
-                        backgroundColor: ['#28a745', '#ffc107', '#dc3545'],
-                        borderColor: ['#ffffff', '#ffffff', '#ffffff'],
-                        borderWidth: 2
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        legend: { position: 'bottom' },
-                        title: {
-                            display: true,
-                            text: ''
-                        }
-                    }
-                }
-            });
-
-            new Chart(document.getElementById('grafico-goleiros'), {
-                type: 'bar',
-                data: {
-                    labels: dados.goleiros.labels,
-                    datasets: [{
-                        label: 'Gols Sofridos',
-                        data: dados.goleiros.valores,
-                        backgroundColor: 'rgba(100, 100, 255, 0.7)'
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        legend: { position: 'top' },
-                        title: {
-                            display: true,
-                            text: 'Gols Sofridos por Goleiro'
+    document.addEventListener('DOMContentLoaded', function() {
+        // Configuração global do Chart.js para animação
+        Chart.defaults.animation.duration = 1500;
+        Chart.defaults.animation.easing = 'easeOutQuart';
+        Chart.defaults.font.family = "'Roboto', 'Helvetica', 'Arial', sans-serif";
+        Chart.defaults.color = '#6c757d';
+        
+        fetch('/api/performance/graficos')
+            .then(res => res.json())
+            .then(dados => {
+                const escalaInteira = {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1,
+                        callback: function(value) {
+                            if (Number.isInteger(value)) return value;
+                        },
+                        font: {
+                            weight: 500
                         }
                     },
-                    scales: {
-                        y: escalaInteira
+                    grid: {
+                        color: 'rgba(200, 200, 200, 0.2)'
                     }
-                }
+                };
+
+                // Configuração de cores consistentes
+                const coresPrimarias = [
+                    'rgba(52, 152, 219, 0.8)',  // Azul
+                    'rgba(231, 76, 60, 0.8)',   // Vermelho
+                    'rgba(46, 204, 113, 0.8)',  // Verde
+                    'rgba(241, 196, 15, 0.8)',  // Amarelo
+                    'rgba(155, 89, 182, 0.8)',  // Roxo
+                    'rgba(52, 73, 94, 0.8)',    // Azul escuro
+                    'rgba(230, 126, 34, 0.8)',  // Laranja
+                    'rgba(26, 188, 156, 0.8)'   // Turquesa
+                ];
+                
+                // Gráfico de Gols
+                new Chart(document.getElementById('grafico-gols'), {
+                    type: 'bar',
+                    data: {
+                        labels: dados.gols.labels,
+                        datasets: [{
+                            label: 'Gols',
+                            data: dados.gols.valores,
+                            backgroundColor: coresPrimarias[0],
+                            borderColor: coresPrimarias[0].replace('0.8', '1'),
+                            borderWidth: 1,
+                            borderRadius: 4,
+                            barPercentage: 0.7,
+                            categoryPercentage: 0.8
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            y: escalaInteira,
+                            x: {
+                                grid: {
+                                    display: false
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                                labels: {
+                                    boxWidth: 15,
+                                    usePointStyle: true,
+                                    pointStyle: 'circle'
+                                }
+                            },
+                            tooltip: {
+                                backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                                padding: 10,
+                                cornerRadius: 6,
+                                titleFont: {
+                                    size: 14,
+                                    weight: 'bold'
+                                },
+                                displayColors: false
+                            }
+                        },
+                        responsive: true,
+                        maintainAspectRatio: false
+                    }
+                });
+
+                // Gráfico de Assistências
+                new Chart(document.getElementById('grafico-assistencias'), {
+                    type: 'bar',
+                    data: {
+                        labels: dados.assistencias.labels,
+                        datasets: [{
+                            label: 'Assistências',
+                            data: dados.assistencias.valores,
+                            backgroundColor: coresPrimarias[2],
+                            borderColor: coresPrimarias[2].replace('0.8', '1'),
+                            borderWidth: 1,
+                            borderRadius: 4,
+                            barPercentage: 0.7,
+                            categoryPercentage: 0.8
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            y: escalaInteira,
+                            x: {
+                                grid: {
+                                    display: false
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                                labels: {
+                                    boxWidth: 15,
+                                    usePointStyle: true,
+                                    pointStyle: 'circle'
+                                }
+                            },
+                            tooltip: {
+                                backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                                padding: 10,
+                                cornerRadius: 6,
+                                displayColors: false
+                            }
+                        },
+                        responsive: true,
+                        maintainAspectRatio: false
+                    }
+                });
+
+                // Gráfico de Participações
+                new Chart(document.getElementById('grafico-participacoes'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: dados.participacoes.labels,
+                        datasets: [{
+                            label: 'Participações',
+                            data: dados.participacoes.valores,
+                            backgroundColor: coresPrimarias,
+                            borderColor: '#ffffff',
+                            borderWidth: 2,
+                            hoverOffset: 10
+                        }]
+                    },
+                    options: {
+                        cutout: '60%',
+                        plugins: {
+                            legend: {
+                                position: 'right',
+                                labels: {
+                                    font: {
+                                        size: 12
+                                    },
+                                    usePointStyle: true,
+                                    pointStyle: 'circle',
+                                    padding: 15
+                                }
+                            },
+                            tooltip: {
+                                backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                                padding: 10,
+                                cornerRadius: 6,
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.label || '';
+                                        let value = context.formattedValue;
+                                        let total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                        let percentage = Math.round((context.raw / total) * 100);
+                                        return `${label}: ${value} (${percentage}%)`;
+                                    }
+                                }
+                            }
+                        },
+                        responsive: true,
+                        maintainAspectRatio: false
+                    }
+                });
+
+                // Gráfico de Resultados
+                new Chart(document.getElementById('grafico-resultados'), {
+                    type: 'pie',
+                    data: {
+                        labels: dados.resultados.labels,
+                        datasets: [{
+                            data: dados.resultados.valores,
+                            backgroundColor: [
+                                'rgba(46, 204, 113, 0.8)', // Vitórias - Verde
+                                'rgba(241, 196, 15, 0.8)', // Empates - Amarelo
+                                'rgba(231, 76, 60, 0.8)'   // Derrotas - Vermelho
+                            ],
+                            borderColor: '#ffffff',
+                            borderWidth: 3,
+                            hoverBorderWidth: 0
+                        }]
+                    },
+                    options: {
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    padding: 20,
+                                    usePointStyle: true,
+                                    pointStyle: 'circle',
+                                    font: {
+                                        size: 14
+                                    }
+                                }
+                            },
+                            tooltip: {
+                                backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                                padding: 10,
+                                cornerRadius: 6,
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.label || '';
+                                        let value = context.formattedValue;
+                                        let total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                        let percentage = Math.round((context.raw / total) * 100);
+                                        return `${label}: ${value} (${percentage}%)`;
+                                    }
+                                }
+                            }
+                        },
+                        responsive: true,
+                        maintainAspectRatio: false
+                    }
+                });
+
+                // Gráfico de Goleiros
+                new Chart(document.getElementById('grafico-goleiros'), {
+                    type: 'bar',
+                    data: {
+                        labels: dados.goleiros.labels,
+                        datasets: [{
+                            label: 'Gols Sofridos',
+                            data: dados.goleiros.valores,
+                            backgroundColor: coresPrimarias[1],
+                            borderColor: coresPrimarias[1].replace('0.8', '1'),
+                            borderWidth: 1,
+                            borderRadius: 4,
+                            barPercentage: 0.7,
+                            categoryPercentage: 0.8
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            y: escalaInteira,
+                            x: {
+                                grid: {
+                                    display: false
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                                labels: {
+                                    boxWidth: 15,
+                                    usePointStyle: true,
+                                    pointStyle: 'circle'
+                                }
+                            },
+                            tooltip: {
+                                backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                                padding: 10,
+                                cornerRadius: 6,
+                                displayColors: false
+                            }
+                        },
+                        responsive: true,
+                        maintainAspectRatio: false
+                    }
+                });
+                
+                // Adiciona funcionalidade aos botões de download e expansão
+                document.querySelectorAll('.btn-action').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        // Esta é apenas uma demonstração. Você pode implementar a funcionalidade real posteriormente.
+                        if (this.title === 'Expandir') {
+                            const panel = this.closest('.chart-panel');
+                            panel.classList.toggle('expanded');
+                            this.innerHTML = panel.classList.contains('expanded') 
+                                ? '<i class="fas fa-compress"></i>' 
+                                : '<i class="fas fa-expand"></i>';
+                            this.title = panel.classList.contains('expanded') ? 'Comprimir' : 'Expandir';
+                        }
+                    });
+                });
+            })
+            .catch(error => {
+                console.error('Erro ao carregar dados:', error);
+                document.querySelectorAll('.chart-body').forEach(el => {
+                    el.innerHTML = '<div class="error-message"><i class="fas fa-exclamation-triangle"></i> Erro ao carregar dados. Tente novamente mais tarde.</div>';
+                });
             });
-        });
+    });
 </script>
 {% endblock %}

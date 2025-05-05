@@ -1,16 +1,30 @@
 {% extends 'base.html' %}
 {% block content %}
 
-<h1 class="titulo-pagina">🎨 Colagem do Jogo</h1>
+<h1 style="text-align:center; margin-top: 20px;">
+  🎨 Colagem Visual – {{ jogo.titulo }}
+</h1>
 
-<div style="text-align: center; margin-bottom: 20px;">
-    <a href="{{ url_for('galeria.exportar_colagem_canva', jogo_id=jogo_id) }}" class="botao-galeria">⬇ Baixar PNG</a>
-    <a href="{{ url_for('galeria.galeria') }}" class="botao-galeria">⬅ Voltar à Galeria</a>
+<div style="text-align: center; margin-bottom: 25px;">
+  <!-- Botão de download -->
+  <a href="{{ url_for('galeria.exportar_colagem_canva', jogo_id=jogo.id) }}" download>
+    <button style="background-color: #008000; color: white; padding: 10px 20px; border: none; border-radius: 5px;">
+      ⬇️ Fazer download da imagem
+    </button>
+  </a>
+
+  <!-- Botão de voltar -->
+  <a href="{{ url_for('galeria.galeria', jogo_id=jogo.id) }}">
+    <button style="background-color: #800000; color: white; padding: 10px 20px; border: none; border-radius: 5px; margin-left: 10px;">
+      ⬅️ Voltar à Galeria
+    </button>
+  </a>
 </div>
 
-<div style="text-align: center;">
-    <img src="{{ url_for('galeria.exportar_colagem_canva', jogo_id=jogo_id) }}" alt="Colagem Final"
-         style="max-width: 100%; border: 4px solid #800000; border-radius: 6px;">
+<!-- Exibe a colagem gerada -->
+<div style="display: flex; justify-content: center; align-items: center;">
+  <img src="{{ url_for('galeria.exportar_colagem_canva', jogo_id=jogo.id) }}" alt="Colagem do jogo"
+       style="max-width: 100%; border: 8px solid #800000; background: #800000;">
 </div>
 
 {% endblock %}

@@ -3,31 +3,119 @@
 
 <h1 class="titulo-pagina">📸 Fotos - {{ jogo.titulo }}</h1>
 
-<a href="{{ url_for('galeria.galeria') }}" class="botao-voltar">Voltar </a>
+<div class="botoes-superiores">
+  <a href="{{ url_for('galeria.galeria') }}" class="botao-vermelho">⬅ Voltar</a>
+  <a href="{{ url_for('galeria.visualizar_colagem_canva', jogo_id=jogo.id) }}" class="botao-preto">🖼️ Ver Colagem do Jogo</a>
+  <a href="{{ url_for('galeria.exportar_colagem_canva', jogo_id=jogo.id) }}" class="botao-verde">⬇️ Baixar PNG da Colagem</a>
 
-
-{% if fotos|length < 11 %} <form action="{{ url_for('galeria.envio_fotos', jogo_id=jogo.id) }}" method="get"
-  style="margin-bottom: 18px;">
-  <button class="botao-galeria"> ➕ Add foto</button>
-  </form>
+  {% if fotos|length < 11 %}
+  <a href="{{ url_for('galeria.envio_fotos', jogo_id=jogo.id) }}" class="botao-azul">➕ Add foto</a>
   {% else %}
-  <div class="alerta erro" style="margin-bottom: 15px;">
-    Este jogo atingiu o limite de 11 fotos.
-  </div>
+  <div class="alerta erro">Este jogo atingiu o limite de 11 fotos.</div>
   {% endif %}
+</div>
 
-
-
-  <div class="galeria-container">
-    {% for foto in fotos %}
-    <div class="foto-wrapper">
-      <img src="data:image/png;base64,{{ foto.imagem_base64 }}" class="foto-mosaico">
-      <form action="{{ url_for('galeria.excluir_foto', foto_id=foto.id, jogo_id=jogo.id) }}" method="POST">
-        <button class="btn-remover-foto" onclick="return confirm('Remover esta foto?')">❌</button>
-      </form>
-    </div>
-    {% endfor %}
+<div class="galeria-grid">
+  {% for foto in fotos %}
+  <div class="card-foto">
+    <img src="data:image/png;base64,{{ foto.imagem_base64 }}" alt="Foto" class="foto-mosaico">
+    <form action="{{ url_for('galeria.excluir_foto', foto_id=foto.id, jogo_id=jogo.id) }}" method="POST" class="form-excluir">
+      <button class="btn-remover" onclick="return confirm('Remover esta foto?')">❌</button>
+    </form>
   </div>
+  {% endfor %}
+</div>
 
-  
-  {% endblock %}
+<style>
+  .botoes-superiores {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  .botao-vermelho, .botao-preto, .botao-verde, .botao-azul {
+    padding: 8px 15px;
+    font-weight: bold;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    color: white;
+    text-decoration: none;
+  }
+
+  .botao-vermelho { background-color: #a00000; }
+  .botao-preto { background-color: #333; }
+  .botao-verde { background-color: #28a745; }
+  .botao-azul { background-color: #007bff; }
+
+  .botao-vermelho:hover,
+  .botao-preto:hover,
+  .botao-verde:hover,
+  .botao-azul:hover {
+    filter: brightness(1.1);
+  }
+
+  .galeria-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 20px;
+    margin-top: 30px;
+  }
+
+  .card-foto {
+    position: relative;
+    border-radius: 8px;
+    overflow: hidden;
+    background: white;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    transition: transform 0.2s ease;
+  }
+
+  .card-foto:hover {
+    transform: scale(1.02);
+  }
+
+  .foto-mosaico {
+    width: 100%;
+    height: 220px;
+    object-fit: cover;
+    display: block;
+  }
+
+  .form-excluir {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+  }
+
+  .btn-remover {
+    background: rgba(255, 0, 0, 0.8);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    font-size: 16px;
+    width: 28px;
+    height: 28px;
+    cursor: pointer;
+  }
+
+  .btn-remover:hover {
+    background: red;
+  }
+
+  .alerta.erro {
+    background: #c0392b;
+    color: white;
+    padding: 10px;
+    border-radius: 5px;
+  }
+
+  @media (max-width: 600px) {
+    .foto-mosaico {
+      height: 180px;
+    }
+  }
+</style>
+
+{% endblock %}
