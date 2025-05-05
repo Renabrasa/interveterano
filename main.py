@@ -8,7 +8,6 @@ from routes.financeiro import financeiro_bp
 from routes.auth import auth_bp
 from routes.galeria import galeria_bp
 from sqlalchemy import text
-from routes.ajuste import ajuste_bp
 from routes.pessoas import pessoa_bp
 import os
 from routes.admin import admin_bp
@@ -44,7 +43,6 @@ app.register_blueprint(performance_bp)
 app.register_blueprint(financeiro_bp)
 app.register_blueprint(auth_bp)
 app.register_blueprint(galeria_bp)
-app.register_blueprint(ajuste_bp)
 app.register_blueprint(pessoa_bp)
 app.register_blueprint(admin_bp, url_prefix='/admin')
 
