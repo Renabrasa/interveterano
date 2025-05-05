@@ -15,6 +15,7 @@ def login():
 
         if usuario == 'interadmin' and senha == 'Intervet2025':
             session['usuario'] = 'interadmin'
+            session['logado'] = True
             flash('Login realizado com sucesso!', 'sucesso')
             return redirect(url_for('home'))  # ou redirecionar para uma página protegida
         else:
