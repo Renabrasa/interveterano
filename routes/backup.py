@@ -3,7 +3,7 @@
 from flask import Blueprint, send_file
 from io import BytesIO
 import json
-from models import db, Pessoa, Mensalidade, MovimentacaoFinanceira
+from models.models import db, Pessoa, Mensalidade, MovimentacaoFinanceira
 
 backup_bp = Blueprint('backup', __name__)
 
