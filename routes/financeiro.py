@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, send_file,session
-from models.models import db, Jogador, Categoria, Mensalidade, MovimentacaoFinanceira, ConfigFinanceiro
-from datetime import datetime, date
+from models.models import db, Categoria, Mensalidade, MovimentacaoFinanceira, ConfigFinanceiro,Configuracao, Pessoa
+from datetime import datetime, timedelta,date
 from sqlalchemy import func
 from io import BytesIO
 from reportlab.pdfgen import canvas
@@ -17,6 +17,9 @@ def login_obrigatorio():
         session['destino'] = request.endpoint
         return redirect(url_for('auth.login'))
 
+
+
+
 # ----------------------------
 # PAINEL MENSAL DE MENSALIDADES
 # ----------------------------
@@ -25,19 +28,33 @@ def login_obrigatorio():
 def painel_mensal():
     mes = request.args.get('mes') or datetime.today().strftime('%Y-%m')
 
-    jogadores = Jogador.query.join(Categoria).filter(
-        Categoria.nome.notin_(['Convidado', 'Treinador', 'Goleiro']),
-        Jogador.ativo == True
-    ).order_by(Jogador.nome).all()
+    # Buscar pessoas que são jogadores ativos e não isentos
+    jogadores = Pessoa.query.filter(
+        Pessoa.ativo == True,
+        Pessoa.tipo == 'jogador',
+        Pessoa.categoria.notin_(['Convidado', 'Treinador', 'Goleiro'])
+    ).order_by(Pessoa.nome).all()
 
-    mensalidades = {m.jogador_id: m for m in Mensalidade.query.filter_by(mes_referencia=mes).all()}
+    # Busca as mensalidades do mês (com pessoa_id válido)
+    mensalidades = {
+        m.pessoa_id: m for m in Mensalidade.query.filter_by(mes_referencia=mes).all() if m.pessoa_id
+    }
+
+    # Valor padrão da mensalidade
     config = ConfigFinanceiro.query.first()
     valor_padrao = config.mensalidade_padrao if config else 30.00
 
+    # Geração automática de mensalidades faltantes
     for jogador in jogadores:
         if jogador.id not in mensalidades:
-            nova = Mensalidade(jogador_id=jogador.id, mes_referencia=mes, valor=valor_padrao, pago=False)
+            nova = Mensalidade(
+                pessoa_id=jogador.id,
+                mes_referencia=mes,
+                valor=valor_padrao,
+                pago=False
+            )
             db.session.add(nova)
+
     db.session.commit()
 
     mensalidades = Mensalidade.query.filter_by(mes_referencia=mes).all()
@@ -45,6 +62,7 @@ def painel_mensal():
     # Saídas do mês
     inicio_mes = datetime.strptime(mes, '%Y-%m')
     fim_mes = datetime(inicio_mes.year + (inicio_mes.month // 12), (inicio_mes.month % 12) + 1, 1)
+
     saidas = MovimentacaoFinanceira.query.filter(
         MovimentacaoFinanceira.tipo == 'saida',
         MovimentacaoFinanceira.data >= inicio_mes,
@@ -56,7 +74,8 @@ def painel_mensal():
     total_saidas = sum(s.valor for s in saidas)
     saldo = total_recebido - total_saidas
 
-    return render_template('financeiro/painel_mensal.html',
+    return render_template(
+        'financeiro/painel_mensal.html',
         mes=mes,
         mensalidades=mensalidades,
         jogadores=jogadores,
@@ -71,25 +90,25 @@ def painel_mensal():
 # ----------------------------
 # AÇÕES SOBRE MENSALIDADES
 # ----------------------------
-@financeiro_bp.route('/financeiro/pagar/<int:mensalidade_id>',methods=['GET'])
+@financeiro_bp.route('/financeiro/pagar/<int:mensalidade_id>', methods=['GET','POST'], endpoint='baixar_mensalidade')
 @login_required
 def registrar_pagamento_mensalidade(mensalidade_id):
     mensalidade = Mensalidade.query.get_or_404(mensalidade_id)
     mensalidade.pago = True
     mensalidade.data_pagamento = date.today()
     db.session.commit()
-    flash(f'Pagamento registrado para {mensalidade.jogador.nome}', 'sucesso')
+    flash(f'Pagamento registrado para {mensalidade.pessoa.nome}', 'sucesso')
     return redirect(url_for('financeiro.exibir_entradas', mes=mensalidade.mes_referencia))
 
-@financeiro_bp.route('/financeiro/mensalidade/<int:id>/cancelar', methods=['POST'])
+@financeiro_bp.route('/financeiro/cancelar/<int:mensalidade_id>', methods=['POST'])
 @login_required
-def cancelar_baixa_mensalidade(id):
-    mensalidade = Mensalidade.query.get_or_404(id)
+def cancelar_baixa(mensalidade_id):
+    mensalidade = Mensalidade.query.get_or_404(mensalidade_id)
     mensalidade.pago = False
-    mensalidade.data_pagamento = None
     db.session.commit()
-    flash('Baixa cancelada com sucesso!', 'sucesso')
-    return redirect(url_for('financeiro.exibir_entradas', mes=mensalidade.mes_referencia))
+    flash(f"Baixa cancelada para {mensalidade.pessoa.nome}.", "info")
+    return redirect(url_for('financeiro.exibir_entradas', mes=request.args.get('mes')))
+
 
 @financeiro_bp.route('/financeiro/mensalidade/<int:id>/excluir', methods=['POST'])
 @login_required
@@ -122,6 +141,33 @@ def atualizar_valor_mensalidade_padrao():
     return redirect(url_for('financeiro.exibir_entradas', mes=mes))
 
 
+@financeiro_bp.route('/aplicar-novo-valor', methods=['POST'])
+def aplicar_novo_valor():
+    mes = request.form.get('mes')
+    valor_str = request.form.get('valor')
+
+    if not valor_str:
+        flash('O valor informado é inválido.', 'erro')
+        return redirect(url_for('financeiro.exibir_entradas', mes=mes))
+
+    try:
+        valor_novo = float(valor_str)
+    except ValueError:
+        flash('Valor inválido para mensalidade.', 'erro')
+        return redirect(url_for('financeiro.exibir_entradas', mes=mes))
+
+    novo_valor = float(request.form.get('valor'))
+
+
+    # Atualiza mensalidades já criadas e ainda pendentes ou com valor desatualizado
+    mensalidades = Mensalidade.query.filter_by(mes_referencia=mes).all()
+    for m in mensalidades:
+        if not m.pago and not m.isento_manual:
+            m.valor = novo_valor
+
+    db.session.commit()
+    flash('Valor atualizado e aplicado às mensalidades pendentes.', 'sucesso')
+    return redirect(url_for('financeiro.exibir_entradas', mes=mes))
 
 
 # ----------------------------
@@ -140,6 +186,15 @@ def isentar_mensalidade(mensalidade_id):
     flash('Mensalidade isenta com sucesso.', 'sucesso')
     return redirect(request.referrer or url_for('financeiro.exibir_entradas'))
 
+
+@financeiro_bp.route('/cancelar-isencao/<int:mensalidade_id>', methods=['POST'])
+def cancelar_isencao(mensalidade_id):
+    mensalidade = Mensalidade.query.get_or_404(mensalidade_id)
+    mensalidade.valor = 30.00  # ou valor padrão atual
+    mensalidade.isento_manual = False
+    db.session.commit()
+    flash('Isenção cancelada com sucesso.', 'sucesso')
+    return redirect(url_for('financeiro.exibir_entradas', mes=request.args.get('mes')))
 
 
 
@@ -188,7 +243,7 @@ def relatorio_mensalidades():
         pdf.setFont("Helvetica", 10)
         for m in lista:
            status = "Isento" if m.valor == 0 else f"R$ {m.valor:.2f}"
-           pdf.drawString(60, y, f"{m.jogador.nome} - {status}")
+           pdf.drawString(60, y, f"{m.pessoa.nome} - {status}")
            y -= 15
         y -= 10
 
@@ -208,7 +263,7 @@ def relatorio_mensalidades():
 @financeiro_bp.route('/financeiro/relatorios/financeiros')
 @login_required
 def relatorios_financeiros():
-    jogadores = Jogador.query.filter_by(ativo=True).order_by(Jogador.nome).all()
+    jogadores = Pessoa.query.filter_by(ativo=True).order_by(Pessoa.nome).all()
     ano_atual = datetime.today().year
     return render_template('financeiro/relatorios_financeiros.html', jogadores=jogadores, ano=ano_atual)
 
@@ -320,28 +375,64 @@ def relatorio_fluxo_caixa():
 # ==========================
 # ENTRADAS
 # ==========================
+
+
+def calcular_mes_anterior(mes_str):
+    mes_dt = datetime.strptime(mes_str, '%Y-%m')
+    anterior = mes_dt.replace(day=1) - timedelta(days=1)
+    return anterior.strftime('%Y-%m')
+
+def calcular_mes_proximo(mes_str):
+    mes_dt = datetime.strptime(mes_str, '%Y-%m')
+    proximo = (mes_dt.replace(day=28) + timedelta(days=4)).replace(day=1)
+    return proximo.strftime('%Y-%m')
+
+
+
 @financeiro_bp.route('/financeiro/entradas')
 @login_required
 def exibir_entradas():
-        
-    mes = request.args.get('mes') or datetime.today().strftime('%Y-%m')
+    mes = request.args.get('mes') or datetime.now().strftime('%Y-%m')
+    
+    config = Configuracao.query.first()
+    valor_config = Configuracao.query.filter_by(chave='valor_mensalidade').first()
+    valor_mensalidade = float(valor_config.valor) if valor_config else 30.0
 
-    jogadores = Jogador.query.join(Categoria).filter(
-        Categoria.nome.notin_(['Convidado', 'Treinador', 'Goleiro']),
-        Jogador.ativo == True
-    ).order_by(Jogador.nome).all()
+    pessoas = Pessoa.query.filter(
+        Pessoa.ativo == True,
+        Pessoa.tipo == 'jogador',
+        Pessoa.categoria.notin_(['Goleiro', 'Treinador', 'Convidado'])
+    ).order_by(Pessoa.nome).all()
 
+    '''for pessoa in pessoas:
+        existente = Mensalidade.query.filter_by(pessoa_id=pessoa.id, mes_referencia=mes).first()
+        if not existente:
+            nova = Mensalidade(
+                pessoa_id=pessoa.id,
+                mes_referencia=mes,
+                valor=valor_mensalidade,
+                pago=False
+            )
+            db.session.add(nova)
+
+    db.session.commit()'''
+
+    # Carrega mensalidades do mês e cria mapa para acesso rápido no template
     mensalidades = Mensalidade.query.filter_by(mes_referencia=mes).all()
+    mensalidade_map = {m.pessoa_id: m for m in mensalidades}
 
-    config = ConfigFinanceiro.query.first()
-    valor_padrao = config.mensalidade_padrao if config else 30.00
-
-    return render_template('financeiro/entradas.html',
+    return render_template(
+        'financeiro/entradas.html',
+        jogadores=pessoas,
+        mensalidade_map=mensalidade_map,
+        valor_mensalidade=valor_mensalidade,
         mes=mes,
-        jogadores=jogadores,
-        mensalidades=mensalidades,
-        valor_padrao=valor_padrao
+        mes_anterior=calcular_mes_anterior(mes),
+        mes_proximo=calcular_mes_proximo(mes),
+        config=config
     )
+
+
 
     
 # ==========================
@@ -435,35 +526,34 @@ def relatorios():
 @login_required
 def relatorio_inadimplencia():
     from flask import send_file
+    mes = datetime.today().strftime('%Y-%m')
     inicio = request.args.get('inicio')
     fim = request.args.get('fim')
-
     hoje = datetime.today()
 
     if not inicio or not fim:
-        mes = datetime.today().strftime('%Y-%m')
         vencimento = datetime.strptime(mes + '-15', '%Y-%m-%d')
-        mensalidades = Mensalidade.query.join(Jogador).join(Categoria).filter(
+        mensalidades = Mensalidade.query.join(Pessoa).filter(
             Mensalidade.mes_referencia == mes,
             Mensalidade.pago == False,
-            Jogador.ativo == True,
+            Pessoa.ativo == True,
             hoje > vencimento
         ).with_entities(
-            Jogador.nome.label('nome'),
-            Categoria.nome.label('categoria'),
+            Pessoa.nome.label('nome'),
+            Pessoa.categoria.label('categoria'),
             Mensalidade.valor,
             Mensalidade.mes_referencia.label('mes')
         ).all()
         titulo = f"RELATÓRIO DE INADIMPLÊNCIA - {mes}"
     else:
-        mensalidades = Mensalidade.query.join(Jogador).join(Categoria).filter(
+        mensalidades = Mensalidade.query.join(Pessoa).filter(
             Mensalidade.mes_referencia >= inicio,
             Mensalidade.mes_referencia <= fim,
             Mensalidade.pago == False,
-            Jogador.ativo == True
+            Pessoa.ativo == True
         ).with_entities(
-            Jogador.nome.label('nome'),
-            Categoria.nome.label('categoria'),
+            Pessoa.nome.label('nome'),
+            Pessoa.categoria.label('categoria'),
             Mensalidade.valor,
             Mensalidade.mes_referencia.label('mes')
         ).order_by(Mensalidade.mes_referencia).all()
@@ -522,11 +612,11 @@ def relatorio_inadimplencia():
             pdf.showPage()
             y = altura - 100
 
-    pdf.setDash(2, 2)  # traços e espaços mais visíveis
+    pdf.setDash(2, 2)
     pdf.setLineWidth(0.5)
     pdf.line(60, y, largura - 60, y)
-    pdf.setDash()  # remove pontilhado
-    pdf.setLineWidth(1)  # restaura largura padrão
+    pdf.setDash()
+    pdf.setLineWidth(1)
 
     y -= 20
     pdf.setFont("Helvetica-Bold", 12)
@@ -544,16 +634,16 @@ def relatorio_inadimplencia():
 @login_required
 def relatorio_individual():
     from flask import request, send_file
-    jogador_id = request.args.get('jogador_id')
+    pessoa_id = request.args.get('pessoa_id') or request.args.get('jogador_id')
     ano = request.args.get('ano') or datetime.today().year
 
-    if not jogador_id:
+    if not pessoa_id:
         flash("Selecione um jogador.", "erro")
         return redirect(url_for('financeiro.relatorios_financeiros'))
 
-    jogador = Jogador.query.get_or_404(jogador_id)
+    jogador = Pessoa.query.get_or_404(pessoa_id)
     mensalidades = Mensalidade.query.filter(
-        Mensalidade.jogador_id == jogador_id,
+        Mensalidade.pessoa_id == pessoa_id,
         Mensalidade.mes_referencia.like(f"{ano}-%")
     ).order_by(Mensalidade.mes_referencia.asc()).all()
 
@@ -566,7 +656,6 @@ def relatorio_individual():
     if os.path.exists(logo_path):
         logo_width = 300
         logo_height = 300
-        # Calcula as coordenadas para centralizar
         x = (largura - logo_width) / 2
         y = (altura - logo_height) / 2
         pdf.drawImage(logo_path, x, y, width=logo_width, height=logo_height, preserveAspectRatio=True, mask='auto')
@@ -592,6 +681,8 @@ def relatorio_individual():
     pdf.save()
     buffer.seek(0)
     return send_file(buffer, as_attachment=True, download_name=f"relatorio_individual_{jogador.nome}_{ano}.pdf", mimetype='application/pdf')
+
+
 
 
 @financeiro_bp.route('/financeiro/relatorios/resumo_anual')
@@ -747,32 +838,45 @@ def relatorio_performance():
 @financeiro_bp.route('/financeiro/gerar_mensalidades', methods=['POST'])
 @login_required
 def gerar_mensalidades():
-    mes = request.form['mes']
-    valor_mensalidade = float(request.form['valor_mensalidade'])
+    mes = request.form.get('mes')
+    valor = float(request.form.get('valor'))
 
-    jogadores = Jogador.query.join(Categoria).filter(
-        Categoria.nome.notin_(['Convidado', 'Treinador', 'Goleiro']),
-        Jogador.ativo == True
+    if not mes or not valor:
+        flash('Mês e valor são obrigatórios.', 'erro')
+        return redirect(url_for('financeiro.exibir_entradas'))
+
+    jogadores = Pessoa.query.filter(
+        Pessoa.ativo == True,
+        Pessoa.tipo == 'jogador',
+        Pessoa.data_inativacao == None
     ).all()
 
-    mensalidades_do_mes = {m.jogador_id: m for m in Mensalidade.query.filter_by(mes_referencia=mes).all()}
-
-    novos = 0
-    atualizados = 0
-
     for jogador in jogadores:
-        m = mensalidades_do_mes.get(jogador.id)
-        if not m:
-            nova = Mensalidade(jogador_id=jogador.id, mes_referencia=mes, valor=valor_mensalidade, pago=False)
+        existente = Mensalidade.query.filter_by(pessoa_id=jogador.id, mes_referencia=mes).first()
+        if not existente:
+            nova = Mensalidade(
+                pessoa_id=jogador.id,
+                mes_referencia=mes,
+                valor=valor,
+                pago=False
+            )
             db.session.add(nova)
-            novos += 1
-        elif not m.pago:
-            m.valor = valor_mensalidade
-            atualizados += 1
+
+    # Atualiza o valor padrão (se desejar salvar o novo valor)
+    config = Configuracao.query.first()
+    if config:
+        config.valor_mensalidade = valor
+    else:
+        config = Configuracao(valor_mensalidade=valor)
+        db.session.add(config)
 
     db.session.commit()
-    flash(f'{novos} novas mensalidades criadas e {atualizados} atualizadas com o valor R$ {valor_mensalidade:.2f}', 'sucesso')
+    flash(f'Mensalidades geradas para {mes}.', 'sucesso')
     return redirect(url_for('financeiro.exibir_entradas', mes=mes))
+
+
+
+
 
 
 @financeiro_bp.route('/financeiro/relatorios/fluxo_caixa_analitico')
