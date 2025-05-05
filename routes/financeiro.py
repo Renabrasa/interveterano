@@ -140,8 +140,8 @@ def atualizar_valor_mensalidade_padrao():
     flash(f'Valor da mensalidade atualizado para R$ {novo_valor:.2f}', 'sucesso')
     return redirect(url_for('financeiro.exibir_entradas', mes=mes))
 
-
 @financeiro_bp.route('/aplicar-novo-valor', methods=['POST'])
+@login_required
 def aplicar_novo_valor():
     mes = request.form.get('mes')
     valor_str = request.form.get('valor')
@@ -151,19 +151,43 @@ def aplicar_novo_valor():
         return redirect(url_for('financeiro.exibir_entradas', mes=mes))
 
     try:
-        valor_novo = float(valor_str)
+        novo_valor = float(valor_str)
     except ValueError:
         flash('Valor inválido para mensalidade.', 'erro')
         return redirect(url_for('financeiro.exibir_entradas', mes=mes))
 
-    novo_valor = float(request.form.get('valor'))
+    # Atualiza valor padrão da mensalidade no config
+    config = Configuracao.query.first()
+    if config:
+        config.valor_mensalidade = novo_valor
+    else:
+        config = Configuracao(valor_mensalidade=novo_valor)
+        db.session.add(config)
 
-
-    # Atualiza mensalidades já criadas e ainda pendentes ou com valor desatualizado
+    # Atualiza mensalidades pendentes
     mensalidades = Mensalidade.query.filter_by(mes_referencia=mes).all()
     for m in mensalidades:
         if not m.pago and not m.isento_manual:
             m.valor = novo_valor
+
+    # Cria mensalidades para jogadores que ainda não têm
+    jogadores = Pessoa.query.filter(
+        Pessoa.ativo == True,
+        Pessoa.tipo == 'jogador',
+        Pessoa.categoria.notin_(['Goleiro', 'Treinador', 'Convidado'])
+    ).all()
+
+    ids_existentes = [m.pessoa_id for m in mensalidades]
+
+    for jogador in jogadores:
+        if jogador.id not in ids_existentes:
+            nova = Mensalidade(
+                pessoa_id=jogador.id,
+                mes_referencia=mes,
+                valor=novo_valor,
+                pago=False
+            )
+            db.session.add(nova)
 
     db.session.commit()
     flash('Valor atualizado e aplicado às mensalidades pendentes.', 'sucesso')
@@ -1039,3 +1063,5 @@ def gerar_fluxo_caixa():
         return redirect(url_for('financeiro.relatorio_fluxo_caixa_analitico', inicio=request.args['inicio'], fim=request.args['fim']))
     else:
         return redirect(url_for('financeiro.relatorio_fluxo_caixa', inicio=request.args['inicio'], fim=request.args['fim']))
+
+
