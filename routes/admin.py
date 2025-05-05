@@ -5,7 +5,7 @@ from models.models import db, Pessoa, Performance, Mensalidade,Jogador
 
 admin_bp = Blueprint('admin', __name__)
 
-@admin_bp.route('/ferramentas')
+@admin_bp.route('/ferramentas', endpoint='ferramentas')
 def ferramentas():
     return render_template('admin/ferramentas.html')
 
