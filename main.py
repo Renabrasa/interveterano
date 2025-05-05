@@ -30,6 +30,9 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 # ================================
 db.init_app(app)
 
+with app.app_context():
+    db.create_all() 
+    
 app.register_blueprint(plantel_bp)
 app.register_blueprint(convidado_bp)
 app.register_blueprint(calendario_bp)
