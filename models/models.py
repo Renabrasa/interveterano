@@ -14,7 +14,7 @@ class Posicao(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     nome = db.Column(db.String(50), unique=True, nullable=False)
 
-'''class Jogador(db.Model):
+class Jogador(db.Model):
     __tablename__ = 'jogador'
     id = db.Column(db.Integer, primary_key=True)
     nome = db.Column(db.String(100), nullable=False)
@@ -26,14 +26,14 @@ class Posicao(db.Model):
 
 
     categoria = db.relationship('Categoria', backref=db.backref('jogadores', lazy=True))
-    posicao = db.relationship('Posicao', backref=db.backref('jogadores', lazy=True))'''
+    posicao = db.relationship('Posicao', backref=db.backref('jogadores', lazy=True))
 
 
 #
 #
 #Modelos para convidados 
 #
-'''class Convidado(db.Model):
+class Convidado(db.Model):
     __tablename__ = 'convidado'
     id = db.Column(db.Integer, primary_key=True)
     nome = db.Column(db.String(100), nullable=False)
@@ -43,7 +43,7 @@ class Posicao(db.Model):
     foto = db.Column(db.Text, nullable=True)
 
     categoria = db.relationship('Categoria', backref=db.backref('convidados', lazy=True))
-    posicao = db.relationship('Posicao', backref=db.backref('convidados', lazy=True))'''
+    posicao = db.relationship('Posicao', backref=db.backref('convidados', lazy=True))
     
     
 #
