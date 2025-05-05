@@ -14,7 +14,7 @@ class Posicao(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     nome = db.Column(db.String(50), unique=True, nullable=False)
 
-class Jogador(db.Model):
+'''class Jogador(db.Model):
     __tablename__ = 'jogador'
     id = db.Column(db.Integer, primary_key=True)
     nome = db.Column(db.String(100), nullable=False)
@@ -26,14 +26,14 @@ class Jogador(db.Model):
 
 
     categoria = db.relationship('Categoria', backref=db.backref('jogadores', lazy=True))
-    posicao = db.relationship('Posicao', backref=db.backref('jogadores', lazy=True))
+    posicao = db.relationship('Posicao', backref=db.backref('jogadores', lazy=True))'''
 
 
 #
 #
 #Modelos para convidados 
 #
-class Convidado(db.Model):
+'''class Convidado(db.Model):
     __tablename__ = 'convidado'
     id = db.Column(db.Integer, primary_key=True)
     nome = db.Column(db.String(100), nullable=False)
@@ -43,7 +43,7 @@ class Convidado(db.Model):
     foto = db.Column(db.Text, nullable=True)
 
     categoria = db.relationship('Categoria', backref=db.backref('convidados', lazy=True))
-    posicao = db.relationship('Posicao', backref=db.backref('convidados', lazy=True))
+    posicao = db.relationship('Posicao', backref=db.backref('convidados', lazy=True))'''
     
     
 #
@@ -82,18 +82,16 @@ class FotoJogo(db.Model):
 class Performance(db.Model):
     __tablename__ = 'performance'
     id = db.Column(db.Integer, primary_key=True)
-    
-    jogador_id = db.Column(db.Integer, db.ForeignKey('jogador.id'), nullable=True)
-    convidado_id = db.Column(db.Integer, db.ForeignKey('convidado.id'), nullable=True)
+
+    pessoa_id = db.Column(db.Integer, db.ForeignKey('pessoa.id'), nullable=True)
     jogo_id = db.Column(db.Integer, db.ForeignKey('jogo.id'), nullable=False)
 
     gols = db.Column(db.Integer, default=0)
-    gols_sofridos = db.Column(db.Integer, default=0)  # ✅ aqui
+    gols_sofridos = db.Column(db.Integer, default=0)
     assistencias = db.Column(db.Integer, default=0)
     participou = db.Column(db.Boolean, default=True)
 
-    jogador = db.relationship('Jogador', backref=db.backref('performances', lazy=True))
-    convidado = db.relationship('Convidado', backref=db.backref('performances', lazy=True))
+    pessoa = db.relationship('Pessoa', backref=db.backref('performances', lazy=True))
     jogo = db.relationship('Jogo', backref=db.backref('performances', lazy=True))
 
 #
@@ -108,20 +106,24 @@ class MovimentacaoFinanceira(db.Model):
     valor = db.Column(db.Float, nullable=False)
     data = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     categoria = db.Column(db.String(50), nullable=False)  # exemplo: 'Mensalidade', 'Aluguel', etc
-    jogador_id = db.Column(db.Integer, db.ForeignKey('jogador.id'), nullable=True)
-    jogador = db.relationship('Jogador', backref='pagamentos')
+    pessoa_id = db.Column(db.Integer, db.ForeignKey('pessoa.id'), nullable=True)
+
+    pessoa = db.relationship('Pessoa', backref='movimentacoes')
+
 
 
 class Mensalidade(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    jogador_id = db.Column(db.Integer, db.ForeignKey('jogador.id'), nullable=False)
-    mes_referencia = db.Column(db.String(7), nullable=False)  # formato: '2025-04'
+    pessoa_id = db.Column(db.Integer, db.ForeignKey('pessoa.id'), nullable=False)
+    mes_referencia = db.Column(db.String(7), nullable=False)  # ex: 2024-05
     valor = db.Column(db.Float, nullable=False)
     pago = db.Column(db.Boolean, default=False)
     data_pagamento = db.Column(db.Date)
     isento_manual = db.Column(db.Boolean, default=False)
 
-    jogador = db.relationship('Jogador', backref='mensalidades')
+    pessoa = db.relationship('Pessoa',backref='mensalidades')
+
+
     
 
 class ConfigFinanceiro(db.Model):
@@ -130,5 +132,21 @@ class ConfigFinanceiro(db.Model):
     saldo_inicial = db.Column(db.Float, default=0.0)
 
 
-    
+class Pessoa(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    nome = db.Column(db.String(100), nullable=False)
+    posicao = db.Column(db.String(50))  # zagueiro, meia, etc
+    pe_preferencial = db.Column(db.String(10))
+    foto = db.Column(db.String(200))
+    tipo = db.Column(db.String(20), nullable=False)  # 'jogador', 'convidado', etc
+    ativo = db.Column(db.Boolean, default=True)
+    categoria = db.Column(db.String(50))  # opcional
+    data_inativacao = db.Column(db.DateTime, nullable=True)
+    data_reintegracao = db.Column(db.DateTime, nullable=True)
+    data_nascimento = db.Column(db.Date, nullable=True)  # ✅ NOVO CAMPO
 
+
+class Configuracao(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    chave = db.Column(db.String(50), unique=True, nullable=False)
+    valor = db.Column(db.String(100), nullable=False)
