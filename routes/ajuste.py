@@ -1,12 +1,9 @@
-from flask import Blueprint
-from models.models import db, FotoJogo  # ✅ Importa o modelo necessário
+from main import app
+from models.models import db, Pessoa
 
-ajuste_bp = Blueprint('ajuste_bp', __name__)
-
-@ajuste_bp.route('/ajustar-galeria')
-def ajustar_galeria():
+with app.app_context():
     try:
-        db.create_all()  # Cria todas as tabelas pendentes, incluindo foto_jogo
-        return "✅ Tabela 'foto_jogo' criada com sucesso no banco do Render."
+        db.create_all()
+        print("✅ Tabela 'Pessoa' criada com sucesso no banco de dados.")
     except Exception as e:
-        return f"⚠️ Erro ao criar tabela: {str(e)}"
+        print(f"❌ Erro ao criar a tabela Pessoa: {e}")

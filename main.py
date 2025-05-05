@@ -1,5 +1,8 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template
 from models.models import db
+from config import Config
+
+# Blueprints
 from routes.plantel import plantel_bp
 from routes.convidados import convidado_bp
 from routes.calendario import calendario_bp
@@ -7,35 +10,19 @@ from routes.performance import performance_bp
 from routes.financeiro import financeiro_bp
 from routes.auth import auth_bp
 from routes.galeria import galeria_bp
-from sqlalchemy import text
 from routes.pessoas import pessoa_bp
-import os
 from routes.admin import admin_bp
 
-
 app = Flask(__name__)
-app.secret_key = 'inter-veterano-super-segura-2025'
+app.config.from_object(Config)
 
-# ================================
-# CONFIGURAÇÃO PARA POSTGRESQL NO NEON
-# ================================
-DATABASE_URL = os.getenv('DATABASE_URL')
-if not DATABASE_URL:
-    raise ValueError("DATABASE_URL não configurada nas variáveis de ambiente.")
-app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-
-# ================================
-# INICIALIZAÇÕES
-# ================================
+# Inicializa DB
 db.init_app(app)
 
 with app.app_context():
     db.create_all()
 
-# ================================
-# REGISTRO DOS BLUEPRINTS
-# ================================
+# Registro de Blueprints
 app.register_blueprint(plantel_bp)
 app.register_blueprint(convidado_bp)
 app.register_blueprint(calendario_bp)
@@ -54,8 +41,6 @@ def home():
 def erro_502(e):
     return render_template('erro502.html'), 502
 
-# ================================
-# EXECUÇÃO LOCAL
-# ================================
+# Para rodar localmente
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run()

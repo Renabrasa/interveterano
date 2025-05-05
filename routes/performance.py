@@ -272,24 +272,4 @@ def ranking():
 
 
 
-@performance_bp.route('/performance/migrar', methods=['POST'])
-@login_required
-def migrar_performances():
-    from models.models import Pessoa
 
-    performances = Performance.query.filter(Performance.jogador_id != None).all()
-    migrados = 0
-
-    for p in performances:
-        jogador_antigo = Jogador.query.get(p.jogador_id)
-        if not jogador_antigo:
-            continue
-
-        pessoa = Pessoa.query.filter_by(nome=jogador_antigo.nome, tipo='jogador').first()
-        if pessoa:
-            p.pessoa_id = pessoa.id
-            migrados += 1
-
-    db.session.commit()
-    flash(f'{migrados} performances vinculadas à tabela Pessoa.', 'sucesso')
-    return redirect(url_for('performance.index'))
