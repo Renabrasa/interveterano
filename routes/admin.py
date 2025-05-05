@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, redirect, url_for, flash
-from models.models import db, Pessoa, Performance, Mensalidade
+from models.models import db, Pessoa, Performance, Mensalidade,Jogador  
 
 
 
