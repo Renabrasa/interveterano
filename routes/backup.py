@@ -1,29 +1,28 @@
-from flask import Blueprint, jsonify
-from models import db, Pessoa, Performance, Jogo, Categoria, Posicao, MovimentacaoFinanceira
+# routes/backup.py
+
+from flask import Blueprint, send_file
+from io import BytesIO
+import json
+from models.models import db, Pessoa, Mensalidade, MovimentacaoFinanceira
 
 backup_bp = Blueprint('backup', __name__)
 
 @backup_bp.route('/backup/json')
 def gerar_backup_json():
-    def serialize(obj):
-        return {col.name: getattr(obj, col.name) for col in obj.__table__.columns}
-
-    jogadores = Pessoa.query.filter_by(tipo='jogador').all()
-    convidados = Pessoa.query.filter_by(tipo='convidado').all()
-    performance = Performance.query.all()
-    jogos = Jogo.query.all()
-    categorias = Categoria.query.all()
-    posicoes = Posicao.query.all()
-    movimentacoes = MovimentacaoFinanceira.query.all()
-
-    backup_data = {
-        "jogadores": [serialize(j) for j in jogadores],
-        "convidados": [serialize(c) for c in convidados],
-        "performance": [serialize(p) for p in performance],
-        "jogos": [serialize(jg) for jg in jogos],
-        "categorias": [serialize(cat) for cat in categorias],
-        "posicoes": [serialize(pos) for pos in posicoes],
-        "movimentacoes": [serialize(mv) for mv in movimentacoes]
+    dados = {
+        "pessoas": [p.serializar() for p in Pessoa.query.all()],
+        "mensalidades": [m.serializar() for m in Mensalidade.query.all()],
+        "movimentacoes": [mv.serializar() for mv in MovimentacaoFinanceira.query.all()]
+        
     }
 
-    return jsonify(backup_data)
+    buffer = BytesIO()
+    buffer.write(json.dumps(dados, indent=2, ensure_ascii=False).encode('utf-8'))
+    buffer.seek(0)
+
+    return send_file(
+        buffer,
+        mimetype='application/json',
+        as_attachment=True,
+        download_name='backup_intervet.json'
+    )
