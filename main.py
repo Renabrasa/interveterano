@@ -13,14 +13,14 @@ from routes.galeria import galeria_bp
 from routes.pessoas import pessoa_bp
 from routes.admin import admin_bp
 
+# Inicializa app e configuração
 app = Flask(__name__)
-from config import Config
 app.config.from_object(Config)
 
-# Inicializa DB
+# Inicializa banco de dados
 db.init_app(app)
 
-# Registro de Blueprints
+# Registra os blueprints
 app.register_blueprint(plantel_bp)
 app.register_blueprint(convidado_bp)
 app.register_blueprint(calendario_bp)
@@ -31,15 +31,16 @@ app.register_blueprint(galeria_bp)
 app.register_blueprint(pessoa_bp)
 app.register_blueprint(admin_bp, url_prefix='/admin')
 
+# Rota principal
 @app.route('/')
 def home():
     return render_template('home.html')
 
+# Tratamento de erro 502
 @app.errorhandler(502)
 def erro_502(e):
     return render_template('erro502.html'), 502
 
-# Para rodar localmente
+# Execução local
 if __name__ == '__main__':
     app.run(debug=True)
-
