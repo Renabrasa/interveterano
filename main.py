@@ -20,9 +20,6 @@ app.config.from_object(Config)
 # Inicializa DB
 db.init_app(app)
 
-with app.app_context():
-    db.create_all()
-
 # Registro de Blueprints
 app.register_blueprint(plantel_bp)
 app.register_blueprint(convidado_bp)
