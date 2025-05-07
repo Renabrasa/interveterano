@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block content %}
+<style>
+    body, html {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        background-color: #800000;
+    }
+
+    .home-wrapper {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: calc(100vh - 40px); /* para compensar o menu lateral */
+        background-color: #800000;
+    }
+
+    .home-wrapper img {
+        max-width: 90vw;
+        max-height: 90vh;
+        border-radius: 10px;
+    }
+</style>
+
+<div class="home-wrapper">
+    <img src="{{ url_for('static', filename='img/home_inter.png') }}" alt="Inter Veterano">
+</div>
+{% endblock %}

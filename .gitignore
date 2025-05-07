@@ -27,3 +27,12 @@ dist/
 # Ignorar arquivos de configuração locais
 instance/
 config_local.py
+main_local.py
+fundoPhotoshop.psd
+plantel.psd
+routes/__pycache__/auth.cpython-313.pyc
+routes/__pycache__/auth.cpython-313.pyc
+routes/__pycache__/plantel.cpython-313.pyc
+routes/__pycache__/performance.cpython-313.pyc
+routes/__pycache__/convidados.cpython-313.pyc
+routes/__pycache__/auth.cpython-313.pyc

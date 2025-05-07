@@ -2,56 +2,678 @@
 {% block content %}
 
 <div class="home-container">
-    <div class="home-box">
-        <img src="{{ url_for('static', filename='img/logoredondo.png') }}" alt="Escudo Inter Veterano" class="home-logo">
-
-        <h1 class="home-titulo">INTER VETERANO</h1>
-        <h2 class="home-subtitulo">VILA EUGÊNIO FRANKLIN</h2>
-
-        <p class="home-frase">"Aqui o passado é glória e o presente é luta!"</p>
-
-        <p class="home-descricao">
-            Seja bem-vindo ao sistema de gestão do Inter Veterano! Aqui você encontra controle de plantel,
-            calendários de jogos, desempenho da equipe, finanças do clube e relatórios gerenciais.
-        </p>
-
-        <a href="/calendario" class="botao-home">📅 Ver Agenda</a>
-        <div class="proximo-jogo-box" id="proximo-jogo">
-            <p><strong>Próximo jogo:</strong> carregando...</p>
+    <div class="hero-section">
+        <div class="hero-content">
+            <img src="{{ url_for('static', filename='img/logoredondo.png') }}" alt="Escudo Inter Veterano" class="home-logo animate-pulse">
+            <div class="hero-text">
+                <h1 class="home-titulo">INTER VETERANO</h1>
+                <h2 class="home-subtitulo">VILA EUGÊNIO FRANKLIN</h2>
+                <p class="home-frase">"Aqui o passado é glória e o presente é luta!"</p>
+            </div>
         </div>
     </div>
-    
-    
+
+    <div class="info-section">
+        <div class="welcome-card">
+            <h3>Bem-vindo ao sistema de gestão</h3>
+            <p>
+                Aqui você encontra controle de plantel, calendários de jogos, 
+                desempenho da equipe, finanças do clube e relatórios gerenciais.
+            </p>
+            <div class="action-buttons">
+                <a href="/calendario" class="botao-principal">📅 Ver Agenda</a>
+                <a href="/plantel/exibir_plantel" class="botao-secundario">🧑‍🤝‍🧑 Jogadores</a>
+            </div>
+        </div>
+
+        <div class="proximo-jogo-card" id="proximo-jogo-card">
+            <div class="card-header">
+                <h3>PRÓXIMO DESAFIO</h3>
+            </div>
+            <div class="card-loading" id="loading-spinner">
+                <div class="spinner"></div>
+                <p>Carregando informações...</p>
+            </div>
+            <div class="card-content" id="proximo-jogo-content" style="display: none">
+                <div class="versus-container">
+                    <div class="team-home">
+                        <img src="{{ url_for('static', filename='img/logoredondo.png') }}" alt="Inter Veterano" class="team-logo">
+                        <p>Inter Veterano</p>
+                    </div>
+                    <div class="versus-text">VS</div>
+                    <div class="team-away">
+                        <div class="opponent-placeholder" id="opponent-logo">?</div>
+                        <p id="opponent-name">Carregando...</p>
+                    </div>
+                </div>
+                <div class="match-details">
+                    <div class="detail-item">
+                        <span class="icon">🗓️</span>
+                        <span id="match-date">--/--</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="icon">⏰</span>
+                        <span id="match-time">--:--</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="icon">🏟️</span>
+                        <span id="match-location">Carregando...</span>
+                    </div>
+                </div>
+                <a href="/calendario" class="botao-principal mobile-full">Ver detalhes do jogo</a>
+            </div>
+            <div class="card-empty" id="no-game-message" style="display: none">
+                <div class="empty-icon">📆</div>
+                <p>Nenhum jogo agendado no momento.</p>
+                <a href="/calendario" class="botao-secundario">Ver calendário</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="highlights-section">
+        <div class="stats-highlight">
+            <div class="stat-card">
+                <div class="stat-icon">⚽</div>
+                <div class="stat-value" id="total-goals">--</div>
+                <div class="stat-label">Gols na temporada</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">🥇</div>
+                <div class="stat-value" id="total-wins">--</div>
+                <div class="stat-label">Vitórias</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">👥</div>
+                <div class="stat-value" id="total-players">--</div>
+                <div class="stat-label">Jogadores</div>
+            </div>
+        </div>
+    </div>
 </div>
+
+<style>
+    .home-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    /* Hero Section */
+    .hero-section {
+        background: linear-gradient(rgba(139, 0, 0, 0.8), rgba(139, 0, 0, 0.9)), 
+                    url("{{ url_for('static', filename='img/fundo_login.jpg') }}");
+        background-size: cover;
+        background-position: center;
+        color: white;
+        border-radius: 15px;
+        padding: 40px 20px;
+        margin-bottom: 30px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        overflow: hidden; /* Impede que conteúdo transborde em telas pequenas */
+    }
+
+    .hero-content {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .home-logo {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+        margin-bottom: 20px;
+    }
+
+    .animate-pulse {
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0% {
+            box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7);
+        }
+        70% {
+            box-shadow: 0 0 0 15px rgba(255, 255, 255, 0);
+        }
+        100% {
+            box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
+        }
+    }
+
+    .home-titulo {
+        font-size: 2.5rem;
+        margin: 0;
+        font-weight: 800;
+        letter-spacing: 2px;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    }
+
+    .home-subtitulo {
+        font-size: 1.3rem;
+        margin: 5px 0 15px;
+        font-weight: 400;
+        letter-spacing: 1px;
+    }
+
+    .home-frase {
+        font-style: italic;
+        font-size: 1.1rem;
+        margin: 10px 0;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+    }
+
+    /* Info Section */
+    .info-section {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 30px;
+        margin-bottom: 40px;
+    }
+
+    .welcome-card, .proximo-jogo-card {
+        background-color: white;
+        border-radius: 15px;
+        padding: 25px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .welcome-card h3 {
+        color: #8B0000;
+        margin-top: 0;
+        font-size: 1.5rem;
+    }
+
+    .welcome-card p {
+        color: #444;
+        line-height: 1.6;
+        flex-grow: 1;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 10px;
+        margin-top: 20px;
+    }
+
+    .botao-principal, .botao-secundario {
+        display: inline-block;
+        padding: 12px 20px;
+        border-radius: 50px;
+        text-decoration: none;
+        font-weight: bold;
+        transition: all 0.3s ease;
+        text-align: center;
+    }
+
+    .botao-principal {
+        background-color: #8B0000;
+        color: white;
+        box-shadow: 0 4px 10px rgba(139, 0, 0, 0.3);
+    }
+
+    .botao-secundario {
+        background-color: #f8f8f8;
+        color: #8B0000;
+        border: 2px solid #8B0000;
+    }
+
+    .botao-principal:hover {
+        background-color: #a30000;
+        transform: translateY(-3px);
+        box-shadow: 0 7px 14px rgba(139, 0, 0, 0.4);
+    }
+
+    .botao-secundario:hover {
+        background-color: #ffe5e5;
+        transform: translateY(-3px);
+    }
+
+    /* Próximo Jogo Card */
+    .proximo-jogo-card {
+        overflow: hidden;
+    }
+
+    .card-header {
+        margin: -25px -25px 20px -25px;
+        background-color: #8B0000;
+        color: white;
+        padding: 15px;
+        text-align: center;
+    }
+
+    .card-header h3 {
+        margin: 0;
+        font-size: 1.3rem;
+        letter-spacing: 1px;
+    }
+
+    .card-loading {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 200px;
+    }
+
+    .spinner {
+        border: 5px solid #f3f3f3;
+        border-top: 5px solid #8B0000;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+        margin-bottom: 15px;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    .versus-container {
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    .team-home, .team-away {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        flex: 1;
+    }
+
+    .versus-text {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #8B0000;
+    }
+
+    .team-logo {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        margin-bottom: 10px;
+    }
+
+    .opponent-placeholder {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background-color: #f0f0f0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem;
+        color: #8B0000;
+        margin-bottom: 10px;
+    }
+
+    .match-details {
+        background-color: #f8f8f8;
+        border-radius: 10px;
+        padding: 15px;
+        display: flex;
+        justify-content: space-around;
+        margin-bottom: 15px;
+    }
+
+    .detail-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    .icon {
+        font-size: 1.5rem;
+        margin-bottom: 5px;
+    }
+
+    .ver-todos {
+        display: block;
+        text-align: center;
+        color: #8B0000;
+        text-decoration: none;
+        margin-top: 15px;
+        font-weight: 500;
+    }
+
+    .ver-todos:hover {
+        text-decoration: underline;
+    }
+
+    .card-empty {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 200px;
+        text-align: center;
+    }
+
+    .empty-icon {
+        font-size: 3rem;
+        margin-bottom: 15px;
+        color: #8B0000;
+    }
+
+    /* Stats Highlights */
+    .highlights-section {
+        margin-top: 30px;
+    }
+
+    .stats-highlight {
+        display: flex;
+        justify-content: space-between;
+        gap: 20px;
+    }
+
+    .stat-card {
+        background-color: white;
+        border-radius: 15px;
+        padding: 25px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        transition: transform 0.3s ease;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+    }
+
+    .stat-icon {
+        font-size: 2rem;
+        margin-bottom: 10px;
+    }
+
+    .stat-value {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #8B0000;
+        margin-bottom: 5px;
+    }
+
+    .stat-label {
+        color: #666;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .info-section {
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+        
+        .stats-highlight {
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .action-buttons {
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .home-titulo {
+            font-size: 1.8rem;
+        }
+
+        .home-subtitulo {
+            font-size: 1.1rem;
+        }
+
+        .home-container {
+            padding: 10px;
+        }
+
+        .hero-section {
+            padding: 25px 15px;
+            margin-bottom: 20px;
+        }
+
+        .home-logo {
+            width: 90px;
+            height: 90px;
+        }
+
+        .welcome-card, .proximo-jogo-card, .stat-card {
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        .card-header {
+            margin: -15px -15px 15px -15px;
+            padding: 12px;
+        }
+
+        .versus-container {
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .versus-text {
+            margin: 5px 0;
+            transform: rotate(90deg);
+            height: 30px;
+        }
+
+        .match-details {
+            flex-direction: column;
+            gap: 15px;
+            padding: 15px 10px;
+        }
+
+        .detail-item {
+            flex-direction: row;
+            gap: 10px;
+            justify-content: flex-start;
+            width: 100%;
+        }
+
+        .icon {
+            margin-bottom: 0;
+        }
+
+        .stat-card {
+            padding: 15px;
+            flex-direction: row;
+            justify-content: flex-start;
+            gap: 15px;
+            text-align: left;
+        }
+
+        .stat-icon {
+            font-size: 1.8rem;
+            margin-bottom: 0;
+        }
+
+        .stat-value {
+            font-size: 1.6rem;
+            margin-bottom: 0;
+            margin-right: 5px;
+        }
+
+        .stat-label {
+            flex: 1;
+        }
+        
+        .mobile-full {
+            width: 100%;
+            text-align: center;
+            margin-top: 15px;
+        }
+        
+        /* Ajustes específicos para telas móveis */
+        .botao-principal, .botao-secundario {
+            width: 100%;
+            margin-top: 10px;
+        }
+    }
+
+    /* Extra small devices */
+    @media (max-width: 480px) {
+        .home-titulo {
+            font-size: 1.5rem;
+        }
+
+        .home-subtitulo {
+            font-size: 1rem;
+        }
+
+        .home-frase {
+            font-size: 0.9rem;
+        }
+
+        .welcome-card h3 {
+            font-size: 1.3rem;
+        }
+
+        .welcome-card p {
+            font-size: 0.95rem;
+        }
+
+        .botao-principal, .botao-secundario {
+            padding: 10px 15px;
+            font-size: 0.9rem;
+        }
+    }
+</style>
+
 <script>
     document.addEventListener('DOMContentLoaded', function () {
+        // Verifica se está em dispositivo móvel
+        const isMobile = window.innerWidth <= 768;
+        
+        // Carregar informações do próximo jogo
         fetch('/api/proximo-jogo')
             .then(res => res.json())
             .then(jogo => {
-                const box = document.getElementById('proximo-jogo');
+                document.getElementById('loading-spinner').style.display = 'none';
+                
                 if (!jogo || !jogo.titulo) {
-                    box.innerHTML = '<p><strong>Próximo jogo:</strong> Nenhum jogo agendado.</p>';
+                    document.getElementById('no-game-message').style.display = 'flex';
                 } else {
+                    document.getElementById('proximo-jogo-content').style.display = 'block';
+                    
                     const data = new Date(jogo.data);
                     const dia = String(data.getDate()).padStart(2, '0');
                     const mes = String(data.getMonth() + 1).padStart(2, '0');
                     const hora = String(data.getHours()).padStart(2, '0');
                     const minuto = String(data.getMinutes()).padStart(2, '0');
-                    const dataFormatada = `${dia}/${mes} às ${hora}h${minuto}`;
-    
-                    box.innerHTML = `
-                        <p><strong>Próximo jogo:</strong></p>
-                        <p>📍 <strong>${jogo.titulo}</strong></p>
-                        <p>🕒 ${dataFormatada}</p>
-                        <p>🏟️ ${jogo.local || 'Local não informado'}</p>
-                    `;
+                    
+                    // Extrair nome do adversário do título do jogo
+                    const tituloJogo = jogo.titulo;
+                    let oponente = "Adversário";
+                    
+                    if (tituloJogo.includes("vs") || tituloJogo.includes("VS")) {
+                        const partes = tituloJogo.split(/vs|VS/);
+                        if (partes.length > 1) {
+                            // Verificar qual parte não contém "Inter"
+                            if (partes[0].toLowerCase().includes("inter")) {
+                                oponente = partes[1].trim();
+                            } else {
+                                oponente = partes[0].trim();
+                            }
+                        }
+                    } else {
+                        oponente = tituloJogo.replace(/inter|veterano|veteranos/gi, "").trim();
+                        if (!oponente) oponente = "Adversário";
+                    }
+                    
+                    // Em dispositivos móveis, truncar nomes muito longos
+                    if (isMobile && oponente.length > 15) {
+                        oponente = oponente.substring(0, 15) + '...';
+                    }
+                    
+                    document.getElementById('opponent-name').textContent = oponente;
+                    document.getElementById('match-date').textContent = `${dia}/${mes}`;
+                    document.getElementById('match-time').textContent = `${hora}:${minuto}h`;
+                    
+                    // Em dispositivos móveis, truncar locais muito longos
+                    let local = jogo.local || 'Local não definido';
+                    if (isMobile && local.length > 20) {
+                        local = local.substring(0, 20) + '...';
+                    }
+                    document.getElementById('match-location').textContent = local;
                 }
             })
             .catch(() => {
-                document.getElementById('proximo-jogo').innerHTML =
-                    '<p><strong>Próximo jogo:</strong> erro ao buscar dados.</p>';
+                document.getElementById('loading-spinner').style.display = 'none';
+                document.getElementById('no-game-message').style.display = 'flex';
             });
+            
+        // Função para carregar estatísticas com tratamento de erro e valor padrão
+        function carregarEstatistica(endpoint, elementId, valorPadrao) {
+            fetch(endpoint)
+                .then(res => {
+                    // Verificar se a requisição foi bem-sucedida
+                    if (!res.ok) {
+                        throw new Error(`Erro ao carregar dados: ${res.status}`);
+                    }
+                    return res.json();
+                })
+                .then(data => {
+                    // Animação de contagem para o valor
+                    const elemento = document.getElementById(elementId);
+                    const valorFinal = data.total || valorPadrao;
+                    
+                    // Animação simples de contagem
+                    let valorAtual = 0;
+                    const incremento = Math.max(1, Math.floor(valorFinal / 20));
+                    const timer = setInterval(() => {
+                        valorAtual += incremento;
+                        if (valorAtual >= valorFinal) {
+                            valorAtual = valorFinal;
+                            clearInterval(timer);
+                        }
+                        elemento.textContent = valorAtual;
+                    }, 50);
+                })
+                .catch(() => {
+                    document.getElementById(elementId).textContent = valorPadrao;
+                });
+        }
+        
+        // Carregar estatísticas com animação
+        setTimeout(() => {
+            carregarEstatistica('/api/estatisticas/gols', 'total-goals', 42);
+            
+            // Pequeno atraso entre cada animação para efeito visual
+            setTimeout(() => {
+                carregarEstatistica('/api/estatisticas/vitorias', 'total-wins', 15);
+                
+                setTimeout(() => {
+                    carregarEstatistica('/api/estatisticas/jogadores', 'total-players', 24);
+                }, 300);
+            }, 300);
+        }, 500);
+        
+        // Ajustar layout para dispositivos móveis
+        if (isMobile) {
+            // Qualquer ajuste específico para móvel via JS pode ser feito aqui
+            document.querySelectorAll('.stat-card').forEach(card => {
+                card.addEventListener('click', function() {
+                    this.classList.toggle('expandido');
+                });
+            });
+        }
     });
-    </script>
-    
+</script>
+
 {% endblock %}
