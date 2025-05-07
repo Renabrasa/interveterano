@@ -13,4 +13,5 @@ services:
       - key: SECRET_KEY
         value: chave-secreta
       - key: SQLALCHEMY_DATABASE_URI
-        value: mysql+pymysql://rena1558_interadmin:Intervet2025@br24.hostgator.com.br/rena1558_intervetdb
+        value: mysql+pymysql://admin:Intervet2025@intervetdb.cep6qq66kx3j.us-east-1.rds.amazonaws.com:3306/intervetdb
+
