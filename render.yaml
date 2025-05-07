@@ -2,8 +2,10 @@ services:
   - type: web
     name: inter-veterano
     env: python
-    buildCommand: ""
+    buildCommand: pip install -r requirements.txt
     startCommand: gunicorn main:app
     envVars:
-      - key: FLASK_ENV
-        value: production
+      - key: DATABASE_URL
+        value: mysql+pymysql://rena1558_interadmin:Intervet2025@interveterano.com/rena1558_intervetdb
+      - key: SECRET_KEY
+        value: chave-secreta
