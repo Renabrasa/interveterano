@@ -170,7 +170,7 @@ def editar_jogador(id):
         flash('Jogador atualizado com sucesso!', 'sucesso')
         return redirect(url_for('plantel.exibir_plantel'))
 
-    return render_template('plantel/editar.html', jogador=jogador, categorias=categorias, posicoes=posicoes)
+    return render_template("editar.html", jogador=jogador, categorias=categorias, posicoes=posicoes)
 
 
 
