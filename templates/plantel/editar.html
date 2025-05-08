@@ -35,16 +35,17 @@
                 <label for="categoria-jogador">Categoria*</label>
                 <select name="categoria" id="categoria-jogador" required>
                   {% for cat in categorias %}
-                  <option value="{{ cat.nome }}" {% if jogador.categoria_id == cat.nome %}selected{% endif %}>{{ cat.nome }}</option>
+                  <option value="{{ cat.id }}" {% if jogador.categoria == cat.nome %}selected{% endif %}>{{ cat.nome }}</option>
                   {% endfor %}
                 </select>
+                
               </div>
 
               <div class="grupo-campo">
                 <label for="posicao-jogador">Posição*</label>
                 <select name="posicao" id="posicao-jogador" required>
                   {% for pos in posicoes %}
-                  <option value="{{ pos.nome }}" {% if jogador.posicao_id == pos.nome %}selected{% endif %}>{{ pos.nome }}</option>
+                  <option value="{{ pos.id }}" {% if jogador.posicao == pos.nome %}selected{% endif %}>{{ pos.nome }}</option>
                   {% endfor %}
                 </select>
               </div>
