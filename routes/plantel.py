@@ -51,8 +51,8 @@ def exibir_plantel():
 @login_required
 def adicionar_jogador():
     nome = request.form['nome']
-    categoria = request.form['categoria']
-    posicao = request.form['posicao']
+    categoria_id = request.form['categoria']
+    posicao_id = request.form['posicao']
     pe_preferencial = request.form['pe_preferencial']
 
     jogador_existente = Pessoa.query.filter(
@@ -64,23 +64,28 @@ def adicionar_jogador():
         flash('Já existe um jogador com esse nome!', 'erro')
         return redirect(url_for('plantel.exibir_plantel'))
 
+    # Buscar os nomes da categoria e posição
+    categoria_nome = request.form['categoria']
+    posicao_nome = request.form['posicao']
+
+
     # Foto
     foto = request.files['foto']
     foto_base64 = None
     if foto and foto.filename != '':
         foto_base64 = base64.b64encode(foto.read()).decode('utf-8')
 
-    # Data de desligamento (opcional)
+    # Datas
     data_inativacao_str = request.form.get('data_inativacao')
     data_inativacao = datetime.strptime(data_inativacao_str, '%Y-%m-%d') if data_inativacao_str else None
+
     data_nascimento_str = request.form.get('data_nascimento')
     data_nascimento = datetime.strptime(data_nascimento_str, '%Y-%m-%d').date() if data_nascimento_str else None
 
-
     nova_pessoa = Pessoa(
         nome=nome,
-        categoria=categoria,
-        posicao=posicao,
+        categoria=categoria_nome,
+        posicao=posicao_nome,
         pe_preferencial=pe_preferencial,
         foto=foto_base64,
         tipo='jogador',
@@ -94,7 +99,6 @@ def adicionar_jogador():
     flash('Jogador cadastrado com sucesso!', 'sucesso')
     return redirect(url_for('plantel.exibir_plantel'))
 
-from datetime import datetime
 
 @plantel_bp.route('/editar/<int:id>', methods=['POST'], endpoint='atualizar_jogador')
 @login_required
