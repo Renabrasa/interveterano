@@ -208,34 +208,6 @@
       </div>
 </div>
 
-      <h2 class="titulo-setor" style="margin-top: 40px;">Convidados</h2>
-      
-<div class="pesquisa-container">
-  <div class="campo-pesquisa-wrapper">
-    <i class="fas fa-search icone-pesquisa"></i>
-    <input type="text" id="pesquisaJogadorAtivo" placeholder="Pesquisar jogador..." class="campo-pesquisa">
-    <button id="limparPesquisaAtivos" class="btn-limpar-pesquisa" title="Limpar pesquisa">
-      <i class="fas fa-times"></i>
-    </button>
-  </div>
-
-  <div class="filtros-container">
-    <select id="filtroCategoriaAtivos" class="filtro-select">
-      <option value="">Todas as categorias</option>
-      {% for cat in categorias %}
-      <option value="{{ cat.nome }}">{{ cat.nome }}</option>
-      {% endfor %}
-    </select>
-
-    <select id="filtroPosicaoAtivos" class="filtro-select">
-      <option value="">Todas as posições</option>
-      {% for pos in posicoes %}
-      <option value="{{ pos.nome }}">{{ pos.nome }}</option>
-      {% endfor %}
-    </select>
-  </div>
-</div>
-<div id="cartoes-ativos">
 
   <div class="cartoes-container">
         {% for convidado in convidados_ativos %}
