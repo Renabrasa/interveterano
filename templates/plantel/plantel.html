@@ -39,7 +39,7 @@
       </button>
       {% endif %}
     </div>
-  
+
 
     <!-- FORMULÁRIO DE CADASTRO -->
     {% if 'usuario' in session %}
@@ -47,7 +47,7 @@
       <div class="form-card">
         <form action="{{ url_for('plantel.adicionar_jogador') }}" method="POST" enctype="multipart/form-data"
           class="form-jogador" id="formJogador">
-          
+
           <div class="form-linha">
             <!-- FOTO -->
             <div class="col-esquerda">
@@ -132,31 +132,36 @@
 
     <!-- JOGADORES ATIVOS -->
     <div class="aba-conteudo" id="aba-ativos">
-      <div class="pesquisa-container">
-        <div class="campo-pesquisa-wrapper">
-          <i class="fas fa-search icone-pesquisa"></i>
-          <input type="text" id="pesquisaJogadorAtivo" placeholder="Pesquisar jogador..." class="campo-pesquisa">
-          <button id="limparPesquisaAtivos" class="btn-limpar-pesquisa" title="Limpar pesquisa">
-            <i class="fas fa-times"></i>
-          </button>
-        </div>
-        <div class="filtros-container">
-          <select id="filtroCategoriaAtivos" class="filtro-select">
-            <option value="">Todas as categorias</option>
-            {% for cat in categorias %}
-            <option value="{{ cat.nome }}">{{ cat.nome }}</option>
-            {% endfor %}
-          </select>
-          <select id="filtroPosicaoAtivos" class="filtro-select">
-            <option value="">Todas as posições</option>
-            {% for pos in posicoes %}
-            <option value="{{ pos.nome }}">{{ pos.nome }}</option>
-            {% endfor %}
-          </select>
-        </div>
-      </div>
+      <h2 class="titulo-setor">Jogadores</h2>
+      
+<div class="pesquisa-container">
+  <div class="campo-pesquisa-wrapper">
+    <i class="fas fa-search icone-pesquisa"></i>
+    <input type="text" id="pesquisaJogadorAtivo" placeholder="Pesquisar jogador..." class="campo-pesquisa">
+    <button id="limparPesquisaAtivos" class="btn-limpar-pesquisa" title="Limpar pesquisa">
+      <i class="fas fa-times"></i>
+    </button>
+  </div>
 
-      <div class="cartoes-container" id="cartoes-ativos">
+  <div class="filtros-container">
+    <select id="filtroCategoriaAtivos" class="filtro-select">
+      <option value="">Todas as categorias</option>
+      {% for cat in categorias %}
+      <option value="{{ cat.nome }}">{{ cat.nome }}</option>
+      {% endfor %}
+    </select>
+
+    <select id="filtroPosicaoAtivos" class="filtro-select">
+      <option value="">Todas as posições</option>
+      {% for pos in posicoes %}
+      <option value="{{ pos.nome }}">{{ pos.nome }}</option>
+      {% endfor %}
+    </select>
+  </div>
+</div>
+<div id="cartoes-ativos">
+
+  <div class="cartoes-container">
         {% for jogador in jogadores_ativos %}
         <div class="cartao-jogador" data-categoria="{{ jogador.categoria }}" data-posicao="{{ jogador.posicao }}">
           <div class="cartao-cabecalho">
@@ -174,7 +179,8 @@
             <h3 class="cartao-nome">{{ jogador.nome }}</h3>
             <p class="cartao-detalhes">
               <span class="detalhe-pe">
-                <i class="fas {{ 'fa-shoe-prints' if jogador.pe_preferencial == 'Direito' else 'fa-shoe-prints fa-flip-horizontal' }}"></i> 
+                <i
+                  class="fas {{ 'fa-shoe-prints' if jogador.pe_preferencial == 'Direito' else 'fa-shoe-prints fa-flip-horizontal' }}"></i>
                 {{ jogador.pe_preferencial }}
               </span>
               {% if jogador.data_nascimento %}
@@ -189,7 +195,8 @@
             <a href="{{ url_for('plantel.editar_jogador', id=jogador.id) }}" class="btn-acao editar" title="Editar">
               <i class="fas fa-edit"></i>
             </a>
-            <form method="POST" action="{{ url_for('plantel.desligar_jogador', pessoa_id=jogador.id) }}" class="form-inline">
+            <form method="POST" action="{{ url_for('plantel.desligar_jogador', pessoa_id=jogador.id) }}"
+              class="form-inline">
               <button type="submit" class="btn-acao desligar" title="Desligar jogador">
                 <i class="fas fa-user-slash"></i>
               </button>
@@ -199,19 +206,93 @@
         </div>
         {% endfor %}
       </div>
+</div>
 
-      <div class="sem-resultados" id="sem-resultados-ativos" style="display: none;">
-        <i class="fas fa-search"></i>
-        <p>Nenhum jogador encontrado com esses critérios de busca.</p>
+      <h2 class="titulo-setor" style="margin-top: 40px;">Convidados</h2>
+      
+<div class="pesquisa-container">
+  <div class="campo-pesquisa-wrapper">
+    <i class="fas fa-search icone-pesquisa"></i>
+    <input type="text" id="pesquisaJogadorAtivo" placeholder="Pesquisar jogador..." class="campo-pesquisa">
+    <button id="limparPesquisaAtivos" class="btn-limpar-pesquisa" title="Limpar pesquisa">
+      <i class="fas fa-times"></i>
+    </button>
+  </div>
+
+  <div class="filtros-container">
+    <select id="filtroCategoriaAtivos" class="filtro-select">
+      <option value="">Todas as categorias</option>
+      {% for cat in categorias %}
+      <option value="{{ cat.nome }}">{{ cat.nome }}</option>
+      {% endfor %}
+    </select>
+
+    <select id="filtroPosicaoAtivos" class="filtro-select">
+      <option value="">Todas as posições</option>
+      {% for pos in posicoes %}
+      <option value="{{ pos.nome }}">{{ pos.nome }}</option>
+      {% endfor %}
+    </select>
+  </div>
+</div>
+<div id="cartoes-ativos">
+
+  <div class="cartoes-container">
+        {% for convidado in convidados_ativos %}
+        <div class="cartao-jogador" data-categoria="{{ convidado.categoria }}" data-posicao="{{ convidado.posicao }}">
+          <div class="cartao-cabecalho">
+            <span class="cartao-categoria">{{ convidado.categoria }}</span>
+            <span class="cartao-posicao">{{ convidado.posicao }}</span>
+          </div>
+          <div class="cartao-foto">
+            {% if convidado.foto %}
+            <img src="data:image/jpeg;base64,{{ convidado.foto }}" alt="{{ convidado.nome }}">
+            {% else %}
+            <img src="{{ url_for('static', filename='img/avatar_padrao.png') }}" alt="Sem foto">
+            {% endif %}
+          </div>
+          <div class="cartao-info">
+            <h3 class="cartao-nome">{{ convidado.nome }}</h3>
+            <p class="cartao-detalhes">
+              <span class="detalhe-pe">
+                <i
+                  class="fas {{ 'fa-shoe-prints' if convidado.pe_preferencial == 'Direito' else 'fa-shoe-prints fa-flip-horizontal' }}"></i>
+                {{ convidado.pe_preferencial }}
+              </span>
+              {% if convidado.data_nascimento %}
+              <span class="detalhe-idade">
+                <i class="fas fa-birthday-cake"></i> {{ calcular_idade(convidado.data_nascimento) }} anos
+              </span>
+              {% endif %}
+            </p>
+          </div>
+          {% if 'usuario' in session %}
+          <div class="cartao-acoes">
+            <a href="{{ url_for('plantel.editar_jogador', id=convidado.id) }}" class="btn-acao editar" title="Editar">
+              <i class="fas fa-edit"></i>
+            </a>
+            <form method="POST" action="{{ url_for('plantel.desligar_jogador', pessoa_id=convidado.id) }}"
+              class="form-inline">
+              <button type="submit" class="btn-acao desligar" title="Desligar convidado">
+                <i class="fas fa-user-slash"></i>
+              </button>
+            </form>
+          </div>
+          {% endif %}
+        </div>
+        {% endfor %}
       </div>
+</div>
     </div>
+
 
     <!-- JOGADORES DESLIGADOS -->
     <div class="aba-conteudo" id="aba-desligados">
       <div class="pesquisa-container">
         <div class="campo-pesquisa-wrapper">
           <i class="fas fa-search icone-pesquisa"></i>
-          <input type="text" id="pesquisaJogadorDesligado" placeholder="Pesquisar jogador desligado..." class="campo-pesquisa">
+          <input type="text" id="pesquisaJogadorDesligado" placeholder="Pesquisar jogador desligado..."
+            class="campo-pesquisa">
           <button id="limparPesquisaDesligados" class="btn-limpar-pesquisa" title="Limpar pesquisa">
             <i class="fas fa-times"></i>
           </button>
@@ -343,8 +424,15 @@
   }
 
   @keyframes slideIn {
-    from { transform: translateX(100%); opacity: 0; }
-    to { transform: translateX(0); opacity: 1; }
+    from {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
   }
 
   .alerta.erro {
@@ -432,8 +520,13 @@
   }
 
   @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from {
+      opacity: 0;
+    }
+
+    to {
+      opacity: 1;
+    }
   }
 
   /* === FORMULÁRIO === */
@@ -691,7 +784,7 @@
     border-bottom: 1px solid var(--cor-borda);
   }
 
-  .cartao-categoria, 
+  .cartao-categoria,
   .cartao-posicao {
     font-size: 12px;
     font-weight: 600;
@@ -744,7 +837,7 @@
     color: var(--cor-texto-claro);
   }
 
-  .detalhe-pe, 
+  .detalhe-pe,
   .detalhe-idade {
     display: flex;
     align-items: center;
@@ -865,7 +958,7 @@
       flex-direction: column-reverse;
     }
 
-    .btn-primario, 
+    .btn-primario,
     .btn-secundario {
       width: 100%;
       justify-content: center;
@@ -897,11 +990,11 @@
 </style>
 
 <script>
-  document.addEventListener('DOMContentLoaded', function() {
+  document.addEventListener('DOMContentLoaded', function () {
     // Inicialização das abas
     const abaBtns = document.querySelectorAll('.aba-btn');
     abaBtns.forEach(btn => {
-      btn.addEventListener('click', function() {
+      btn.addEventListener('click', function () {
         const abaId = this.getAttribute('data-aba');
         mostrarAba(abaId);
       });
@@ -912,7 +1005,7 @@
     const fotoPreview = document.getElementById('fotoPreview');
     const fotoWrapper = document.querySelector('.foto-wrapper');
 
-        if (fotoWrapper && fotoInput && fotoPreview) {
+    if (fotoWrapper && fotoInput && fotoPreview) {
       fotoWrapper.addEventListener('click', () => fotoInput.click());
 
       fotoInput.addEventListener('change', function () {
@@ -1027,10 +1120,10 @@
     filtroPosicao.addEventListener('change', aplicarFiltros);
   });
   {% if not 'usuario' in session %}
-document.addEventListener('DOMContentLoaded', function() {
-  mostrarAba('ativos');
-});
-{% endif %}
+  document.addEventListener('DOMContentLoaded', function () {
+    mostrarAba('ativos');
+  });
+  {% endif %}
 
 </script>
 

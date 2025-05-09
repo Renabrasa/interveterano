@@ -19,24 +19,20 @@ def calcular_idade(nascimento):
 
 
 @plantel_bp.route('/plantel')
-#@login_required
 def exibir_plantel():
-    print(session)
-    jogadores_ativos = Pessoa.query.filter(
-        Pessoa.ativo == True,
-        Pessoa.tipo.in_(['jogador', 'goleiro', 'treinador', 'presidente']),
+    # [X]
+    jogadores_ativos = Pessoa.query.filter_by(tipo='jogador', ativo=True).filter(
         Pessoa.data_inativacao == None
     ).order_by(Pessoa.nome).all()
 
-    jogadores_desligados = Pessoa.query.filter(
-        Pessoa.ativo == True,
-        Pessoa.tipo.in_(['jogador', 'goleiro', 'treinador', 'presidente']),
+    jogadores_desligados = Pessoa.query.filter_by(tipo='jogador', ativo=True).filter(
         Pessoa.data_inativacao != None
     ).order_by(Pessoa.nome).all()
+    # [Y]
 
     categorias = Categoria.query.all()
     posicoes = Posicao.query.all()
-    
+
     return render_template(
         'plantel.html',
         jogadores_ativos=jogadores_ativos,
@@ -45,6 +41,8 @@ def exibir_plantel():
         posicoes=posicoes,
         calcular_idade=calcular_idade
     )
+
+
 
 
 @plantel_bp.route('/plantel/adicionar', methods=['POST'])

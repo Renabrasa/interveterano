@@ -1,698 +1,766 @@
 {% extends 'base.html' %}
 {% block content %}
 
-<h1 class="titulo-pagina">Editar Convidado</h1>
+<div class="pagina-container">
+  <h1 class="titulo-pagina">Editar Jogador</h1>
 
-<div class="form-card">
+  <div class="painel-principal">
+    <div class="form-card">
+      <form action="{{ url_for('plantel.atualizar_jogador', id=jogador.id) }}" method="POST" enctype="multipart/form-data" class="form-jogador" id="formJogador">
 
-  {% if convidado.foto %}
-  <form action="{{ url_for('convidado.remover_foto', convidado_id=convidado.id) }}" method="post" class="form-remover-foto">
-    <button type="submit" class="btn-remover-foto">🗑️</button>
-  </form>
-  {% endif %}
+        <div class="form-linha">
+          <!-- FOTO -->
+          <div class="col-esquerda">
+            <div class="foto-container">
+              <div class="foto-wrapper">
+                <img src="{{ 'data:image/jpeg;base64,' ~ jogador.foto if jogador.foto else url_for('static', filename='img/avatar_padrao.png') }}" alt="Foto do Jogador" class="foto-preview" id="fotoPreview">
+                <div class="foto-overlay">
+                  <i class="fas fa-camera"></i>
+                  <span>Alterar foto</span>
+                </div>
 
-  <form method="POST" enctype="multipart/form-data" class="form-jogador">
-    <div class="form-linha">
-      <!-- FOTO -->
-      <div class="col-esquerda">
-        <div class="foto-container">
-          <label for="foto-input">
-            <img src="data:image/jpeg;base64,{{ convidado.foto }}" alt="Foto do Convidado"
-              class="foto-preview"
-              onerror="this.src='{{ url_for('static', filename='img/avatar_padrao.png') }}'">
-          </label>
-          <input type="file" name="foto" id="foto-input" accept="image/*" style="display: none;">
-        </div>
-      </div>
-
-      <!-- CAMPOS -->
-      <div class="col-direita">
-        <input type="text" name="nome" value="{{ convidado.nome }}" placeholder="Nome do Convidado" required>
-
-        <select name="categoria" required>
-          {% for cat in categorias %}
-          <option value="{{ cat.id }}" {% if convidado.categoria_id==cat.id %}selected{% endif %}>{{ cat.nome }}</option>
-          {% endfor %}
-        </select>
-
-        <select name="posicao" required>
-          {% for pos in posicoes %}
-          <option value="{{ pos.id }}" {% if convidado.posicao_id==pos.id %}selected{% endif %}>{{ pos.nome }}</option>
-          {% endfor %}
-        </select>
-
-        <select name="pe_preferencial" required class="pe-preferencial">
-          <option value="Direito" {% if convidado.pe_preferencial=='Direito' %}selected{% endif %}>Direito</option>
-          <option value="Esquerdo" {% if convidado.pe_preferencial=='Esquerdo' %}selected{% endif %}>Esquerdo</option>
-          <option value="Ambos" {% if convidado.pe_preferencial=='Ambos' %}selected{% endif %}>Ambos</option>
-        </select>
-      </div>
-    </div>
-    
-  
-    <div class="botoes-finais">
-      <button type="submit" class="btn-salvar">Salvar Alterações</button>
-      <a href="{{ url_for('convidado.exibir_convidados') }}" class="btn-cancelar">Cancelar</a>
-    </div>
-    
-  </form>
+<div class="botoes-finais">
+  <a href="{% if jogador.tipo == 'convidado' %}{{ url_for('convidado.exibir_convidados') }}{% else %}{{ url_for('plantel.exibir_plantel') }}{% endif %}" class="btn-secundario">
+    <i class="fas fa-arrow-left"></i> Voltar
+  </a>
+  <button type="submit" class="btn-primario">
+    <i class="fas fa-save"></i> Atualizar
+  </button>
 </div>
 
-<style>
-  /* === VARIÁVEIS === */
-  :root {
-    --cor-primaria: #a00000;
-    --cor-primaria-escura: #800000;
-    --cor-primaria-clara: #cc0000;
-    --cor-secundaria: #333;
-    --cor-fundo: #f5f5f5;
-    --cor-borda: #ddd;
-    --cor-texto: #333;
-    --cor-texto-claro: #666;
-    --borda-raio: 8px;
-    --sombra-padrao: 0 4px 12px rgba(0, 0, 0, 0.1);
-    --transicao: all 0.3s ease;
-  }
 
-  /* === GERAIS === */
-  .pagina-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 20px;
-  }
-
-  .titulo-pagina {
-    text-align: center;
-    margin: 20px 0 30px;
-    font-size: 32px;
-    font-weight: bold;
-    color: var(--cor-primaria);
-    position: relative;
-  }
-
-  .titulo-pagina::after {
-    content: '';
-    display: block;
-    width: 60px;
-    height: 4px;
-    background-color: var(--cor-primaria);
-    margin: 10px auto 0;
-    border-radius: 2px;
-  }
-
-  .painel-principal {
-    background: white;
-    border-radius: var(--borda-raio);
-    box-shadow: var(--sombra-padrao);
-    overflow: hidden;
-  }
-
-  /* === ALERTAS === */
-  .alertas-container {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    width: 300px;
-    z-index: 1000;
-  }
-
-  .alerta {
-    position: relative;
-    padding: 15px;
-    margin-bottom: 15px;
-    border-radius: var(--borda-raio);
-    color: white;
-    background-color: #28a745;
-    box-shadow: var(--sombra-padrao);
-    animation: slideIn 0.3s ease forwards;
-  }
-
-  @keyframes slideIn {
-    from { transform: translateX(100%); opacity: 0; }
-    to { transform: translateX(0); opacity: 1; }
-  }
-
-  .alerta.erro {
-    background-color: #dc3545;
-  }
-
-  .alerta-conteudo {
-    display: flex;
-    align-items: center;
-  }
-
-  .alerta-icone {
-    margin-right: 10px;
-    font-size: 20px;
-  }
-
-  .alerta-fechar {
-    position: absolute;
-    top: 5px;
-    right: 5px;
-    background: none;
-    border: none;
-    color: white;
-    font-size: 20px;
-    cursor: pointer;
-  }
-
-  /* === ABAS === */
-  .abas-container {
-    display: flex;
-    background-color: #f0f0f0;
-    padding: 0;
-    overflow-x: auto;
-    border-bottom: 1px solid var(--cor-borda);
-  }
-
-  .aba-btn {
-    padding: 15px 25px;
-    background-color: transparent;
-    border: none;
-    color: var(--cor-texto-claro);
-    font-weight: 600;
-    font-size: 16px;
-    cursor: pointer;
-    transition: var(--transicao);
-    position: relative;
-    white-space: nowrap;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .aba-btn i {
-    font-size: 18px;
-  }
-
-  .aba-btn:hover {
-    background-color: rgba(0, 0, 0, 0.05);
-    color: var(--cor-primaria);
-  }
-
-  .aba-btn.ativo {
-    color: var(--cor-primaria);
-    background-color: white;
-  }
-
-  .aba-btn.ativo::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 3px;
-    background-color: var(--cor-primaria);
-  }
-
-  .aba-conteudo {
-    display: none;
-    padding: 30px;
-  }
-
-  .aba-conteudo.ativo {
-    display: block;
-    animation: fadeIn 0.3s ease;
-  }
-
-  @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-  }
-
-  /* === FORMULÁRIO === */
-  .form-card {
-    border-radius: var(--borda-raio);
-    overflow: hidden;
-  }
-
-  .form-jogador {
-    display: flex;
-    flex-direction: column;
-    gap: 25px;
-  }
-
-  .form-linha {
-    display: flex;
-    gap: 30px;
-    align-items: flex-start;
-  }
-
-  .col-esquerda {
-    width: 180px;
-  }
-
-  .foto-container {
-    width: 100%;
-  }
-
-  .foto-wrapper {
-    position: relative;
-    width: 100%;
-    height: 240px;
-    overflow: hidden;
-    border-radius: var(--borda-raio);
-    border: 2px solid var(--cor-borda);
-    cursor: pointer;
-    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
-  }
-
-  .foto-preview {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: var(--transicao);
-  }
-
-  .foto-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    color: white;
-    opacity: 0;
-    transition: var(--transicao);
-  }
-
-  .foto-overlay i {
-    font-size: 40px;
-    margin-bottom: 10px;
-  }
-
-  .foto-wrapper:hover .foto-overlay {
-    opacity: 1;
-  }
-
-  .foto-wrapper:hover .foto-preview {
-    transform: scale(1.05);
-  }
-
-  #foto-input {
-    display: none;
-  }
-
-  .col-direita {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-  }
-
-  .linha-2-colunas {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
-  }
-
-  .grupo-campo {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  .grupo-campo label {
-    font-weight: 600;
-    color: var(--cor-texto);
-    font-size: 14px;
-  }
-
-  input[type="text"],
-  input[type="date"],
-  select {
-    padding: 12px 15px;
-    border-radius: var(--borda-raio);
-    border: 1px solid var(--cor-borda);
-    font-size: 16px;
-    transition: var(--transicao);
-    background-color: #f9f9f9;
-  }
-
-  input[type="text"]:focus,
-  input[type="date"]:focus,
-  select:focus {
-    border-color: var(--cor-primaria);
-    box-shadow: 0 0 0 2px rgba(160, 0, 0, 0.1);
-    outline: none;
-  }
-
-  .botoes-finais {
-    display: flex;
-    justify-content: flex-end;
-    gap: 15px;
-    margin-top: 20px;
-  }
-
-  .btn-primario,
-  .btn-secundario {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 12px 20px;
-    border-radius: var(--borda-raio);
-    font-weight: 600;
-    font-size: 16px;
-    cursor: pointer;
-    transition: var(--transicao);
-  }
-
-  .btn-primario {
-    background-color: var(--cor-primaria);
-    color: white;
-    border: none;
-  }
-
-  .btn-primario:hover {
-    background-color: var(--cor-primaria-escura);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(160, 0, 0, 0.3);
-  }
-
-  .btn-secundario {
-    background-color: #f0f0f0;
-    color: var(--cor-texto);
-    border: 1px solid var(--cor-borda);
-  }
-
-  .btn-secundario:hover {
-    background-color: #e0e0e0;
-  }
-
-  /* === PESQUISA === */
-  .pesquisa-container {
-    margin-bottom: 25px;
-  }
-
-  .campo-pesquisa-wrapper {
-    position: relative;
-    margin-bottom: 15px;
-  }
-
-  .campo-pesquisa {
-    width: 100%;
-    padding: 14px 40px;
-    border-radius: 30px;
-    border: 1px solid var(--cor-borda);
-    font-size: 16px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-    transition: var(--transicao);
-  }
-
-  .campo-pesquisa:focus {
-    border-color: var(--cor-primaria);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    outline: none;
-  }
-
-  .icone-pesquisa {
-    position: absolute;
-    left: 15px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: #999;
-    font-size: 18px;
-  }
-
-  .btn-limpar-pesquisa {
-    position: absolute;
-    right: 15px;
-    top: 50%;
-    transform: translateY(-50%);
-    background: none;
-    border: none;
-    color: #999;
-    font-size: 18px;
-    cursor: pointer;
-    display: none;
-  }
-
-  .filtros-container {
-    display: flex;
-    gap: 15px;
-    flex-wrap: wrap;
-  }
-
-  .filtro-select {
-    flex: 1;
-    min-width: 150px;
-    padding: 10px 15px;
-    border-radius: var(--borda-raio);
-    border: 1px solid var(--cor-borda);
-    background-color: white;
-  }
-
-  /* === CARTÕES DE JOGADORES === */
-  .cartoes-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 20px;
-  }
-
-  .cartao-jogador {
-    background-color: white;
-    border-radius: var(--borda-raio);
-    overflow: hidden;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    transition: var(--transicao);
-    position: relative;
-  }
-
-  .cartao-jogador:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-  }
-
-  .cartao-cabecalho {
-    display: flex;
-    justify-content: space-between;
-    padding: 12px;
-    background-color: #f9f9f9;
-    border-bottom: 1px solid var(--cor-borda);
-  }
-
-  .cartao-categoria, 
-  .cartao-posicao {
-    font-size: 12px;
-    font-weight: 600;
-    padding: 4px 10px;
-    border-radius: 12px;
-  }
-
-  .cartao-categoria {
-    background-color: var(--cor-primaria);
-    color: white;
-  }
-
-  .cartao-posicao {
-    background-color: #333;
-    color: white;
-  }
-
-  .cartao-foto {
-    height: 200px;
-    overflow: hidden;
-  }
-
-  .cartao-foto img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: transform 0.5s ease;
-  }
-
-  .cartao-jogador:hover .cartao-foto img {
-    transform: scale(1.05);
-  }
-
-  .cartao-info {
-    padding: 15px;
-  }
-
-  .cartao-nome {
-    font-size: 18px;
-    font-weight: 600;
-    margin-bottom: 8px;
-    color: var(--cor-secundaria);
-  }
-
-  .cartao-detalhes {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 15px;
-    font-size: 14px;
-    color: var(--cor-texto-claro);
-  }
-
-  .detalhe-pe, 
-  .detalhe-idade {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-  }
-
-  .cartao-acoes {
-    display: flex;
-    justify-content: flex-end;
-    padding: 10px 15px;
-    background-color: #f9f9f9;
-    border-top: 1px solid var(--cor-borda);
-  }
-
-  .btn-acao {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-left: 10px;
-    color: white;
-    cursor: pointer;
-    transition: var(--transicao);
-    border: none;
-  }
-
-  .btn-acao.editar {
-    background-color: #2196F3;
-  }
-
-  .btn-acao.desligar {
-    background-color: #ff9800;
-  }
-
-  .btn-acao.reintegrar {
-    background-color: #4CAF50;
-  }
-
-  .btn-acao:hover {
-    transform: scale(1.1);
-  }
-
-  /* === TABELA === */
-  .tabela-container {
-    overflow-x: auto;
-    border-radius: var(--borda-raio);
-    box-shadow: var(--sombra-padrao);
-  }
-
-  .tabela-jogadores {
-    width: 100%;
-    border-collapse: collapse;
-  }
-
-  .tabela-jogadores th,
-  .tabela-jogadores td {
-    padding: 12px 15px;
-    text-align: left;
-    border-bottom: 1px solid var(--cor-borda);
-  }
-
-  .tabela-jogadores th {
-    background-color: var(--cor-primaria);
-    color: white;
-    font-weight: 600;
-    white-space: nowrap;
-  }
-
-  .tabela-jogadores tbody tr {
-    transition: var(--transicao);
-  }
-
-  .tabela-jogadores tbody tr:hover {
-    background-color: #f5f5f5;
-  }
-
-  /* === MENSAGEM SEM RESULTADOS === */
-  .sem-resultados {
-    text-align: center;
-    padding: 50px 20px;
-    color: var(--cor-texto-claro);
-  }
-
-  .sem-resultados i {
-    font-size: 50px;
-    margin-bottom: 15px;
-    opacity: 0.3;
-  }
-
-  .sem-resultados p {
-    font-size: 18px;
-  }
-
-  /* === RESPONSIVIDADE === */
-  @media (max-width: 768px) {
-    .form-linha {
-      flex-direction: column;
-    }
-
-    .col-esquerda {
-      width: 100%;
-      max-width: 200px;
-      margin: 0 auto 20px;
-    }
-
-    .col-direita {
-      width: 100%;
-    }
-
-    .linha-2-colunas {
-      grid-template-columns: 1fr;
-      gap: 15px;
-    }
-
-    .botoes-finais {
-      flex-direction: column-reverse;
-    }
-
-    .btn-primario, 
-    .btn-secundario {
-      width: 100%;
-      justify-content: center;
-    }
-
-    .cartoes-container {
-      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    }
-  }
-
-  @media (max-width: 480px) {
-    .aba-btn {
-      padding: 12px 15px;
-      font-size: 14px;
-    }
-
-    .aba-btn i {
-      font-size: 16px;
-    }
-
-    .aba-conteudo {
-      padding: 20px 15px;
-    }
-
-    .titulo-pagina {
-      font-size: 24px;
-    }
-  }
-</style>
+<div class="botoes-finais">
+  <a href="{{ url_for('plantel.exibir_plantel') }}" class="btn-secundario">
+    <i class="fas fa-arrow-left"></i> Voltar
+  </a>
+  <button type="submit" class="btn-primario">
+    <i class="fas fa-save"></i> Atualizar
+  </button>
+</div>
+
+
+<div class="botoes-finais">
+          <a href="{{ url_for('plantel.exibir_plantel') }}" class="btn-secundario">
+            <i class="fas fa-arrow-left"></i> Voltar
+          </a>
+          <button type="submit" class="btn-primario">
+            <i class="fas fa-save"></i> Atualizar
+          </button>
+        </div>
+              </div>
+              <input type="file" name="foto" id="foto-input" accept="image/*">
+            </div>
+          </div>
+
+          <!-- CAMPOS -->
+          <div class="col-direita">
+            <div class="grupo-campo">
+              <label for="nome-jogador">Nome do Jogador*</label>
+              <input type="text" name="nome" id="nome-jogador" value="{{ jogador.nome }}" required>
+            </div>
+
+            <div class="linha-2-colunas">
+              <div class="grupo-campo">
+                <label for="categoria-jogador">Categoria*</label>
+                <select name="categoria" id="categoria-jogador" required>
+                  {% for cat in categorias %}
+                    <option value="{{ cat.nome }}" {% if jogador.categoria == cat.nome %}selected{% endif %}>{{ cat.nome }}</option>
+                  {% endfor %}
+                </select>
+                
+              </div>
+
+              <div class="grupo-campo">
+                <label for="posicao-jogador">Posição*</label>
+                <select name="posicao" id="posicao-jogador" required>
+                  {% for pos in posicoes %}
+                    <option value="{{ pos.nome }}" {% if jogador.posicao == pos.nome %}selected{% endif %}>{{ pos.nome }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+
+            <div class="linha-2-colunas">
+              <div class="grupo-campo">
+                <label for="pe-preferencial">Pé Preferencial*</label>
+                <select name="pe_preferencial" id="pe-preferencial" required>
+                  <option value="Direito" {% if jogador.pe_preferencial == 'Direito' %}selected{% endif %}>Direito</option>
+                  <option value="Esquerdo" {% if jogador.pe_preferencial == 'Esquerdo' %}selected{% endif %}>Esquerdo</option>
+                  <option value="Ambos" {% if jogador.pe_preferencial == 'Ambos' %}selected{% endif %}>Ambos</option>
+                </select>
+              </div>
+
+              <div class="grupo-campo">
+                <label for="data_nascimento">Data de Nascimento</label>
+                <input type="date" name="data_nascimento" id="data_nascimento" value="{{ jogador.data_nascimento.strftime('%Y-%m-%d') if jogador.data_nascimento else '' }}">
+
+
+              </div>
+            </div>
+
+            <div class="grupo-campo">
+              <label for="data_inativacao">Data de desligamento (opcional)</label>
+              <input type="date" name="data_inativacao" id="data_inativacao" value="{{ jogador.data_inativacao.strftime('%Y-%m-%d') if jogador.data_inativacao else '' }}">
+
+            </div>
+          </div>
+        </div>
+          <div class="botoes-finais">
+          <a href="{{ url_for('convidado.exibir_convidados') }}" class="btn-secundario">
+            <i class="fas fa-arrow-left"></i> Voltar
+          </a>
+          <button type="submit" class="btn-primario">
+            <i class="fas fa-save"></i> Atualizar
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
 
 <script>
-  document.getElementById('foto-input').addEventListener('change', function (event) {
-    const preview = document.querySelector('.foto-preview');
-    const file = event.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = function (e) {
-        preview.src = e.target.result;
+  document.addEventListener('DOMContentLoaded', function () {
+    const fotoInput = document.getElementById('foto-input');
+    const fotoPreview = document.getElementById('fotoPreview');
+    const fotoWrapper = document.querySelector('.foto-wrapper');
+
+    fotoWrapper.addEventListener('click', function () {
+      fotoInput.click();
+    });
+
+    fotoInput.addEventListener('change', function () {
+      const file = this.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          fotoPreview.src = e.target.result;
+        }
+        reader.readAsDataURL(file);
       }
-      reader.readAsDataURL(file);
-    }
+    });
   });
 </script>
 
-{% endblock %}
+  <style>
+    /* === VARIÁVEIS === */
+    :root {
+      --cor-primaria: #a00000;
+      --cor-primaria-escura: #800000;
+      --cor-primaria-clara: #cc0000;
+      --cor-secundaria: #333;
+      --cor-fundo: #f5f5f5;
+      --cor-borda: #ddd;
+      --cor-texto: #333;
+      --cor-texto-claro: #666;
+      --borda-raio: 8px;
+      --sombra-padrao: 0 4px 12px rgba(0, 0, 0, 0.1);
+      --transicao: all 0.3s ease;
+    }
+  
+    /* === GERAIS === */
+    .pagina-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+  
+    .titulo-pagina {
+      text-align: center;
+      margin: 20px 0 30px;
+      font-size: 32px;
+      font-weight: bold;
+      color: var(--cor-primaria);
+      position: relative;
+    }
+  
+    .titulo-pagina::after {
+      content: '';
+      display: block;
+      width: 60px;
+      height: 4px;
+      background-color: var(--cor-primaria);
+      margin: 10px auto 0;
+      border-radius: 2px;
+    }
+  
+    .painel-principal {
+      background: white;
+      border-radius: var(--borda-raio);
+      box-shadow: var(--sombra-padrao);
+      overflow: hidden;
+    }
+  
+    /* === ALERTAS === */
+    .alertas-container {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      width: 300px;
+      z-index: 1000;
+    }
+  
+    .alerta {
+      position: relative;
+      padding: 15px;
+      margin-bottom: 15px;
+      border-radius: var(--borda-raio);
+      color: white;
+      background-color: #28a745;
+      box-shadow: var(--sombra-padrao);
+      animation: slideIn 0.3s ease forwards;
+    }
+  
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+  
+    .alerta.erro {
+      background-color: #dc3545;
+    }
+  
+    .alerta-conteudo {
+      display: flex;
+      align-items: center;
+    }
+  
+    .alerta-icone {
+      margin-right: 10px;
+      font-size: 20px;
+    }
+  
+    .alerta-fechar {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      background: none;
+      border: none;
+      color: white;
+      font-size: 20px;
+      cursor: pointer;
+    }
+  
+    /* === ABAS === */
+    .abas-container {
+      display: flex;
+      background-color: #f0f0f0;
+      padding: 0;
+      overflow-x: auto;
+      border-bottom: 1px solid var(--cor-borda);
+    }
+  
+    .aba-btn {
+      padding: 15px 25px;
+      background-color: transparent;
+      border: none;
+      color: var(--cor-texto-claro);
+      font-weight: 600;
+      font-size: 16px;
+      cursor: pointer;
+      transition: var(--transicao);
+      position: relative;
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+  
+    .aba-btn i {
+      font-size: 18px;
+    }
+  
+    .aba-btn:hover {
+      background-color: rgba(0, 0, 0, 0.05);
+      color: var(--cor-primaria);
+    }
+  
+    .aba-btn.ativo {
+      color: var(--cor-primaria);
+      background-color: white;
+    }
+  
+    .aba-btn.ativo::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background-color: var(--cor-primaria);
+    }
+  
+    .aba-conteudo {
+      display: none;
+      padding: 30px;
+    }
+  
+    .aba-conteudo.ativo {
+      display: block;
+      animation: fadeIn 0.3s ease;
+    }
+  
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+  
+    /* === FORMULÁRIO === */
+    .form-card {
+      border-radius: var(--borda-raio);
+      overflow: hidden;
+    }
+  
+    .form-jogador {
+      display: flex;
+      flex-direction: column;
+      gap: 25px;
+    }
+  
+    .form-linha {
+      display: flex;
+      gap: 30px;
+      align-items: flex-start;
+    }
+  
+    .col-esquerda {
+      width: 180px;
+    }
+  
+    .foto-container {
+      width: 100%;
+    }
+  
+    .foto-wrapper {
+      position: relative;
+      width: 100%;
+      height: 240px;
+      overflow: hidden;
+      border-radius: var(--borda-raio);
+      border: 2px solid var(--cor-borda);
+      cursor: pointer;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+    }
+  
+    .foto-preview {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: var(--transicao);
+    }
+  
+    .foto-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      color: white;
+      opacity: 0;
+      transition: var(--transicao);
+    }
+  
+    .foto-overlay i {
+      font-size: 40px;
+      margin-bottom: 10px;
+    }
+  
+    .foto-wrapper:hover .foto-overlay {
+      opacity: 1;
+    }
+  
+    .foto-wrapper:hover .foto-preview {
+      transform: scale(1.05);
+    }
+  
+    #foto-input {
+      display: none;
+    }
+  
+    .col-direita {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+  
+    .linha-2-colunas {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+  
+    .grupo-campo {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+  
+    .grupo-campo label {
+      font-weight: 600;
+      color: var(--cor-texto);
+      font-size: 14px;
+    }
+  
+    input[type="text"],
+    input[type="date"],
+    select {
+      padding: 12px 15px;
+      border-radius: var(--borda-raio);
+      border: 1px solid var(--cor-borda);
+      font-size: 16px;
+      transition: var(--transicao);
+      background-color: #f9f9f9;
+    }
+  
+    input[type="text"]:focus,
+    input[type="date"]:focus,
+    select:focus {
+      border-color: var(--cor-primaria);
+      box-shadow: 0 0 0 2px rgba(160, 0, 0, 0.1);
+      outline: none;
+    }
+  
+    .botoes-finais {
+      display: flex;
+      justify-content: flex-end;
+      gap: 15px;
+      margin-top: 20px;
+    }
+  
+    .btn-primario,
+    .btn-secundario {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 20px;
+      border-radius: var(--borda-raio);
+      font-weight: 600;
+      font-size: 16px;
+      cursor: pointer;
+      transition: var(--transicao);
+    }
+  
+    .btn-primario {
+      background-color: var(--cor-primaria);
+      color: white;
+      border: none;
+    }
+  
+    .btn-primario:hover {
+      background-color: var(--cor-primaria-escura);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(160, 0, 0, 0.3);
+    }
+  
+    .btn-secundario {
+      background-color: #f0f0f0;
+      color: var(--cor-texto);
+      border: 1px solid var(--cor-borda);
+    }
+  
+    .btn-secundario:hover {
+      background-color: #e0e0e0;
+    }
+  
+    /* === PESQUISA === */
+    .pesquisa-container {
+      margin-bottom: 25px;
+    }
+  
+    .campo-pesquisa-wrapper {
+      position: relative;
+      margin-bottom: 15px;
+    }
+  
+    .campo-pesquisa {
+      width: 100%;
+      padding: 14px 40px;
+      border-radius: 30px;
+      border: 1px solid var(--cor-borda);
+      font-size: 16px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+      transition: var(--transicao);
+    }
+  
+    .campo-pesquisa:focus {
+      border-color: var(--cor-primaria);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      outline: none;
+    }
+  
+    .icone-pesquisa {
+      position: absolute;
+      left: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #999;
+      font-size: 18px;
+    }
+  
+    .btn-limpar-pesquisa {
+      position: absolute;
+      right: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: #999;
+      font-size: 18px;
+      cursor: pointer;
+      display: none;
+    }
+  
+    .filtros-container {
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+    }
+  
+    .filtro-select {
+      flex: 1;
+      min-width: 150px;
+      padding: 10px 15px;
+      border-radius: var(--borda-raio);
+      border: 1px solid var(--cor-borda);
+      background-color: white;
+    }
+  
+    /* === CARTÕES DE JOGADORES === */
+    .cartoes-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 20px;
+    }
+  
+    .cartao-jogador {
+      background-color: white;
+      border-radius: var(--borda-raio);
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      transition: var(--transicao);
+      position: relative;
+    }
+  
+    .cartao-jogador:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    }
+  
+    .cartao-cabecalho {
+      display: flex;
+      justify-content: space-between;
+      padding: 12px;
+      background-color: #f9f9f9;
+      border-bottom: 1px solid var(--cor-borda);
+    }
+  
+    .cartao-categoria, 
+    .cartao-posicao {
+      font-size: 12px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 12px;
+    }
+  
+    .cartao-categoria {
+      background-color: var(--cor-primaria);
+      color: white;
+    }
+  
+    .cartao-posicao {
+      background-color: #333;
+      color: white;
+    }
+  
+    .cartao-foto {
+      height: 200px;
+      overflow: hidden;
+    }
+  
+    .cartao-foto img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.5s ease;
+    }
+  
+    .cartao-jogador:hover .cartao-foto img {
+      transform: scale(1.05);
+    }
+  
+    .cartao-info {
+      padding: 15px;
+    }
+  
+    .cartao-nome {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: var(--cor-secundaria);
+    }
+  
+    .cartao-detalhes {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      font-size: 14px;
+      color: var(--cor-texto-claro);
+    }
+  
+    .detalhe-pe, 
+    .detalhe-idade {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+  
+    .cartao-acoes {
+      display: flex;
+      justify-content: flex-end;
+      padding: 10px 15px;
+      background-color: #f9f9f9;
+      border-top: 1px solid var(--cor-borda);
+    }
+  
+    .btn-acao {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-left: 10px;
+      color: white;
+      cursor: pointer;
+      transition: var(--transicao);
+      border: none;
+    }
+  
+    .btn-acao.editar {
+      background-color: #2196F3;
+    }
+  
+    .btn-acao.desligar {
+      background-color: #ff9800;
+    }
+  
+    .btn-acao.reintegrar {
+      background-color: #4CAF50;
+    }
+  
+    .btn-acao:hover {
+      transform: scale(1.1);
+    }
+  
+    /* === TABELA === */
+    .tabela-container {
+      overflow-x: auto;
+      border-radius: var(--borda-raio);
+      box-shadow: var(--sombra-padrao);
+    }
+  
+    .tabela-jogadores {
+      width: 100%;
+      border-collapse: collapse;
+    }
+  
+    .tabela-jogadores th,
+    .tabela-jogadores td {
+      padding: 12px 15px;
+      text-align: left;
+      border-bottom: 1px solid var(--cor-borda);
+    }
+  
+    .tabela-jogadores th {
+      background-color: var(--cor-primaria);
+      color: white;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+  
+    .tabela-jogadores tbody tr {
+      transition: var(--transicao);
+    }
+  
+    .tabela-jogadores tbody tr:hover {
+      background-color: #f5f5f5;
+    }
+  
+    /* === MENSAGEM SEM RESULTADOS === */
+    .sem-resultados {
+      text-align: center;
+      padding: 50px 20px;
+      color: var(--cor-texto-claro);
+    }
+  
+    .sem-resultados i {
+      font-size: 50px;
+      margin-bottom: 15px;
+      opacity: 0.3;
+    }
+  
+    .sem-resultados p {
+      font-size: 18px;
+    }
+  
+    /* === RESPONSIVIDADE === */
+    @media (max-width: 768px) {
+      .form-linha {
+        flex-direction: column;
+      }
+  
+      .col-esquerda {
+        width: 100%;
+        max-width: 200px;
+        margin: 0 auto 20px;
+      }
+  
+      .col-direita {
+        width: 100%;
+      }
+  
+      .linha-2-colunas {
+        grid-template-columns: 1fr;
+        gap: 15px;
+      }
+  
+      .botoes-finais {
+        flex-direction: column-reverse;
+      }
+  
+      .btn-primario, 
+      .btn-secundario {
+        width: 100%;
+        justify-content: center;
+      }
+  
+      .cartoes-container {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      }
+    }
+  
+    @media (max-width: 480px) {
+      .aba-btn {
+        padding: 12px 15px;
+        font-size: 14px;
+      }
+  
+      .aba-btn i {
+        font-size: 16px;
+      }
+  
+      .aba-conteudo {
+        padding: 20px 15px;
+      }
+  
+      .titulo-pagina {
+        font-size: 24px;
+      }
+    }
+  </style>
+  {% endblock %}

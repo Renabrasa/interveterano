@@ -1,75 +1,469 @@
 {% extends 'base.html' %}
 {% block content %}
 
+<div class="login-container">
+    <!-- Animated Background Elements -->
+    <div class="animated-bg">
+        <div class="bg-circle circle-1"></div>
+        <div class="bg-circle circle-2"></div>
+        <div class="bg-circle circle-3"></div>
+    </div>
+
+    <div class="auth-card">
+        <!-- Logo Section -->
+        <div class="auth-logo-section">
+            <div class="logo-container">
+                <img src="{{ url_for('static', filename='img/logoredondo.png') }}" alt="Inter Veterano" class="auth-logo">
+                <div class="logo-shine"></div>
+            </div>
+            <h1 class="auth-title">INTER VETERANO</h1>
+            <p class="auth-subtitle">ACESSO DA DIRETORIA</p>
+        </div>
+
+        <!-- Form Section -->
+        <div class="auth-form-section">
+            <form action="{{ url_for('auth.login') }}" method="post" class="login-form">
+                <div class="input-group">
+                    <div class="input-icon">👤</div>
+                    <input type="text" name="username" id="username" placeholder="Usuário" required autocomplete="off">
+                </div>
+                
+                <div class="input-group">
+                    <div class="input-icon">🔒</div>
+                    <input type="password" name="password" id="password" placeholder="Senha" required>
+                    <div class="password-toggle" onclick="togglePasswordVisibility()">👁️</div>
+                </div>
+                
+                <div class="remember-me">
+                    <input type="checkbox" id="remember" name="remember">
+                    <label for="remember">Lembrar de mim</label>
+                </div>
+                
+                <button type="submit" class="login-btn">
+                    <span class="btn-text">ENTRAR</span>
+                    <span class="btn-icon">→</span>
+                </button>
+            </form>
+            
+            <!--div class="auth-links">
+                <a href="#" class="forgot-password">Esqueceu a senha?</a>
+                <a href="{{ url_for('home') }}" class="back-to-site">Voltar ao site</a>
+            </div-->
+        </div>
+    </div>
+    
+    <!-- Decorative elements -->
+    <div class="decorative-element ball-element"></div>
+    <div class="club-motto">"Aqui o passado é glória e o presente é luta!"</div>
+</div>
+
 <style>
-    body {
-        background-image: url("/static/img/fundo_login.jpg");
-        background-size: cover;
-        background-position: center;
-        background-repeat: no-repeat;
-        height: 100vh;
-        margin: 0;
-    }
-
+    /* Login Page Styles */
     .login-container {
-        background-color: rgba(255, 255, 255, 0.95);
-        max-width: 400px;
-        margin: 100px auto;
-        padding: 30px;
-        border-radius: 10px;
-        box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        width: 100%;
+        padding: 20px;
+        position: relative;
+        overflow: hidden;
+        background: linear-gradient(145deg, #9b0000, #800000);
+    }
+    
+    /* Animated Background */
+    .animated-bg {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        overflow: hidden;
+        z-index: 0;
+    }
+    
+    .bg-circle {
+        position: absolute;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.1);
+    }
+    
+    .circle-1 {
+        width: 300px;
+        height: 300px;
+        top: -150px;
+        right: -100px;
+        animation: float 15s infinite alternate ease-in-out;
+    }
+    
+    .circle-2 {
+        width: 500px;
+        height: 500px;
+        bottom: -250px;
+        left: -200px;
+        animation: float 20s infinite alternate-reverse ease-in-out;
+    }
+    
+    .circle-3 {
+        width: 200px;
+        height: 200px;
+        top: 50%;
+        right: 10%;
+        animation: float 12s infinite alternate ease-in-out;
+    }
+    
+    @keyframes float {
+        0% {
+            transform: translate(0, 0) rotate(0deg);
+        }
+        100% {
+            transform: translate(30px, 30px) rotate(20deg);
+        }
+    }
+    
+    /* Auth Card */
+    .auth-card {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+        width: 100%;
+        max-width: 420px;
+        overflow: hidden;
+        z-index: 10;
+        position: relative;
+        animation: cardAppear 0.8s ease-out forwards;
+    }
+    
+    @keyframes cardAppear {
+        0% {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        100% {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    /* Logo Section */
+    .auth-logo-section {
+        background: linear-gradient(135deg, #8B0000, #600000);
+        padding: 25px 20px;
         text-align: center;
-    }
-
-    .login-container h2 {
-        color: #8B0000;
-        margin-bottom: 25px;
-    }
-
-    .login-container input[type="text"],
-    .login-container input[type="password"] {
-        width: 90%;
-        padding: 14px;
-        margin-bottom: 18px;
-        border: 1px solid #ccc;
-        border-radius: 5px;
-        font-size: 16px;
-    }
-
-    .login-container button {
-        background-color: #8B0000;
         color: white;
-        padding: 14px 22px;
-        border: none;
-        border-radius: 5px;
-        font-size: 16px;
-        cursor: pointer;
+        position: relative;
     }
-
-    .login-container button:hover {
-        background-color: #a30000;
+    
+    .logo-container {
+        position: relative;
+        width: 90px;
+        height: 90px;
+        margin: 0 auto 15px;
     }
-
-    .login-container a {
-        display: block;
-        margin-top: 15px;
+    
+    .auth-logo {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 3px solid rgba(255, 255, 255, 0.7);
+        animation: pulse 3s infinite;
+    }
+    
+    .logo-shine {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        border-radius: 50%;
+        background: linear-gradient(120deg, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0) 60%);
+        transform: rotate(-30deg);
+        animation: shine 6s infinite;
+    }
+    
+    @keyframes pulse {
+        0% {
+            box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4);
+        }
+        70% {
+            box-shadow: 0 0 0 15px rgba(255, 255, 255, 0);
+        }
+        100% {
+            box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
+        }
+    }
+    
+    @keyframes shine {
+        0%, 100% {
+            opacity: 0.5;
+            transform: rotate(-30deg) scale(1);
+        }
+        50% {
+            opacity: 0.8;
+            transform: rotate(0deg) scale(1.05);
+        }
+    }
+    
+    .auth-title {
+        font-size: 1.8rem;
+        font-weight: 800;
+        letter-spacing: 2px;
+        margin: 0 0 5px;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    }
+    
+    .auth-subtitle {
+        font-size: 0.9rem;
+        letter-spacing: 1px;
+        margin: 0;
+        opacity: 0.9;
+    }
+    
+    /* Form Section */
+    .auth-form-section {
+        padding: 30px 25px;
+    }
+    
+    .login-form {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+    
+    .input-group {
+        position: relative;
+        display: flex;
+        align-items: center;
+        border-radius: 8px;
+        background: #f7f7f7;
+        overflow: hidden;
+        box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.05);
+        transition: all 0.3s ease;
+    }
+    
+    .input-group:focus-within {
+        background: #fff;
+        box-shadow: 0 0 0 2px rgba(139, 0, 0, 0.3);
+    }
+    
+    .input-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 50px;
+        font-size: 1.2rem;
         color: #8B0000;
-        text-decoration: none;
     }
-
-    .login-container a:hover {
-        text-decoration: underline;
+    
+    .input-group input {
+        flex: 1;
+        padding: 15px 15px 15px 0;
+        border: none;
+        background: transparent;
+        outline: none;
+        font-size: 1rem;
+        color: #333;
+    }
+    
+    .password-toggle {
+        padding: 0 15px;
+        cursor: pointer;
+        opacity: 0.6;
+        transition: opacity 0.3s ease;
+    }
+    
+    .password-toggle:hover {
+        opacity: 1;
+    }
+    
+    .remember-me {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.9rem;
+        color: #666;
+    }
+    
+    .remember-me input[type="checkbox"] {
+        accent-color: #8B0000;
+        width: 16px;
+        height: 16px;
+    }
+    
+    .login-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        background: #8B0000;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 15px;
+        font-size: 1rem;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .login-btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.7s ease;
+    }
+    
+    .login-btn:hover {
+        background: #a30000;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(139, 0, 0, 0.4);
+    }
+    
+    .login-btn:hover::before {
+        left: 100%;
+    }
+    
+    .btn-icon {
+        font-size: 1.2rem;
+        transition: transform 0.3s ease;
+    }
+    
+    .login-btn:hover .btn-icon {
+        transform: translateX(5px);
+    }
+    
+    .auth-links {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 25px;
+        font-size: 0.9rem;
+    }
+    
+    .auth-links a {
+        color: #666;
+        text-decoration: none;
+        transition: color 0.3s ease;
+    }
+    
+    .auth-links a:hover {
+        color: #8B0000;
+    }
+    
+    /* Decorative Elements */
+    .decorative-element {
+        position: absolute;
+        z-index: 5;
+    }
+    
+    .ball-element {
+        width: 50px;
+        height: 50px;
+        background: url("{{ url_for('static', filename='img/logoredondo.png') }}") no-repeat center/contain;
+        top: 15%;
+        right: 15%;
+        opacity: 0.15;
+        animation: rotate 20s linear infinite;
+    }
+    
+    @keyframes rotate {
+        0% {
+            transform: rotate(0deg);
+        }
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+    
+    .club-motto {
+        position: absolute;
+        bottom: 20px;
+        left: 0;
+        right: 0;
+        text-align: center;
+        color: rgba(255, 255, 255, 0.7);
+        font-style: italic;
+        z-index: 5;
+        font-size: 0.95rem;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+    }
+    
+    /* Mobile Responsive Adjustments */
+    @media (max-width: 480px) {
+        .login-container {
+            padding: 15px;
+        }
+        
+        .auth-card {
+            max-width: 100%;
+        }
+        
+        .auth-logo-section {
+            padding: 20px 15px;
+        }
+        
+        .logo-container {
+            width: 75px;
+            height: 75px;
+        }
+        
+        .auth-title {
+            font-size: 1.5rem;
+        }
+        
+        .auth-subtitle {
+            font-size: 0.8rem;
+        }
+        
+        .auth-form-section {
+            padding: 25px 20px;
+        }
+        
+        .input-group input {
+            padding: 12px 12px 12px 0;
+        }
+        
+        .login-btn {
+            padding: 12px;
+        }
+        
+        .club-motto {
+            font-size: 0.85rem;
+            bottom: 10px;
+        }
     }
 </style>
 
-<div class="login-container">
-    <h2>Login Administrativo</h2>
-    <form method="POST" action="{{ url_for('auth.login') }}">
-        <input type="text" name="username" placeholder="Usuário" required>
-        <input type="password" name="password" placeholder="Senha" required>
-        <button type="submit">Entrar</button>
-    </form>
-    <a href="{{ url_for('home') }}">⬅️ Voltar para a Home</a>
-</div>
+<script>
+    function togglePasswordVisibility() {
+        const passwordInput = document.getElementById('password');
+        const toggle = document.querySelector('.password-toggle');
+        
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            toggle.textContent = '👁️‍🗨️';
+        } else {
+            passwordInput.type = 'password';
+            toggle.textContent = '👁️';
+        }
+    }
+    
+    // Adicione efeitos sutis de hover e focus aos elementos
+    document.addEventListener('DOMContentLoaded', function() {
+        // Adiciona classe para indicar que o DOM está carregado e as animações podem começar
+        document.body.classList.add('loaded');
+        
+        // Focus inicial no campo de usuário
+        setTimeout(() => {
+            document.getElementById('username').focus();
+        }, 1000);
+    });
+</script>
 
 {% endblock %}

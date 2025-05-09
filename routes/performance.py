@@ -4,6 +4,7 @@ from sqlalchemy import func
 from routes.auth import login_required
 from sqlalchemy.orm import joinedload
 from flask import jsonify
+from datetime import date
 
 performance_bp = Blueprint('performance', __name__, template_folder='../templates/performance')
 
@@ -19,31 +20,22 @@ def login_obrigatorio():
 @performance_bp.route('/performance')
 @login_required
 def index():
-    from models.models import Pessoa, Performance, Jogo
-    from sqlalchemy.orm import joinedload
+    from datetime import datetime
 
-    performances = Performance.query\
-        .join(Jogo, Performance.jogo_id == Jogo.id)\
-        .options(joinedload(Performance.jogo), joinedload(Performance.pessoa))\
-        .order_by(Jogo.data.desc())\
-        .all()
+    jogadores = Pessoa.query.filter_by(ativo=True).order_by(Pessoa.nome).all()
+    jogos = Jogo.query.filter(Jogo.data <= datetime.now()).order_by(Jogo.data.desc()).all()
+    performances = Performance.query.all()
 
-    jogos = Jogo.query.order_by(Jogo.data.desc()).all()
+    jogadores_json = [{'id': j.id, 'nome': j.nome, 'posicao': j.posicao, 'categoria': j.categoria} for j in jogadores]
+    performances_json = [{'jogo_id': p.jogo_id, 'pessoa_id': p.pessoa_id} for p in performances]
 
-    pessoas = Pessoa.query.filter(Pessoa.ativo == True).order_by(Pessoa.nome).all()
-
-    pessoas_json = [{
-        'id': p.id,
-        'nome': p.nome,
-        'posicao': p.posicao,
-        'categoria': p.categoria
-    } for p in pessoas]
-
-    return render_template('performance.html',
-                           performances=performances,
+    return render_template('performance/performance.html',
+                           jogadores=jogadores,
                            jogos=jogos,
-                           pessoas=pessoas,
-                           pessoas_json=pessoas_json)
+                           performances=performances,
+                           jogadores_json=jogadores_json,
+                           pessoas_json=jogadores_json,
+                           performances_json=performances_json)
 
 
     

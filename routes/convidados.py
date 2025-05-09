@@ -7,12 +7,29 @@ from sqlalchemy import func
 convidado_bp = Blueprint('convidado', __name__, template_folder='../templates/convidado')
 
 @convidado_bp.route('/convidados')
-#@login_required
 def exibir_convidados():
-    convidados = Pessoa.query.filter_by(tipo='convidado', ativo=True).order_by(Pessoa.nome).all()
+    # [X]
+    convidados_ativos = Pessoa.query.filter_by(tipo='convidado', ativo=True).filter(
+        Pessoa.data_inativacao == None
+    ).order_by(Pessoa.nome).all()
+
+    convidados_desligados = Pessoa.query.filter_by(tipo='convidado', ativo=True).filter(
+        Pessoa.data_inativacao != None
+    ).order_by(Pessoa.nome).all()
+    # [Y]
+
     categorias = Categoria.query.all()
     posicoes = Posicao.query.all()
-    return render_template('convidado/convidados.html', convidados=convidados, categorias=categorias, posicoes=posicoes)
+
+    return render_template(
+        'convidado/convidados.html',
+        convidados_ativos=convidados_ativos,
+        convidados_desligados=convidados_desligados,
+        categorias=categorias,
+        posicoes=posicoes
+    )
+
+
 
 
 @convidado_bp.route('/convidados/adicionar', methods=['POST'])
@@ -73,24 +90,32 @@ def excluir_convidado(id):
 @convidado_bp.route('/convidados/editar/<int:id>', methods=['GET', 'POST'])
 @login_required
 def editar_convidado(id):
-    pessoa = Pessoa.query.get_or_404(id)
+    convidado = Pessoa.query.get_or_404(id)
     categorias = Categoria.query.all()
     posicoes = Posicao.query.all()
 
     if request.method == 'POST':
-        pessoa.nome = request.form['nome']
-        pessoa.categoria_id = request.form['categoria']
-        pessoa.posicao_id = request.form['posicao']
-        pessoa.pe_preferencial = request.form['pe_preferencial']
+        convidado.nome = request.form['nome']
+        categoria = Categoria.query.get(request.form['categoria'])
+        posicao = Posicao.query.get(request.form['posicao'])
 
-        foto = request.files['foto']
-        if foto and foto.filename != '':
-            pessoa.foto = base64.b64encode(foto.read()).decode('utf-8')
+        convidado.categoria = categoria.nome if categoria else ''
+        convidado.posicao = posicao.nome if posicao else ''
+        convidado.pe_preferencial = request.form['pe_preferencial']
+
+        foto = request.files.get('foto')
+        if foto and foto.filename:
+            convidado.foto = base64.b64encode(foto.read()).decode('utf-8')
 
         db.session.commit()
+        flash('Convidado atualizado com sucesso!', 'sucesso')
         return redirect(url_for('convidado.exibir_convidados'))
 
-    return render_template('convidado/editar.html', convidado=pessoa, categorias=categorias, posicoes=posicoes)
+    # ← ESSA LINHA É O RETORNO PARA O GET
+    return render_template('convidado/editar.html', jogador=convidado, categorias=categorias, posicoes=posicoes)
+
+
+
 
 
 @convidado_bp.route('/convidado/<int:convidado_id>/remover_foto', methods=['POST'])

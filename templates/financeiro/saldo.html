@@ -18,7 +18,8 @@
     {% for categoria, mensagem in messages %}
     <div class="alerta {{ categoria }}">
       <div class="alerta-conteudo">
-        <span class="alerta-icone">{% if categoria == 'sucesso' %}✅{% elif categoria == 'erro' %}❌{% else %}ℹ️{% endif %}</span>
+        <span class="alerta-icone">{% if categoria == 'sucesso' %}✅{% elif categoria == 'erro' %}❌{% else %}ℹ️{% endif
+          %}</span>
         <span class="alerta-texto">{{ mensagem }}</span>
       </div>
       <button class="alerta-fechar" onclick="this.parentElement.style.display='none'">×</button>
@@ -51,7 +52,9 @@
       </div>
     </div>
 
-    {% if mes == mes_primeiro %}
+    {% set ano_atual, mes_atual = mes.split('-')|map('int') %}
+    {% if ano_atual == 2024 and mes_atual == 12 %}
+
     <div class="saldo-inicial-section">
       <form method="POST" class="form-saldo-inicial">
         <div class="saldo-inicial-header">
@@ -69,8 +72,7 @@
         </div>
       </form>
     </div>
-    {% else %}
-    <div class="saldo-inicial-section">
+    {% elif ano_atual < 2024 or (ano_atual==2024 and mes_atual < 12) %} <div class="saldo-inicial-section">
       <div class="saldo-inicial-display">
         <div class="saldo-inicial-header">
           <i class="saldo-icon">🏦</i>
@@ -80,37 +82,37 @@
           R$ {{ '%.2f'|format(saldo_inicial) }}
         </div>
       </div>
-    </div>
-    {% endif %}
+  </div>
+  {% endif %}
 
-    <div class="resumo-section">
-      <div class="cards-resumo">
-        <div class="card-resumo entrada">
-          <div class="card-resumo-icon">💹</div>
-          <div class="card-resumo-content">
-            <h3>Entradas Acumuladas</h3>
-            <p class="valor-entrada">R$ {{ '%.2f'|format(entradas) }}</p>
-          </div>
+  <div class="resumo-section">
+    <div class="cards-resumo">
+      <div class="card-resumo entrada">
+        <div class="card-resumo-icon">💹</div>
+        <div class="card-resumo-content">
+          <h3>Entradas Acumuladas</h3>
+          <p class="valor-entrada">R$ {{ '%.2f'|format(entradas) }}</p>
         </div>
-        
-        <div class="card-resumo saida">
-          <div class="card-resumo-icon">📉</div>
-          <div class="card-resumo-content">
-            <h3>Saídas Acumuladas</h3>
-            <p class="valor-saida">R$ {{ '%.2f'|format(saidas) }}</p>
-          </div>
+      </div>
+
+      <div class="card-resumo saida">
+        <div class="card-resumo-icon">📉</div>
+        <div class="card-resumo-content">
+          <h3>Saídas Acumuladas</h3>
+          <p class="valor-saida">R$ {{ '%.2f'|format(saidas) }}</p>
         </div>
-        
-        <div class="card-resumo saldo">
-          <div class="card-resumo-icon">💼</div>
-          <div class="card-resumo-content">
-            <h3>Saldo Atual</h3>
-            <p class="valor-saldo {{ 'positivo' if saldo >= 0 else 'negativo' }}">R$ {{ '%.2f'|format(saldo) }}</p>
-          </div>
+      </div>
+
+      <div class="card-resumo saldo">
+        <div class="card-resumo-icon">💼</div>
+        <div class="card-resumo-content">
+          <h3>Saldo Atual</h3>
+          <p class="valor-saldo {{ 'positivo' if saldo >= 0 else 'negativo' }}">R$ {{ '%.2f'|format(saldo) }}</p>
         </div>
       </div>
     </div>
   </div>
+</div>
 </div>
 
 <script>
@@ -128,7 +130,7 @@
     const novoMes = `${ano}-${mes.toString().padStart(2, '0')}`;
     window.location.href = `?mes=${novoMes}`;
   }
-  
+
   inputMes?.addEventListener('blur', () => {
     if (inputMes.value) {
       window.location.href = `?mes=${inputMes.value}`;
@@ -212,214 +214,241 @@
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     animation: fadeIn 0.3s ease-in-out;
 
-}
-
-.alerta.sucesso { background-color: #28a745; color: #fff; }
-.alerta.erro { background-color: #dc3545; color: #fff; }
-
-.alerta-icone {
-  margin-right: 10px;
-  font-size: 20px;
-}
-
-.alerta-fechar {
-  background: none;
-  border: none;
-  font-size: 20px;
-  color: #fff;
-  cursor: pointer;
-}
-
-/* TABS */
-.tabs {
-  display: flex;
-  gap: 20px;
-  align-items: center;
-}
-
-.tab {
-  text-decoration: none;
-  color: #555;
-  font-weight: 600;
-  padding: 10px 20px;
-  border-radius: 8px;
-  background-color: #eaeaea;
-  transition: all 0.2s ease;
-}
-
-.tab.active {
-  background-color: #a00000;
-  color: #fff;
-}
-
-.tab:hover {
-  background-color: #c62828;
-  color: white;
-}
-
-.tab-icon {
-  margin-right: 8px;
-}
-
-/* NAVEGAÇÃO MÊS */
-.controles-superiores {
-  margin-top: 15px;
-  display: flex;
-  justify-content: flex-end;
-}
-
-.filtro-mes {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.btn-navegacao {
-  font-size: 18px;
-  padding: 5px 10px;
-  background-color: #a00000;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-.seletor-mes {
-  padding: 8px;
-  font-size: 15px;
-  border-radius: 6px;
-  border: 1px solid #ccc;
-}
-
-/* SALDO INICIAL */
-.saldo-inicial-section {
-  padding: 20px;
-  background-color: #fffdf5;
-  border-top: 1px solid #eee;
-}
-
-.form-saldo-inicial {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-}
-
-.saldo-inicial-header {
-  display: flex;
-  align-items: center;
-  font-weight: bold;
-  font-size: 18px;
-  color: #555;
-  gap: 10px;
-}
-
-.input-wrapper {
-  display: flex;
-  align-items: center;
-  background-color: #fafafa;
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  width: max-content;
-}
-
-.input-prefixo {
-  font-weight: bold;
-  color: #555;
-  margin-right: 5px;
-}
-
-.input-wrapper input {
-  border: none;
-  background: transparent;
-  font-size: 16px;
-  width: 120px;
-  outline: none;
-}
-
-.btn-principal {
-  background-color: #a00000;
-  color: #fff;
-  border: none;
-  padding: 10px 18px;
-  font-size: 15px;
-  border-radius: 6px;
-  cursor: pointer;
-}
-
-.btn-principal:hover {
-  background-color: #800000;
-}
-
-.saldo-valor {
-  margin-top: 10px;
-  font-size: 20px;
-  font-weight: 600;
-  color: #333;
-}
-
-/* RESUMO */
-.resumo-section {
-  padding: 30px;
-  background-color: #fafafa;
-}
-
-.cards-resumo {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 20px;
-  justify-content: space-around;
-}
-
-.card-resumo {
-  flex: 1 1 200px;
-  background: white;
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-  display: flex;
-  align-items: center;
-  gap: 15px;
-}
-
-.card-resumo-icon {
-  font-size: 32px;
-}
-
-.card-resumo-content h3 {
-  font-size: 16px;
-  margin-bottom: 5px;
-  color: #555;
-}
-
-.valor-entrada { color: #28a745; font-weight: bold; }
-.valor-saida { color: #dc3545; font-weight: bold; }
-.valor-saldo.positivo { color: #2e7d32; }
-.valor-saldo.negativo { color: #b71c1c; }
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-5px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-@media (max-width: 768px) {
-  .cards-resumo {
-    flex-direction: column;
   }
 
-  .form-saldo-inicial {
-    flex-direction: column;
+  .alerta.sucesso {
+    background-color: #28a745;
+    color: #fff;
   }
 
-  .input-wrapper input {
-    width: 100%;
+  .alerta.erro {
+    background-color: #dc3545;
+    color: #fff;
+  }
+
+  .alerta-icone {
+    margin-right: 10px;
+    font-size: 20px;
+  }
+
+  .alerta-fechar {
+    background: none;
+    border: none;
+    font-size: 20px;
+    color: #fff;
+    cursor: pointer;
+  }
+
+  /* TABS */
+  .tabs {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+  }
+
+  .tab {
+    text-decoration: none;
+    color: #555;
+    font-weight: 600;
+    padding: 10px 20px;
+    border-radius: 8px;
+    background-color: #eaeaea;
+    transition: all 0.2s ease;
+  }
+
+  .tab.active {
+    background-color: #a00000;
+    color: #fff;
+  }
+
+  .tab:hover {
+    background-color: #c62828;
+    color: white;
+  }
+
+  .tab-icon {
+    margin-right: 8px;
+  }
+
+  /* NAVEGAÇÃO MÊS */
+  .controles-superiores {
+    margin-top: 15px;
+    display: flex;
+    justify-content: flex-end;
   }
 
   .filtro-mes {
-    flex-direction: column;
-    align-items: stretch;
+    display: flex;
+    align-items: center;
+    gap: 10px;
   }
-}
+
+  .btn-navegacao {
+    font-size: 18px;
+    padding: 5px 10px;
+    background-color: #a00000;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+
+  .seletor-mes {
+    padding: 8px;
+    font-size: 15px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+  }
+
+  /* SALDO INICIAL */
+  .saldo-inicial-section {
+    padding: 20px;
+    background-color: #fffdf5;
+    border-top: 1px solid #eee;
+  }
+
+  .form-saldo-inicial {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .saldo-inicial-header {
+    display: flex;
+    align-items: center;
+    font-weight: bold;
+    font-size: 18px;
+    color: #555;
+    gap: 10px;
+  }
+
+  .input-wrapper {
+    display: flex;
+    align-items: center;
+    background-color: #fafafa;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    width: max-content;
+  }
+
+  .input-prefixo {
+    font-weight: bold;
+    color: #555;
+    margin-right: 5px;
+  }
+
+  .input-wrapper input {
+    border: none;
+    background: transparent;
+    font-size: 16px;
+    width: 120px;
+    outline: none;
+  }
+
+  .btn-principal {
+    background-color: #a00000;
+    color: #fff;
+    border: none;
+    padding: 10px 18px;
+    font-size: 15px;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+
+  .btn-principal:hover {
+    background-color: #800000;
+  }
+
+  .saldo-valor {
+    margin-top: 10px;
+    font-size: 20px;
+    font-weight: 600;
+    color: #333;
+  }
+
+  /* RESUMO */
+  .resumo-section {
+    padding: 30px;
+    background-color: #fafafa;
+  }
+
+  .cards-resumo {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: space-around;
+  }
+
+  .card-resumo {
+    flex: 1 1 200px;
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    display: flex;
+    align-items: center;
+    gap: 15px;
+  }
+
+  .card-resumo-icon {
+    font-size: 32px;
+  }
+
+  .card-resumo-content h3 {
+    font-size: 16px;
+    margin-bottom: 5px;
+    color: #555;
+  }
+
+  .valor-entrada {
+    color: #28a745;
+    font-weight: bold;
+  }
+
+  .valor-saida {
+    color: #dc3545;
+    font-weight: bold;
+  }
+
+  .valor-saldo.positivo {
+    color: #2e7d32;
+  }
+
+  .valor-saldo.negativo {
+    color: #b71c1c;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(-5px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @media (max-width: 768px) {
+    .cards-resumo {
+      flex-direction: column;
+    }
+
+    .form-saldo-inicial {
+      flex-direction: column;
+    }
+
+    .input-wrapper input {
+      width: 100%;
+    }
+
+    .filtro-mes {
+      flex-direction: column;
+      align-items: stretch;
+    }
+  }
 </style>
 
 {% endblock %}

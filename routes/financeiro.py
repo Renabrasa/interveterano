@@ -531,7 +531,23 @@ def exibir_saldo():
         MovimentacaoFinanceira.data < fim
     ).all())
 
-    saldo = config.saldo_inicial + entradas - saidas
+        # Calcula o saldo com base no mês anterior
+    mes_atual = datetime.strptime(mes, '%Y-%m')
+    mes_anterior = (mes_atual.replace(day=1) - timedelta(days=1)).strftime('%Y-%m')
+
+    # Buscar saldo do mês anterior
+    if mes == '2024-12':
+        saldo_acumulado = config.saldo_inicial
+    else:
+        saldo_mes_anterior = ConfigFinanceiro.query.first().saldo_inicial
+        for m in Mensalidade.query.filter(Mensalidade.mes_referencia < mes, Mensalidade.pago == True).all():
+            saldo_mes_anterior += m.valor
+        for s in MovimentacaoFinanceira.query.filter(MovimentacaoFinanceira.tipo == 'saida', MovimentacaoFinanceira.data < inicio).all():
+            saldo_mes_anterior -= s.valor
+        saldo_acumulado = saldo_mes_anterior
+
+    saldo = saldo_acumulado + entradas - saidas
+
     mes_primeiro = Mensalidade.query.order_by(Mensalidade.mes_referencia.asc()).first()
     mes_primeiro = mes_primeiro.mes_referencia if mes_primeiro else mes
 
