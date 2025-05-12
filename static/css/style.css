@@ -1222,4 +1222,29 @@ body, html {
     box-shadow: 0 2px 8px rgba(0,0,0,0.2);
   }
   
-  
+ .acesso-rapido-desktop {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    background-color: #a00000;
+    padding: 12px 10px;
+    flex-wrap: wrap;
+}
+
+.acesso-rapido-desktop a {
+    color: white;
+    font-weight: 600;
+    text-decoration: none;
+    padding: 5px 5px;
+    border-radius: 7px;
+    background-color: #c42121;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    font-size: 0.70rem;
+}
+
+.acesso-rapido-desktop a:hover {
+    background-color: #8b0000;
+    transform: translateY(-2px);
+}
+
+

@@ -9,19 +9,28 @@
     <!-- Fonte Google -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
     <style>
         :root {
-            --cor-primaria: #990000; /* Vermelho Grená */
-            --cor-primaria-hover: #7a0000; /* Vermelho mais escuro para hover */
-            --cor-primaria-light: rgba(153, 0, 0, 0.8); /* Versão com transparência */
-            --cor-secundaria: #FFFFFF; /* Branco */
+            --cor-primaria: #990000;
+            /* Vermelho Grená */
+            --cor-primaria-hover: #7a0000;
+            /* Vermelho mais escuro para hover */
+            --cor-primaria-light: rgba(153, 0, 0, 0.8);
+            /* Versão com transparência */
+            --cor-secundaria: #FFFFFF;
+            /* Branco */
             --cor-texto-primaria: #FFFFFF;
             --cor-texto-secundaria: #333333;
-            --cor-destaque: #FFD700; /* Dourado para detalhes */
-            --cor-destaque-hover: #e6c300; /* Dourado mais escuro para hover */
+            --cor-destaque: #FFD700;
+            /* Dourado para detalhes */
+            --cor-destaque-hover: #e6c300;
+            /* Dourado mais escuro para hover */
             --cor-fundo: #f5f5f5;
             --cor-fundo-card: #FFFFFF;
             --cor-borda: #dddddd;
@@ -59,22 +68,22 @@
         /* Estilos do Menu Hamburger */
         #menu-toggle {
             display: none;
+            position: fixed;
+            z-index: 1002;
         }
 
         .menu-icon {
-            display: none;
-            font-size: 24px;
-            cursor: pointer;
-            color: var(--cor-texto-primaria);
-            padding: 15px;
             position: fixed;
-            top: 15px;
-            left: 15px;
-            z-index: 1001;
-            background-color: var(--cor-primaria);
-            border-radius: var(--border-radius-pequeno);
-            box-shadow: var(--sombra-suave);
-            transition: var(--transicao-padrao);
+            top: 20px;
+            left: 20px;
+            z-index: 1002;
+            font-size: 28px;
+            background-color: #990000;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            display: none;
         }
 
         .menu-icon:hover {
@@ -87,11 +96,10 @@
             top: 0;
             width: 280px;
             height: 100%;
-            background: linear-gradient(to bottom, var(--cor-primaria), var(--cor-primaria-hover));
+            background: linear-gradient(to bottom, #990000, #7a0000);
             transition: left 0.3s ease;
-            z-index: 1000;
+            z-index: 1001;
             padding-top: 20px;
-            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.3);
         }
 
         .sidebar .logo-container {
@@ -157,38 +165,34 @@
         }
 
         /* Ajuste para o conteúdo principal quando o menu está visível */
-        #menu-toggle:checked ~ .wrapper .sidebar {
+       #menu-toggle:checked ~ .sidebar {
             left: 0;
         }
 
-        #menu-toggle:checked ~ .wrapper {
+        #menu-toggle:checked  {
             padding-left: 0;
         }
-        
+
         /* Sobreposição escura quando o menu está aberto em dispositivos móveis */
         .overlay {
             display: none;
             position: fixed;
             top: 0;
             left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: rgba(0, 0, 0, 0.5);
-            z-index: 999;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
             opacity: 0;
             transition: opacity 0.3s ease;
         }
 
-        #menu-toggle:checked ~ .overlay {
+        #menu-toggle:checked~.overlay {
             display: block;
             opacity: 1;
         }
 
-        @media (max-width: 768px) {
-            .menu-icon {
-                display: block;
-            }
-
+        
             header.main-header-desktop {
                 display: none;
             }
@@ -196,7 +200,7 @@
             .wrapper {
                 padding-top: 60px;
             }
-        }
+        
 
         /* Header Desktop */
         header.main-header-desktop {
@@ -217,7 +221,7 @@
         /* Hero Section */
         .hero-section {
             background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.7)),
-                url("{{ url_for('static', filename='img/fundo_login.png') }}") no-repeat center center/cover;
+            url("{{ url_for('static', filename='img/fundo_login.jpg') }}") no-repeat center center/cover;
             color: var(--cor-texto-primaria);
             padding: 100px 20px;
             text-align: center;
@@ -384,7 +388,7 @@
             left: -50%;
             width: 200%;
             height: 200%;
-            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%);
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 70%);
             opacity: 0;
             transition: opacity 0.8s ease;
             pointer-events: none;
@@ -550,7 +554,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: radial-gradient(circle at center, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 70%);
+            background: radial-gradient(circle at center, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0) 70%);
             opacity: 0;
             transition: opacity 0.5s ease;
         }
@@ -664,6 +668,7 @@
                 opacity: 0;
                 transform: translateY(-20px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -675,27 +680,33 @@
                 opacity: 0;
                 transform: translateY(20px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
             }
         }
 
+        @media (max-width: 768px) {
+            .menu-icon {
+                display: block;
+
+
         /* Responsividade adicional */
         @media (max-width: 768px) {
             .hero-section {
                 padding: 70px 20px;
             }
-            
+
             .hero-section h1 {
                 font-size: 2.5rem;
             }
-            
+
             .match-details .teams {
                 flex-direction: row;
                 gap: 15px;
             }
-            
+
             .section {
                 padding: 25px 20px;
             }
@@ -705,202 +716,358 @@
             .hero-section {
                 padding: 50px 15px;
             }
-            
+
             .hero-section h1 {
                 font-size: 2rem;
             }
-            
+
             .hero-section p {
                 font-size: 1rem;
             }
-            
+
             .section-title {
                 font-size: 1.6rem;
             }
-            
+
             .stats-cards-grid {
                 grid-template-columns: 1fr;
             }
-            
+
             .quick-links-grid {
                 grid-template-columns: 1fr;
             }
-            
+
             .match-details {
                 padding: 20px 15px;
             }
-            
+
             .match-details .teams {
                 flex-direction: column;
                 gap: 25px;
             }
-            
+
             .match-details .vs-text {
                 margin: 15px 0;
             }
-            
+
             .cta-button {
                 width: 100%;
                 padding: 12px 20px;
                 font-size: 1rem;
             }
-            
+
             .stat-card .stat-value {
                 font-size: 2.5rem;
             }
         }
+
+         #menu-toggle:checked ~ .overlay {
+            display: block;
+            opacity: 1;
+        }
+     
+
+     .overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 999;
+}
+
+/* Mostrar overlay quando o menu estiver ativo */
+#menu-toggle:checked ~ .overlay {
+    display: block;
+}
+
+ #menu-toggle:checked ~ .sidebar {
+    left: 0;
+}
+  
+/* Correção para .wrapper com menu aberto */
+#menu-toggle:checked ~ .wrapper .sidebar {
+    left: 0;
+}
+
+/* Para esconder/mostrar o overlay corretamente */
+#menu-toggle:checked ~ .overlay {
+    display: block;
+    opacity: 1;
+}
+
+.sidebar {
+  position: fixed;
+  left: -280px;
+  top: 0;
+  width: 280px;
+  height: 100%;
+  background: linear-gradient(to bottom, #990000, #7a0000);
+  transition: left 0.3s ease;
+  z-index: 1001;
+  padding-top: 20px;
+}
+
+/* REGRAS CRÍTICAS para funcionamento do menu: */
+#menu-toggle:checked ~ .wrapper .sidebar {
+  left: 0;
+}
+
+#menu-toggle:checked ~ .overlay {
+  display: block;
+  opacity: 1;
+}
+
+@media (max-width: 768px) {
+  .menu-icon {
+    display: block;
+  }
+}
+#menu-toggle:checked ~ .sidebar {
+    left: 0;
+}
+
+#menu-toggle:checked ~ .overlay {
+    display: block;
+}
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.4);
+    z-index: 900;
+    display: none;
+}
+.menu-icon {
+    display: none;
+    font-size: 30px;
+    cursor: pointer;
+    color: white;
+    padding: 15px;
+    position: fixed;
+    top: 15px;
+    left: 15px;
+    z-index: 1001;
+    background-color: #990000;
+    border-radius: 5px;
+}
+
+#menu-toggle {
+    display: none;
+}
+
+.sidebar {
+    position: fixed;
+    left: -280px;
+    top: 0;
+    width: 280px;
+    height: 100%;
+    background-color: #990000;
+    transition: left 0.3s ease;
+    z-index: 1000;
+    padding-top: 20px;
+}
+
+/* A mágica: exibe o menu quando o checkbox está marcado */
+#menu-toggle:checked ~ .sidebar {
+    left: 0;
+}
+
+@media (max-width: 768px) {
+    .menu-icon {
+        display: block;
+    }
+}
+.acesso-rapido-desktop {
+    display: flex;
+    justify-content: center;
+    gap: 25px;
+    background-color: #990000;
+    padding: 10px 0;
+    font-weight: bold;
+    position: relative;
+    z-index: 5;
+}
+
+.acesso-rapido-desktop a {
+    color: white;
+    text-decoration: none;
+    font-size: 1rem;
+    transition: all 0.2s ease-in-out;
+}
+
+.acesso-rapido-desktop a:hover {
+    text-decoration: underline;
+    color: #FFD700;
+}
+
+/* Oculta esse menu em telas menores */
+@media (max-width: 768px) {
+    .acesso-rapido-desktop {
+        display: none;
+    }
+}
+
     </style>
 </head>
-
 <body>
-    <!-- Menu Toggle -->
-    <input type="checkbox" id="menu-toggle">
-    <label for="menu-toggle" class="menu-icon"><i class="fas fa-bars"></i></label>
-    
-    <!-- Overlay para fechar o menu ao clicar fora -->
-    <div class="overlay" onclick="document.getElementById('menu-toggle').checked = false;"></div>
+<!-- Links rápidos no topo para desktop -->
+<div class="acesso-rapido-desktop">
+  <a href="{{ url_for('plantel.exibir_plantel') }}">🏃 Jogadores</a>
+  <a href="{{ url_for('performance.graficos') }}">📈 Estatísticas</a>
+  <a href="{{ url_for('performance.ranking') }}">🏅 Ranking</a>
+  <a href="{{ url_for('auth.login') }}">🔐 Diretoria</a>
+</div>
 
-    <div class="wrapper">
-        <!-- Sidebar Menu -->
-        <aside class="sidebar">
-            <div class="logo-container">
-                <img src="{{ url_for('static', filename='img/logoredondo.png') }}" alt="Logo Inter Veterano">
-                <h2>Inter Veterano</h2>
-            </div>
-            <nav>
-                <a href="{{ url_for('home.exibir_home') }}" class="active"><i class="fas fa-home"></i><span>Home</span></a>
-                <a href="{{ url_for('plantel.exibir_plantel') }}"><i class="fas fa-users"></i><span>Jogadores</span></a>
-                <a href="{{ url_for('convidado.exibir_convidados') }}"><i class="fas fa-user-plus"></i><span>Convidados</span></a>
-                <a href="{{ url_for('calendario.exibir_calendario') }}"><i class="fas fa-calendar-alt"></i><span>Calendário</span></a>
+<!-- Menu Toggle fora da wrapper -->
+<!--input type="checkbox" id="menu-toggle">
+<label for="menu-toggle" class="menu-icon"><i class="fas fa-bars"></i></label-->
+
+<div class="wrapper">
+    <aside class="sidebar">
+        <div class="logo-container">
+            <img src="{{ url_for('static', filename='img/logoredondo.png') }}" alt="Logo Inter Veterano">
+            <h2>Inter Veterano</h2>
+        </div>>
+     <nav>
+                <a href="{{ url_for('home.exibir_home') }}" class="active">🏠<span>Home</span></a>
+                <a href="{{ url_for('plantel.exibir_plantel') }}">🧑‍🤝‍🧑<span>Jogadores</span></a>
+                <a href="{{ url_for('convidado.exibir_convidados') }}">🙋‍♂️<span>Convidados</span></a>
+                <a href="{{ url_for('calendario.exibir_calendario') }}">📅<span>Calendário</span></a>
                 {% if 'usuario' in session %}
-                <a href="{{ url_for('performance.index') }}"><i class="fas fa-chart-line"></i><span>Performance</span></a>
-                <a href="{{ url_for('financeiro.exibir_entradas') }}"><i class="fas fa-money-bill-wave"></i><span>Financeiro</span></a>
-                <a href="{{ url_for('financeiro.relatorios') }}"><i class="fas fa-file-alt"></i><span>Relatórios</span></a>
+                <a href="{{ url_for('performance.index') }}">📊<span>Performance</span></a>
+                <a href="{{ url_for('financeiro.exibir_entradas') }}">💰<span>Financeiro</span></a>
+                <a href="{{ url_for('financeiro.relatorios') }}">📄<span>Relatórios</span></a>
                 {% endif %}
-                <a href="{{ url_for('performance.graficos') }}"><i class="fas fa-chart-bar"></i><span>Gráficos</span></a>
-                <a href="{{ url_for('performance.ranking') }}"><i class="fas fa-medal"></i><span>Ranking</span></a>
-                <a href="{{ url_for('galeria.galeria') }}"><i class="fas fa-images"></i><span>Galeria</span></a>
+                <a href="{{ url_for('performance.graficos') }}">📈<span>Gráficos</span></a>
+                <a href="{{ url_for('performance.ranking') }}">🏅<span>Ranking</span></a>
+                <a href="{{ url_for('galeria.galeria') }}">📷<span>Galeria</span></a>
                 {% if 'usuario' in session %}
-                <a href="{{ url_for('auth.logout') }}"><i class="fas fa-sign-out-alt"></i><span>Sair</span></a>
+                <a href="{{ url_for('auth.logout') }}">🔓<span>Sair</span></a>
                 {% else %}
-                <a href="{{ url_for('auth.login') }}"><i class="fas fa-lock"></i><span>Diretoria</span></a>
+                <a href="{{ url_for('auth.login') }}">🔐<span>Diretoria</span></a>
                 {% endif %}
             </nav>
-        </aside>
+  </aside>
 
-        <main class="content">
-            <!-- Header Desktop -->
-            <header class="main-header-desktop">
-                <div class="container">
-                    <div class="logo">
-                        INTER VETERANO
-                    </div>
+         <main class="content">
+        <!-- Header Desktop -->
+        <header class="main-header-desktop">
+            <div class="container">
+                <div class="logo">
+                    INTER VETERANO
                 </div>
-            </header>
+            </div>
+        </header>
 
-            <!-- Hero Section -->
-            <section class="hero-section">
-                <div class="container">
-                    <h1>INTER VETERANO</h1>
-                    <p>"Aqui o passado é glória e o presente é luta!"</p>
+        <!-- Hero Section -->
+        <section class="hero-section">
+            <div class="container">
+                <h1>INTER VETERANO</h1>
+                <p>"Aqui o passado é glória e o presente é luta!"</p>
+            </div>
+        </section>
+
+        <!-- Próximo Desafio -->
+        <h2 class="section-title">PRÓXIMO DESAFIO</h2>
+
+        {% if proximo_jogo %}
+        <div class="match-details" id="match-details-content">
+            <div class="teams">
+                <div class="team" id="home-team-info">
+                    <img src="{{ url_for('static', filename='img/logoredondo.png') }}" alt="Inter Veterano">
+                    <span>Inter Veterano</span>
+                </div>
+                <div class="vs-text">VS</div>
+                <div class="team" id="away-team-info">
+                    <!--img src="{{ url_for('static', filename='img/opponent_placeholder.png') }}" alt="{{ proximo_jogo.titulo }}"-->
+                    <span id="opponent-name-placeholder">{{ proximo_jogo.titulo }}</span>
+                </div>
+            </div>
+            <p><strong><i class="far fa-calendar-alt"></i> Data:</strong> <span id="match-date-placeholder">{{
+                    proximo_jogo.data.strftime('%d/%m/%Y') }}</span></p>
+            <p><strong><i class="far fa-clock"></i> Horário:</strong> <span id="match-time-placeholder">{{
+                    proximo_jogo.data.strftime('%H:%M') }}</span></p>
+            <p><strong><i class="fas fa-map-marker-alt"></i> Local:</strong> <span id="match-location-placeholder">{{
+                    proximo_jogo.local }}</span></p>
+            <div class="button-container">
+                <a href="{{ url_for('calendario.exibir_calendario') }}" class="cta-button">Ver Calendário
+                    Completo</a>
+            </div>
+        </div>
+        {% else %}
+        <div id="no-match-message">
+            <p><i class="fas fa-info-circle"></i> Nenhum jogo agendado no momento.</p>
+            <a href="{{ url_for('calendario.exibir_calendario') }}" class="cta-button">Consultar Calendário</a>
+        </div>
+        {% endif %}
+
+        <div class="container">
+            <section id="stats-section" class="section">
+                <h2 class="section-title">DESEMPENHO NA TEMPORADA</h2>
+                <div class="stats-cards-grid">
+                    <div class="stat-card">
+                        <span class="stat-value" id="jogos-temporada">{{ total_jogos }}</span>
+                        <span class="stat-label">Jogos</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-value" id="gols-feitos">{{ total_gols }}</span>
+                        <span class="stat-label">Gols Feitos</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-value" id="vitorias">{{ total_vitorias }}</span>
+                        <span class="stat-label">Vitórias</span>
+                    </div>
                 </div>
             </section>
 
-            <!-- Próximo Desafio -->
-            <h2 class="section-title">PRÓXIMO DESAFIO</h2>
-
-            {% if proximo_jogo %}
-            <div class="match-details" id="match-details-content">
-                <div class="teams">
-                    <div class="team" id="home-team-info">
-                        <img src="{{ url_for('static', filename='img/logoredondo.png') }}" alt="Inter Veterano">
-                        <span>Inter Veterano</span>
-                    </div>
-                    <div class="vs-text">VS</div>
-                    <div class="team" id="away-team-info">
-                        <!--img src="{{ url_for('static', filename='img/opponent_placeholder.png') }}" alt="{{ proximo_jogo.titulo }}"-->
-                        <span id="opponent-name-placeholder">{{ proximo_jogo.titulo }}</span>
-                    </div>
-                </div>
-                <p><strong><i class="far fa-calendar-alt"></i> Data:</strong> <span id="match-date-placeholder">{{ proximo_jogo.data.strftime('%d/%m/%Y') }}</span></p>
-                <p><strong><i class="far fa-clock"></i> Horário:</strong> <span id="match-time-placeholder">{{ proximo_jogo.data.strftime('%H:%M') }}</span></p>
-                <p><strong><i class="fas fa-map-marker-alt"></i> Local:</strong> <span id="match-location-placeholder">{{ proximo_jogo.local }}</span></p>
-                <div class="button-container">
-                    <a href="{{ url_for('calendario.exibir_calendario') }}" class="cta-button">Ver Calendário Completo</a>
-                </div>
-            </div>
-            {% else %}
-            <div id="no-match-message">
-                <p><i class="fas fa-info-circle"></i> Nenhum jogo agendado no momento.</p>
-                <a href="{{ url_for('calendario.exibir_calendario') }}" class="cta-button">Consultar Calendário</a>
-            </div>
-            {% endif %}
-
-            <div class="container">
-                <section id="stats-section" class="section">
-                    <h2 class="section-title">DESEMPENHO NA TEMPORADA</h2>
-                    <div class="stats-cards-grid">
-                        <div class="stat-card">
-                            <span class="stat-value" id="jogos-temporada">{{ total_jogos }}</span>
-                            <span class="stat-label">Jogos</span>
-                        </div>
-                        <div class="stat-card">
-                            <span class="stat-value" id="gols-feitos">{{ total_gols }}</span>
-                            <span class="stat-label">Gols Feitos</span>
-                        </div>
-                        <div class="stat-card">
-                            <span class="stat-value" id="vitorias">{{ total_vitorias }}</span>
-                            <span class="stat-label">Vitórias</span>
-                        </div>
-                    </div>
-                </section>
 
 
-
-                <section id="quick-links-section" class="section">
-                    <h2 class="section-title">ACESSO RÁPIDO</h2>
-                    <div class="quick-links-grid">
-                        <a href="{{ url_for('calendario.exibir_calendario') }}" class="quick-link-item">
-                            <!--svg viewBox="0 0 24 24">
+            <section id="quick-links-section" class="section">
+                <h2 class="section-title">ACESSO RÁPIDO</h2>
+                <div class="quick-links-grid">
+                    <a href="{{ url_for('calendario.exibir_calendario') }}" class="quick-link-item">
+                        <!--svg viewBox="0 0 24 24">
                                 <path
                                     d="M19,4H17V3a1,1,0,0,0-2,0V4H9V3A1,1,0,0,0,7,3V4H5A3,3,0,0,0,2,7V19a3,3,0,0,0,3,3H19a3,3,0,0,0,3-3V7A3,3,0,0,0,19,4Zm1,15a1,1,0,0,1-1,1H5a1,1,0,0,1-1-1V10H20Zm0-11H4V7A1,1,0,0,1,5,6H7V7A1,1,0,0,0,9,7V6h6V7a1,1,0,0,0,2,0V6h2a1,1,0,0,1,1,1Z" />
                             </svg-->
-                            <span>Calendário</span>
-                        </a>
-                        <a href="{{ url_for('plantel.exibir_plantel') }}" class="quick-link-item">
-                           
-                            <span>Jogadores</span>
-                        </a>
-                        <a href="{{ url_for('performance.graficos') }}" class="quick-link-item">
-                           
-                            <span>Estatísticas</span>
-                        </a>
-                        <a href="{{ url_for('performance.ranking') }}" class="quick-link-item">
-                           
-                            <span>Ranking</span>
-                        </a>
-                    </div>
-                </section>
+                        <span>📅 Calendário</span>
+                    </a>
+                    <a href="{{ url_for('plantel.exibir_plantel') }}" class="quick-link-item">
 
-                <section id="info-box" class="section">
-                    <h2 class="section-title">SISTEMA DE GESTÃO</h2>
-                    <p>Gerencie o plantel, acompanhe o desempenho da equipe, organize o calendário de jogos e controle
-                        as finanças do clube de forma eficiente.</p>
-                    {% if 'usuario' in session %}
-                    <a href="{{ url_for('financeiro.exibir_entradas') }}" class="cta-button">Acessar Área Financeira</a>
-                    {% else %}
-                    <a href="{{ url_for('auth.login') }}" class="cta-button">Acessar Área da Diretoria</a>
-                    {% endif %}
-                </section>
-            </div>
-        </main>
+                        <span>🧑‍🤝‍🧑 Jogadores</span>
+                    </a>
+                    <a href="{{ url_for('performance.graficos') }}" class="quick-link-item">
 
-        <footer class="footer">
-            <div class="container">
-                <p>&copy; 2024 Inter Veterano. Todos os direitos reservados.</p>
-                <p>Desenvolvido com paixão!</p>
-            </div>
-        </footer>
+                        <span>📊 Estatísticas</span>
+                    </a>
+                    <a href="{{ url_for('performance.ranking') }}" class="quick-link-item">
+
+                        <span>🏅 Ranking</span>
+                    </a>
+                </div>
+            </section>
+
+            <section id="info-box" class="section">
+                <h2 class="section-title">SISTEMA DE GESTÃO</h2>
+                <p>Gerencie o plantel, acompanhe o desempenho da equipe, organize o calendário de jogos e controle
+                    as finanças do clube de forma eficiente.</p>
+                {% if 'usuario' in session %}
+                <a href="{{ url_for('financeiro.exibir_entradas') }}" class="cta-button">Acessar Área Financeira</a>
+                {% else %}
+                <a href="{{ url_for('auth.login') }}" class="cta-button">Acessar Área da Diretoria</a>
+                {% endif %}
+            </section>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 Inter Veterano. Todos os direitos reservados.</p>
+            <p>Desenvolvido com paixão!</p>
+        </div>
+    </footer>
     </div> <!-- Fim do .wrapper -->
 
 </body>

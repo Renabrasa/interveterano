@@ -4,19 +4,27 @@
 <style>
     :root {
         --primary: #a71611;
-        --primary-light: #a01a08;
-        --primary-dark: #ac0a0a;
+        --primary-light: #c22118;
+        --primary-dark: #8c0d0a;
         --accent: #ff6b6b;
-        --background: #f4f7fa;
+        --accent-dark: #ff4949;
+        --background: #f8fafc;
         --card-bg: #ffffff;
         --text: #1a202c;
-        --text-light: #718096;
+        --text-light: #64748b;
         --border: #e2e8f0;
-        --shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-        --radius: 8px;
-        --transition: all 0.2s ease-in-out;
+        --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        --shadow-hover: 0 6px 16px rgba(0, 0, 0, 0.12);
+        --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.1);
+        --radius: 10px;
+        --radius-sm: 6px;
+        --transition: all 0.25s ease;
         --font-title: 'Poppins', sans-serif;
         --font-body: 'Inter', sans-serif;
+        --success: #10b981;
+        --success-bg: #ecfdf5;
+        --error: #ef4444;
+        --error-bg: #fff1f2;
     }
 
     * {
@@ -29,7 +37,7 @@
         font-family: var(--font-body);
         color: var(--text);
         background-color: var(--background);
-        line-height: 1.5;
+        line-height: 1.6;
     }
 
     .container {
@@ -40,13 +48,14 @@
 
     /* Header */
     .page-header {
-        background: linear-gradient(135deg, var(--primary), var(--primary-light));
-        padding: 2rem;
+        background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+        padding: 2.5rem 2rem;
         border-radius: var(--radius);
         text-align: center;
-        margin-bottom: 2rem;
+        margin-bottom: 2.5rem;
         position: relative;
         overflow: hidden;
+        box-shadow: var(--shadow);
     }
 
     .page-header::before {
@@ -56,32 +65,90 @@
         left: 0;
         width: 100%;
         height: 100%;
-        background: radial-gradient(circle, rgba(255, 255, 255, 0.2) 0%, transparent 70%);
-        opacity: 0.3;
+        background: 
+            radial-gradient(circle at 10% 20%, rgba(255, 255, 255, 0.15) 0%, transparent 40%),
+            radial-gradient(circle at 90% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 40%);
+        opacity: 0.6;
     }
 
     .page-title {
         font-family: var(--font-title);
-        font-size: 2.5rem;
-        font-weight: 600;
+        font-size: 2.75rem;
+        font-weight: 700;
         color: white;
         position: relative;
         z-index: 1;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        letter-spacing: -0.5px;
+    }
+
+    /* Section Headers */
+    .section-header {
+        font-family: var(--font-title);
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: var(--text);
+        margin-bottom: 1rem;
+        position: relative;
+        padding-left: 1rem;
+        border-left: 4px solid var(--primary);
+    }
+
+    /* Cards */
+    .card {
+        background: var(--card-bg);
+        border-radius: var(--radius);
+        padding: 1.75rem;
+        box-shadow: var(--shadow-card);
+        margin-bottom: 2rem;
+        border: 1px solid var(--border);
+        transition: var(--transition);
+    }
+
+    .card:hover {
+        box-shadow: var(--shadow-hover);
     }
 
     /* Form Card */
     .form-card {
         background: var(--card-bg);
         border-radius: var(--radius);
-        padding: 1.5rem;
+        padding: 2rem;
         box-shadow: var(--shadow);
-        margin-bottom: 2rem;
+        margin-bottom: 2.5rem;
+        border: 1px solid var(--border);
+    }
+
+    .form-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .form-icon {
+        background: var(--primary-light);
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 1rem;
+        color: white;
+        font-size: 1.25rem;
+    }
+
+    .form-title {
+        font-family: var(--font-title);
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: var(--text);
     }
 
     .form-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-        gap: 1rem;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
     }
 
     .form-group {
@@ -91,81 +158,163 @@
     }
 
     label {
-        font-size: 0.9rem;
+        font-size: 0.95rem;
         font-weight: 500;
         color: var(--text);
     }
 
     input[type="number"],
     select {
-        padding: 0.75rem;
+        padding: 0.875rem;
         border: 1px solid var(--border);
-        border-radius: var(--radius);
+        border-radius: var(--radius-sm);
         font-size: 1rem;
         background: #fff;
         transition: var(--transition);
+        color: var(--text);
     }
 
     input:focus,
     select:focus {
         outline: none;
         border-color: var(--primary);
-        box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+        box-shadow: 0 0 0 3px rgba(167, 22, 17, 0.15);
     }
 
     .checkbox-group {
         display: flex;
         align-items: center;
-        gap: 0.5rem;
+        gap: 0.75rem;
         margin-top: 0.5rem;
+    }
+
+    .checkbox-group input[type="checkbox"] {
+        width: 20px;
+        height: 20px;
+        accent-color: var(--primary);
+        cursor: pointer;
+    }
+
+    .checkbox-group label {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        cursor: pointer;
+    }
+
+    .btn-container {
+        display: flex;
+        justify-content: flex-end;
+        margin-top: 1.5rem;
     }
 
     .btn-registrar {
         background: var(--primary);
         color: white;
-        padding: 0.75rem 1.5rem;
+        padding: 0.875rem 1.75rem;
         border: none;
-        border-radius: var(--radius);
-        font-weight: 500;
+        border-radius: var(--radius-sm);
+        font-weight: 600;
+        font-size: 1rem;
         cursor: pointer;
         transition: var(--transition);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        box-shadow: 0 2px 4px rgba(167, 22, 17, 0.2);
     }
 
     .btn-registrar:hover {
         background: var(--primary-dark);
-        transform: translateY(-1px);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(167, 22, 17, 0.25);
+    }
+
+    .btn-registrar:active {
+        transform: translateY(0);
     }
 
     /* Filters */
     .filtros-container {
         background: var(--card-bg);
         border-radius: var(--radius);
-        padding: 1.5rem;
-        box-shadow: var(--shadow);
-        margin: 2rem 0;
+        padding: 1.75rem;
+        box-shadow: var(--shadow-card);
+        margin: 2.5rem 0;
+        border: 1px solid var(--border);
+    }
+
+    .filtros-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1.25rem;
+    }
+
+    .filtros-icon {
+        color: var(--primary);
+        font-size: 1.25rem;
+        margin-right: 0.75rem;
+    }
+
+    .filtros-title {
+        font-family: var(--font-title); 
+        font-size: 1.5rem; 
+        font-weight: 600;
+        color: var(--text);
     }
 
     .filtros-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
         gap: 1rem;
     }
 
     .filtro-input {
-        padding: 0.75rem;
+        padding: 0.875rem;
         border: 1px solid var(--border);
-        border-radius: var(--radius);
-        font-size: 0.9rem;
+        border-radius: var(--radius-sm);
+        font-size: 0.95rem;
         width: 100%;
+        transition: var(--transition);
+    }
+
+    .filtro-input:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(167, 22, 17, 0.15);
+    }
+
+    .filtro-input::placeholder {
+        color: var(--text-light);
     }
 
     /* Table */
     .tabela-container {
         background: var(--card-bg);
         border-radius: var(--radius);
-        padding: 1.5rem;
-        box-shadow: var(--shadow);
+        padding: 1.75rem;
+        box-shadow: var(--shadow-card);
         overflow-x: auto;
+        border: 1px solid var(--border);
+    }
+
+    .tabela-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1.25rem;
+    }
+    
+    .tabela-icon {
+        color: var(--primary);
+        font-size: 1.25rem;
+        margin-right: 0.75rem;
+    }
+    
+    .tabela-title {
+        font-family: var(--font-title);
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: var(--text);
     }
 
     .tabela-performances {
@@ -176,9 +325,8 @@
 
     .tabela-performances th,
     .tabela-performances td {
-        padding: 1rem;
+        padding: 1.15rem 1rem;
         text-align: left;
-        border-bottom: 1px solid var(--border);
     }
 
     .tabela-performances th {
@@ -188,31 +336,52 @@
         position: sticky;
         top: 0;
         z-index: 1;
+        font-size: 1rem;
+    }
+
+    .tabela-performances th:first-child {
+        border-top-left-radius: var(--radius-sm);
+    }
+
+    .tabela-performances th:last-child {
+        border-top-right-radius: var(--radius-sm);
     }
 
     .tabela-performances tr {
         transition: var(--transition);
+        border-bottom: 1px solid var(--border);
     }
 
-    .tabela-performances tr:hover {
-        background-color: rgba(0, 123, 255, 0.05);
+    .tabela-performances tr:last-child {
+        border-bottom: none;
+    }
+
+    .tabela-performances tbody tr:hover {
+        background-color: rgba(167, 22, 17, 0.04);
+    }
+
+    .tabela-performances td {
+        font-size: 0.95rem;
+        color: var(--text);
     }
 
     .acoes-cell {
         display: flex;
-        gap: 0.5rem;
+        gap: 0.75rem;
     }
 
     .btn-acao {
-        width: 36px;
-        height: 36px;
+        width: 38px;
+        height: 38px;
         display: flex;
         align-items: center;
         justify-content: center;
-        border-radius: var(--radius);
+        border-radius: var(--radius-sm);
         border: none;
         cursor: pointer;
         transition: var(--transition);
+        font-size: 1.15rem;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
 
     .btn-editar {
@@ -222,6 +391,8 @@
 
     .btn-editar:hover {
         background: var(--primary-dark);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(167, 22, 17, 0.25);
     }
 
     .btn-excluir {
@@ -230,7 +401,35 @@
     }
 
     .btn-excluir:hover {
-        background: #e63946;
+        background: var(--accent-dark);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(255, 107, 107, 0.25);
+    }
+
+    .btn-editar:active,
+    .btn-excluir:active {
+        transform: translateY(0);
+    }
+
+    /* Status Badge */
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.35rem 0.75rem;
+        border-radius: 100px;
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+
+    .status-sim {
+        background-color: #d1fae5;
+        color: #047857;
+    }
+
+    .status-nao {
+        background-color: #fee2e2;
+        color: #b91c1c;
     }
 
     /* Modal */
@@ -243,6 +442,7 @@
         bottom: 0;
         z-index: 1000;
         background: rgba(0, 0, 0, 0.7);
+        backdrop-filter: blur(3px);
         align-items: center;
         justify-content: center;
     }
@@ -252,14 +452,15 @@
         padding: 2rem;
         border-radius: var(--radius);
         width: 90%;
-        max-width: 600px;
-        box-shadow: var(--shadow);
+        max-width: 640px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
         animation: slideIn 0.3s ease-out;
+        position: relative;
     }
 
     @keyframes slideIn {
         from {
-            transform: translateY(-20px);
+            transform: translateY(-30px);
             opacity: 0;
         }
 
@@ -269,40 +470,125 @@
         }
     }
 
-    .close-modal {
-        position: absolute;
-        top: 1rem;
-        right: 1rem;
-        font-size: 1.5rem;
-        cursor: pointer;
-        color: var(--text-light);
+    .modal-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid var(--border);
     }
 
-    .close-modal:hover {
+    .modal-icon {
+        background: var(--primary-light);
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 1rem;
+        color: white;
+        font-size: 1.25rem;
+    }
+
+    .modal-title {
+        font-family: var(--font-title);
+        font-size: 1.5rem;
+        font-weight: 600;
         color: var(--text);
     }
 
+    .close-modal {
+        position: absolute;
+        top: 1.25rem;
+        right: 1.25rem;
+        width: 32px;
+        height: 32px;
+        background: #f1f5f9;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+        cursor: pointer;
+        color: var(--text-light);
+        transition: var(--transition);
+    }
+
+    .close-modal:hover {
+        background: #e2e8f0;
+        color: var(--text);
+    }
+
+    .modal-actions {
+        margin-top: 1.75rem;
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-end;
+    }
+
+    .btn-cancelar {
+        background: #e2e8f0;
+        color: var(--text);
+        padding: 0.875rem 1.75rem;
+        border: none;
+        border-radius: var(--radius-sm);
+        font-weight: 500;
+        cursor: pointer;
+        transition: var(--transition);
+    }
+
+    .btn-cancelar:hover {
+        background: #cbd5e1;
+    }
+
     /* Alerts */
+    .alertas-container {
+        margin-bottom: 1.5rem;
+    }
+
+    .alerta {
+        padding: 1rem;
+        border-radius: var(--radius-sm);
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        animation: fadeIn 0.5s ease;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
     .alerta-sucesso {
-        background: #e6ffed;
-        color: #065f46;
-        padding: 0.75rem 1rem;
-        border-radius: var(--radius);
-        border-left: 4px solid #10b981;
-        margin: 1rem 0;
+        background: var(--success-bg);
+        color: var(--success);
+        border-left: 4px solid var(--success);
     }
 
     .alerta-erro {
-        background: #fff1f2;
-        color: #991b1b;
-        padding: 0.75rem 1rem;
-        border-radius: var(--radius);
-        border-left: 4px solid #ef4444;
-        margin: 1rem 0;
+        background: var(--error-bg);
+        color: var(--error);
+        border-left: 4px solid var(--error);
+    }
+
+    .alerta-icon {
+        margin-right: 0.75rem;
+        font-size: 1.25rem;
     }
 
     /* Responsive */
     @media (max-width: 768px) {
+        .container {
+            padding: 1.5rem;
+        }
 
         .form-grid,
         .filtros-grid {
@@ -312,6 +598,12 @@
         .page-title {
             font-size: 2rem;
         }
+        
+        .form-card,
+        .filtros-container,
+        .tabela-container {
+            padding: 1.25rem;
+        }
     }
 
     @media (max-width: 480px) {
@@ -319,13 +611,26 @@
             padding: 1rem;
         }
 
+        .page-header {
+            padding: 1.75rem 1rem;
+        }
+
         .btn-acao {
-            width: 32px;
-            height: 32px;
+            width: 34px;
+            height: 34px;
         }
 
         .tabela-performances {
-            font-size: 0.9rem;
+            font-size: 0.85rem;
+        }
+        
+        .tabela-performances th,
+        .tabela-performances td {
+            padding: 0.75rem 0.5rem;
+        }
+        
+        .modal-content {
+            padding: 1.5rem;
         }
     }
 </style>
@@ -337,6 +642,9 @@
     <div class="alertas-container">
         {% for categoria, msg in messages %}
         <div class="alerta alerta-{{ categoria }}">
+            <span class="alerta-icon">
+                {% if categoria == 'sucesso' %}✓{% else %}⚠️{% endif %}
+            </span>
             {{ msg }}
         </div>
         {% endfor %}
@@ -352,6 +660,11 @@
     <!-- Form -->
     {% if 'usuario' in session %}
     <div class="form-card">
+        <div class="form-header">
+            <div class="form-icon">📊</div>
+            <h2 class="form-title">Registrar Nova Performance</h2>
+        </div>
+        
         <form method="POST" action="{{ url_for('performance.adicionar_performance') }}" class="form-jogador">
             <input type="hidden" id="tipo" value="pessoa">
 
@@ -372,7 +685,6 @@
                         <option value="{{ jogo.id }}">{{ jogo.data.strftime('%d/%m %H:%Mh') }} - {{ jogo.titulo }}
                         </option>
                         {% endfor %}
-
                     </select>
                 </div>
 
@@ -400,8 +712,10 @@
                 </div>
             </div>
 
-            <div style="text-align: right;">
-                <button type="submit" class="btn-registrar">Registrar Performance</button>
+            <div class="btn-container">
+                <button type="submit" class="btn-registrar">
+                    <span>✓</span> Registrar Performance
+                </button>
             </div>
         </form>
     </div>
@@ -409,7 +723,11 @@
 
     <!-- Filters -->
     <div class="filtros-container">
-        <h2 style="font-family: var(--font-title); font-size: 1.5rem; margin-bottom: 1rem;">Filtrar Performances</h2>
+        <div class="filtros-header">
+            <span class="filtros-icon">🔍</span>
+            <h2 class="filtros-title">Filtrar Performances</h2>
+        </div>
+        
         <div class="filtros-grid">
             <input type="text" id="filtro-texto" class="filtro-input" placeholder="Buscar por nome, jogo ou data...">
             <select id="filtro-jogo" class="filtro-input">
@@ -417,7 +735,6 @@
                 {% for jogo in jogos %}
                 <option value="{{ jogo.id }}">{{ jogo.data.strftime('%d/%m %H:%Mh') }} - {{ jogo.titulo }}</option>
                 {% endfor %}
-
             </select>
             <select id="filtro-participante" class="filtro-input">
                 <option value="">Todos os Participantes</option>
@@ -431,6 +748,11 @@
 
     <!-- Table -->
     <div class="tabela-container">
+        <div class="tabela-header">
+            <span class="tabela-icon">📋</span>
+            <h2 class="tabela-title">Histórico de Performances</h2>
+        </div>
+        
         <table class="tabela-performances">
             <thead>
                 <tr>
@@ -447,13 +769,17 @@
             <tbody>
                 {% for p in performances %}
                 <tr>
-                    <td>{{ p.jogo.data.strftime('%Y-%m-%d') }}</td>
+                    <td>{{ p.jogo.data.strftime('%d/%m/%Y') }}</td>
                     <td>{{ p.jogo.titulo }}</td>
                     <td>{{ p.pessoa.nome }}</td>
                     <td>{{ p.gols }}</td>
                     <td>{{ p.gols_sofridos if p.gols_sofridos is not none else '-' }}</td>
                     <td>{{ p.assistencias }}</td>
-                    <td>{{ 'Sim' if p.participou else 'Não' }}</td>
+                    <td>
+                        <span class="status-badge {% if p.participou %}status-sim{% else %}status-nao{% endif %}">
+                            {{ 'Sim' if p.participou else 'Não' }}
+                        </span>
+                    </td>
                     <td class="acoes-cell">
                         <button type="button" class="btn-acao btn-editar"
                             onclick="abrirEdicao({{ p.id }}, '{{ p.jogo.data.strftime('%Y-%m-%d') }}', '{{ p.jogo.titulo }}', {{ p.pessoa.id }}, {{ p.gols }}, {{ p.gols_sofridos or 0 }}, {{ p.assistencias }}, {{ 'true' if p.participou else 'false' }})">
@@ -476,8 +802,12 @@
     <!-- Modal -->
     <div id="modal-edicao" class="modal">
         <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-icon">✏️</div>
+                <h2 class="modal-title">Editar Performance</h2>
+            </div>
             <span class="close-modal" id="btn-fechar">×</span>
-            <h2 style="font-family: var(--font-title); margin-bottom: 1.5rem;">Editar Performance</h2>
+            
             <form id="form-edicao" method="POST">
                 <div class="form-grid">
                     <div class="form-group">
@@ -493,10 +823,8 @@
                         <label>Jogo:</label>
                         <select name="jogo_id" id="editar_jogo" required>
                             {% for jogo in jogos %}
-    <option value="{{ jogo.id }}">{{ jogo.data.strftime('%d/%m %H:%Mh') }} - {{ jogo.titulo }}</option>
-{% endfor %}
-
-
+                            <option value="{{ jogo.id }}">{{ jogo.data.strftime('%d/%m %H:%Mh') }} - {{ jogo.titulo }}</option>
+                            {% endfor %}
                         </select>
                     </div>
 
@@ -523,12 +851,12 @@
                     </div>
                 </div>
 
-                <div style="margin-top: 1.5rem; display: flex; gap: 1rem; justify-content: flex-end;">
-                    <button type="submit" class="btn-registrar">Salvar</button>
-                    <button type="button"
-                        style="background: var(--text-light); color: white; padding: 0.75rem 1.5rem; border: none; border-radius: var(--radius);"
-                        onclick="fecharModal()">
+                <div class="modal-actions">
+                    <button type="button" class="btn-cancelar" onclick="fecharModal()">
                         Cancelar
+                    </button>
+                    <button type="submit" class="btn-registrar">
+                        <span>✓</span> Salvar Alterações
                     </button>
                 </div>
             </form>
@@ -537,52 +865,42 @@
 </div>
 
 <script>
-    // Carregar participantes no formulário
     document.addEventListener('DOMContentLoaded', function () {
-        let pessoas;
-        try {
-            pessoas = {{ pessoas_json | tojson | safe }};
-   
-    };
-    if (!Array.isArray(pessoas)) {
-        console.error('pessoas_json não é um array válido:', pessoas);
-        pessoas = [];
-    }
-    } catch (e) {
-        console.error('Erro ao parsear pessoas_json:', e);
-        pessoas = [];
-    }
-
-    const select = document.getElementById('participante_id');
-
-    // Preencher o select com opções de participantes
-    pessoas.forEach(pessoa => {
-        const option = document.createElement('option');
-        option.value = pessoa.id;
-        option.textContent = pessoa.nome;
-        select.appendChild(option);
-    });
-
-    // Mostrar/ocultar campo de gols sofridos
-    select.addEventListener('change', function () {
-        const idSelecionado = this.value;
-        const participante = pessoas.find(p => p.id == idSelecionado);
+        const pessoas = {{ pessoas_json | tojson | safe }};
+        const select = document.getElementById('participante_id');
         const campoGolsSofridos = document.getElementById('campo-gols-sofridos');
 
-        if (participante && (participante.posicao?.toLowerCase() === 'goleiro' || participante.categoria?.toLowerCase() === 'goleiro')) {
-            campoGolsSofridos.style.visibility = 'visible';
-            campoGolsSofridos.style.height = 'auto';
-            campoGolsSofridos.style.overflow = 'visible';
-        } else {
-            campoGolsSofridos.style.visibility = 'hidden';
-            campoGolsSofridos.style.height = '0';
-            campoGolsSofridos.style.overflow = 'hidden';
+        function verificarGoleiro(idSelecionado) {
+            const participante = pessoas.find(p => p.id == idSelecionado);
+            if (participante && (participante.posicao?.toLowerCase() === 'goleiro' || participante.categoria?.toLowerCase() === 'goleiro')) {
+                campoGolsSofridos.style.visibility = 'visible';
+                campoGolsSofridos.style.height = 'auto';
+                campoGolsSofridos.style.overflow = 'visible';
+            } else {
+                campoGolsSofridos.style.visibility = 'hidden';
+                campoGolsSofridos.style.height = '0';
+                campoGolsSofridos.style.overflow = 'hidden';
+            }
         }
-    });
 
+        // Executa ao carregar
+        verificarGoleiro(select.value);
+
+        // Executa ao trocar
+        select.addEventListener('change', function () {
+            verificarGoleiro(this.value);
+        });
+    });
+</script>
+
+<script>
     // Fechar alertas após 5 segundos
     setTimeout(() => {
-        document.querySelectorAll('.alerta').forEach(el => el.remove());
+        document.querySelectorAll('.alerta').forEach(el => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(-10px)';
+            setTimeout(() => el.remove(), 300);
+        });
     }, 5000);
 
     // Aplicar filtros
@@ -599,59 +917,51 @@
         const termo = inputTexto.value.toLowerCase();
         const jogo = inputJogo.value.toLowerCase();
         const participante = inputPart.value.toLowerCase();
-        const data = inputData.value;
+                const data = inputData.value;
 
-        document.querySelectorAll('table tbody tr').forEach(linha => {
-            const texto = linha.innerText.toLowerCase();
-            const colunas = linha.getElementsByTagName('td');
-            const dataLinha = colunas[0]?.textContent;
+        document.querySelectorAll('.tabela-performances tbody tr').forEach(row => {
+            const texto = row.innerText.toLowerCase();
+            const jogoId = row.children[1]?.getAttribute('data-jogo-id') || '';
+            const participanteNome = row.children[2]?.innerText.toLowerCase() || '';
+            const dataTexto = row.children[0]?.innerText || '';
 
-            const matchTexto = texto.includes(termo);
-            const matchJogo = jogo === '' || colunas[1]?.textContent.toLowerCase().includes(jogo);
-            const matchPart = participante === '' || colunas[2]?.textContent.toLowerCase().includes(participante);
-            const matchData = data === '' || dataLinha === data;
+            const passaTexto = texto.includes(termo);
+            const passaJogo = !jogo || jogoId === jogo;
+            const passaPart = !participante || participanteNome.includes(participante);
+            const passaData = !data || dataTexto === formatarData(data);
 
-            linha.style.display = (matchTexto && matchJogo && matchPart && matchData) ? '' : 'none';
+            row.style.display = (passaTexto && passaJogo && passaPart && passaData) ? '' : 'none';
         });
     }
 
-    // Abrir modal de edição
-    window.abrirEdicao = function (id, data, titulo, pessoa_id, gols, gols_sofridos, assistencias, participou) {
-        const form = document.getElementById('form-edicao');
-        form.action = `/performance/editar/${id}`;
-
-        document.getElementById('editar_participante').value = pessoa_id;
-        document.getElementById('editar_jogo').value = obterIdJogo(titulo, data);
-        document.getElementById('editar_gols').value = gols;
-        document.getElementById('editar_gols_sofridos').value = gols_sofridos;
-        document.getElementById('editar_assistencias').value = assistencias;
-        document.getElementById('editar_participou').checked = (participou === true || participou === 'true');
-        document.getElementById('modal-edicao').style.display = 'flex';
-    };
-
-    // Fechar modal
-    document.getElementById('btn-fechar')?.addEventListener('click', fecharModal);
-    document.querySelector('.modal')?.addEventListener('click', function (e) {
-        if (e.target === this) fecharModal();
-    });
-
-    // Função auxiliar para obter ID do jogo
-    function obterIdJogo(titulo, data) {
-        const dataFormatada = new Date(data).toISOString().split('T')[0];
-        const options = document.querySelectorAll('#editar_jogo option');
-        for (let option of options) {
-            const value = option.value;
-            const text = option.text;
-            if (text.includes(dataFormatada) && text.includes(titulo)) {
-                return value;
-            }
-        }
-        return '';
+    function formatarData(inputDate) {
+        const [ano, mes, dia] = inputDate.split("-");
+        return `${dia}/${mes}/${ano}`;
     }
-    });
+</script>
+
+<script>
+    function abrirEdicao(id, data, titulo, participanteId, gols, golsSofridos, assistencias, participou) {
+        const modal = document.getElementById('modal-edicao');
+        modal.style.display = 'flex';
+
+        document.getElementById('form-edicao').action = `/performance/editar/${id}`;
+        document.getElementById('editar_participante').value = participanteId;
+        document.getElementById('editar_jogo').value = [...document.getElementById('editar_jogo').options].find(opt => opt.text.includes(titulo))?.value || '';
+        document.getElementById('editar_gols').value = gols;
+        document.getElementById('editar_gols_sofridos').value = golsSofridos;
+        document.getElementById('editar_assistencias').value = assistencias;
+        document.getElementById('editar_participou').checked = participou;
+    }
 
     function fecharModal() {
         document.getElementById('modal-edicao').style.display = 'none';
     }
+
+    document.getElementById('btn-fechar').addEventListener('click', fecharModal);
+    window.addEventListener('click', e => {
+        if (e.target.id === 'modal-edicao') fecharModal();
+    });
 </script>
+
 {% endblock %}
