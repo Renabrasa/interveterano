@@ -20,17 +20,10 @@ def calcular_idade(nascimento):
 
 @plantel_bp.route('/plantel')
 def exibir_plantel():
-    # [X]
-    jogadores_ativos = Pessoa.query.filter_by(tipo='jogador', ativo=True).filter(
-        Pessoa.data_inativacao == None
-    ).order_by(Pessoa.nome).all()
+    jogadores_ativos = Pessoa.query.filter(Pessoa.categoria != 'Convidado', Pessoa.ativo == True, Pessoa.data_inativacao == None).order_by(Pessoa.nome).all()
+    jogadores_desligados = Pessoa.query.filter(Pessoa.categoria != 'Convidado', Pessoa.ativo == True, Pessoa.data_inativacao != None).order_by(Pessoa.nome).all()
 
-    jogadores_desligados = Pessoa.query.filter_by(tipo='jogador', ativo=True).filter(
-        Pessoa.data_inativacao != None
-    ).order_by(Pessoa.nome).all()
-    # [Y]
-
-    categorias = Categoria.query.all()
+    categorias = Categoria.query.filter(Categoria.nome != 'Convidado').all()
     posicoes = Posicao.query.all()
 
     return render_template(
@@ -45,57 +38,42 @@ def exibir_plantel():
 
 
 
-@plantel_bp.route('/plantel/adicionar', methods=['POST'])
-@login_required
+
+@plantel_bp.route('/adicionar', methods=['POST'])
 def adicionar_jogador():
     nome = request.form['nome']
-    categoria_id = request.form['categoria']
-    posicao_id = request.form['posicao']
-    pe_preferencial = request.form['pe_preferencial']
+    categoria = request.form['categoria']
+    posicao = request.form['posicao']
+    pe = request.form['pe_preferencial']
+    data_nascimento = request.form.get('data_nascimento') or None
+    data_inativacao = request.form.get('data_inativacao') or None
+    tipo = 'jogador'
 
-    jogador_existente = Pessoa.query.filter(
-        func.lower(Pessoa.nome) == nome.lower(),
-        Pessoa.tipo == 'jogador'
-    ).first()
+    if categoria.lower() == 'convidado':
+        tipo = 'convidado'
 
-    if jogador_existente:
-        flash('Já existe um jogador com esse nome!', 'erro')
-        return redirect(url_for('plantel.exibir_plantel'))
-
-    # Buscar os nomes da categoria e posição
-    categoria_nome = request.form['categoria']
-    posicao_nome = request.form['posicao']
-
-
-    # Foto
-    foto = request.files['foto']
     foto_base64 = None
-    if foto and foto.filename != '':
-        foto_base64 = base64.b64encode(foto.read()).decode('utf-8')
-
-    # Datas
-    data_inativacao_str = request.form.get('data_inativacao')
-    data_inativacao = datetime.strptime(data_inativacao_str, '%Y-%m-%d') if data_inativacao_str else None
-
-    data_nascimento_str = request.form.get('data_nascimento')
-    data_nascimento = datetime.strptime(data_nascimento_str, '%Y-%m-%d').date() if data_nascimento_str else None
+    if 'foto' in request.files:
+        foto = request.files['foto']
+        if foto.filename != '':
+            foto_base64 = base64.b64encode(foto.read()).decode('utf-8')
 
     nova_pessoa = Pessoa(
         nome=nome,
-        categoria=categoria_nome,
-        posicao=posicao_nome,
-        pe_preferencial=pe_preferencial,
-        foto=foto_base64,
-        tipo='jogador',
-        ativo=True,
+        categoria=categoria,
+        posicao=posicao,
+        pe_preferencial=pe,
+        data_nascimento=data_nascimento,
         data_inativacao=data_inativacao,
-        data_nascimento=data_nascimento 
+        tipo=tipo,
+        foto=foto_base64,
+        ativo=True
     )
     db.session.add(nova_pessoa)
     db.session.commit()
 
-    flash('Jogador cadastrado com sucesso!', 'sucesso')
     return redirect(url_for('plantel.exibir_plantel'))
+
 
 
 @plantel_bp.route('/editar/<int:id>', methods=['POST'], endpoint='atualizar_jogador')
@@ -103,10 +81,14 @@ def adicionar_jogador():
 def atualizar_jogador(id):
     jogador = Pessoa.query.get_or_404(id)
 
+    categoria_nome = request.form['categoria']
+    posicao_nome = request.form['posicao']
+
     jogador.nome = request.form['nome']
-    jogador.categoria = request.form['categoria']  # nome, não ID
-    jogador.posicao = request.form['posicao']      # nome, não ID
+    jogador.categoria = categoria_nome
+    jogador.posicao = posicao_nome
     jogador.pe_preferencial = request.form['pe_preferencial']
+    jogador.tipo = 'convidado' if categoria_nome.lower() == 'convidado' else 'jogador'
 
     data_nascimento_str = request.form.get('data_nascimento')
     jogador.data_nascimento = datetime.strptime(data_nascimento_str, '%Y-%m-%d').date() if data_nascimento_str else None
@@ -114,14 +96,16 @@ def atualizar_jogador(id):
     data_inativacao_str = request.form.get('data_inativacao')
     jogador.data_inativacao = datetime.strptime(data_inativacao_str, '%Y-%m-%d').date() if data_inativacao_str else None
 
-    # Foto nova
     foto = request.files.get('foto')
     if foto and foto.filename:
         jogador.foto = base64.b64encode(foto.read()).decode('utf-8')
 
     db.session.commit()
-    flash('Jogador atualizado com sucesso!', 'sucesso')
+    flash('Cadastro atualizado com sucesso!', 'sucesso')
+    if jogador.tipo == 'convidado':
+        return redirect(url_for('convidado.exibir_convidados'))
     return redirect(url_for('plantel.exibir_plantel'))
+
 
 
 
@@ -149,30 +133,29 @@ def editar_jogador(id):
 
     if request.method == 'POST':
         jogador.nome = request.form['nome']
-
-        # Pega os nomes da categoria e posição a partir dos IDs recebidos
         categoria = Categoria.query.get(request.form['categoria'])
         posicao = Posicao.query.get(request.form['posicao'])
 
         jogador.categoria = categoria.nome if categoria else ''
         jogador.posicao = posicao.nome if posicao else ''
         jogador.pe_preferencial = request.form['pe_preferencial']
-        data_input = request.form.get('data_inativacao')
-        if data_input:
-            jogador.data_inativacao = datetime.strptime(data_input, '%Y-%m-%d')
-        else:
-            jogador.data_inativacao = None
+        jogador.tipo = 'convidado' if jogador.categoria.lower() == 'convidado' else 'jogador'
 
+        data_input = request.form.get('data_inativacao')
+        jogador.data_inativacao = datetime.strptime(data_input, '%Y-%m-%d') if data_input else None
 
         foto = request.files['foto']
         if foto and foto.filename != '':
             jogador.foto = base64.b64encode(foto.read()).decode('utf-8')
 
         db.session.commit()
-        flash('Jogador atualizado com sucesso!', 'sucesso')
+        flash('Cadastro atualizado com sucesso!', 'sucesso')
+        if jogador.tipo == 'convidado':
+            return redirect(url_for('convidado.exibir_convidados'))
         return redirect(url_for('plantel.exibir_plantel'))
 
-    return render_template("editar.html", jogador=jogador, categorias=categorias, posicoes=posicoes)
+    return render_template("editar.html", jogador=jogador, categorias=categorias, posicoes=posicoes,pessoa=jogador)
+
 
 
 

@@ -7,14 +7,16 @@
   {% if 'usuario' in session %}
   <div class="painel-principal">
     <div class="form-card">
-      <form action="{{ url_for('convidado.adicionar_convidado') }}" method="POST" enctype="multipart/form-data" class="form-jogador">
+      <form action="{{ url_for('convidado.adicionar_convidado') }}" method="POST" enctype="multipart/form-data"
+        class="form-jogador">
 
         <div class="form-linha">
           <!-- FOTO -->
           <div class="col-esquerda">
             <div class="foto-container">
               <div class="foto-wrapper">
-                <img src="{{ url_for('static', filename='img/avatar_padrao.png') }}" alt="Foto do Convidado" class="foto-preview" id="fotoPreview">
+                <img src="{{ url_for('static', filename='img/avatar_padrao.png') }}" alt="Foto do Convidado"
+                  class="foto-preview" id="fotoPreview">
                 <div class="foto-overlay">
                   <i class="fas fa-camera"></i>
                   <span>Adicionar Foto</span>
@@ -95,7 +97,8 @@
           <td>{{ convidado.pe_preferencial }}</td>
           <td>
             {% if convidado.foto %}
-            <img src="data:image/jpeg;base64,{{ convidado.foto }}" width="50" height="50" style="object-fit: cover; border-radius: 5px;">
+            <img src="data:image/jpeg;base64,{{ convidado.foto }}" width="50" height="50"
+              style="object-fit: cover; border-radius: 5px;">
             {% else %}
             Sem foto
             {% endif %}
@@ -103,10 +106,14 @@
           {% if 'usuario' in session %}
           <td>
             <a href="{{ url_for('convidado.editar_convidado', id=convidado.id) }}">✏️</a>
-            <a href="{{ url_for('convidado.excluir_convidado', id=convidado.id) }}" onclick="return confirm('Deseja remover este convidado?')">🗑️</a>
-            <button class="btn-transformar" data-id="{{ convidado.id }}" style="background-color:#ecd92c; color:rgb(5, 5, 5); border:none; padding:2px 6px; margin-left:4px; cursor:pointer; border-radius:4px;">
+            <a href="{{ url_for('convidado.excluir_convidado', id=convidado.id) }}"
+              onclick="return confirm('Deseja remover este convidado?')">🗑️</a>
+            <!-- Botão transformando com formulário de data -->
+            <button onclick="abrirModalData({{ convidado.id }})"
+              style="background-color:#ecd92c; color:rgb(5, 5, 5); border:none; padding:2px 6px; margin-left:4px; cursor:pointer; border-radius:4px;">
               ↑ Jogador
             </button>
+
           </td>
           {% endif %}
         </tr>
@@ -154,6 +161,32 @@
       });
     });
   });
+</script>
+<!-- Modal de Data de Início como Jogador -->
+<div id="modalData" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:2000; justify-content:center; align-items:center;">
+  <div style="background:#fff; padding:20px; border-radius:8px; max-width:400px; width:90%; text-align:center;">
+    <h3>Data de início como jogador</h3>
+    <form id="formTransformar" method="POST">
+      <input type="date" name="data_inicio_jogador" required style="padding:10px; margin:15px 0; width:100%;">
+      <div style="display:flex; justify-content:space-between;">
+        <button type="submit" style="padding:10px 20px; background:#990000; color:white; border:none; border-radius:5px;">Salvar</button>
+        <button type="button" onclick="fecharModal()" style="padding:10px 20px; background:gray; color:white; border:none; border-radius:5px;">Cancelar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  function abrirModalData(id) {
+    const modal = document.getElementById('modalData');
+    const form = document.getElementById('formTransformar');
+    form.action = `/pessoas/transformar/${id}`;
+    modal.style.display = 'flex';
+  }
+
+  function fecharModal() {
+    document.getElementById('modalData').style.display = 'none';
+  }
 </script>
 
 
@@ -227,8 +260,15 @@
   }
 
   @keyframes slideIn {
-    from { transform: translateX(100%); opacity: 0; }
-    to { transform: translateX(0); opacity: 1; }
+    from {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
   }
 
   .alerta.erro {
@@ -316,8 +356,13 @@
   }
 
   @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from {
+      opacity: 0;
+    }
+
+    to {
+      opacity: 1;
+    }
   }
 
   /* === FORMULÁRIO === */
@@ -575,7 +620,7 @@
     border-bottom: 1px solid var(--cor-borda);
   }
 
-  .cartao-categoria, 
+  .cartao-categoria,
   .cartao-posicao {
     font-size: 12px;
     font-weight: 600;
@@ -628,7 +673,7 @@
     color: var(--cor-texto-claro);
   }
 
-  .detalhe-pe, 
+  .detalhe-pe,
   .detalhe-idade {
     display: flex;
     align-items: center;
@@ -749,7 +794,7 @@
       flex-direction: column-reverse;
     }
 
-    .btn-primario, 
+    .btn-primario,
     .btn-secundario {
       width: 100%;
       justify-content: center;

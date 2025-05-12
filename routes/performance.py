@@ -4,7 +4,7 @@ from sqlalchemy import func
 from routes.auth import login_required
 from sqlalchemy.orm import joinedload
 from flask import jsonify
-from datetime import date
+from datetime import datetime
 
 performance_bp = Blueprint('performance', __name__, template_folder='../templates/performance')
 
@@ -20,23 +20,30 @@ def login_obrigatorio():
 @performance_bp.route('/performance')
 @login_required
 def index():
-    from datetime import datetime
-
-    jogadores = Pessoa.query.filter_by(ativo=True).order_by(Pessoa.nome).all()
-    jogos = Jogo.query.filter(Jogo.data <= datetime.now()).order_by(Jogo.data.desc()).all()
+    hoje = datetime.now()
+    pessoas = Pessoa.query.filter_by(ativo=True).all()
+    jogos = Jogo.query.filter(Jogo.data <= hoje).order_by(Jogo.data.desc()).all()
     performances = Performance.query.all()
 
-    jogadores_json = [{'id': j.id, 'nome': j.nome, 'posicao': j.posicao, 'categoria': j.categoria} for j in jogadores]
-    performances_json = [{'jogo_id': p.jogo_id, 'pessoa_id': p.pessoa_id} for p in performances]
+    # Garante que pessoas_json será renderizado corretamente
+    pessoas_json = [
+        {
+            "id": p.id,
+            "nome": p.nome,
+            "categoria": p.categoria,
+            "posicao": p.posicao
+        }
+        for p in pessoas
+    ]
 
-    return render_template('performance/performance.html',
-                           jogadores=jogadores,
-                           jogos=jogos,
-                           performances=performances,
-                           jogadores_json=jogadores_json,
-                           pessoas_json=jogadores_json,
-                           performances_json=performances_json)
-
+    return render_template(
+        'performance/performance.html',
+        pessoas=pessoas,
+        jogos=jogos,
+        performances=performances,
+        pessoas_json=pessoas_json,
+        hoje=hoje.date()
+    ) 
 
     
 

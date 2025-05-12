@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, send_file,session
 from models.models import db, Categoria, Mensalidade, MovimentacaoFinanceira, ConfigFinanceiro,Configuracao, Pessoa
 from datetime import datetime, timedelta,date
-from sqlalchemy import func
+from sqlalchemy import func,or_
 from io import BytesIO
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import A4
@@ -422,32 +422,35 @@ def exibir_entradas():
     valor_config = Configuracao.query.filter_by(chave='valor_mensalidade').first()
     valor_mensalidade = float(valor_config.valor) if valor_config else 30.0
 
-    pessoas = Pessoa.query.filter(
+    jogadores = Pessoa.query.filter(
         Pessoa.ativo == True,
         Pessoa.tipo == 'jogador',
-        Pessoa.categoria.notin_(['Goleiro', 'Treinador', 'Convidado'])
+        or_(
+            Pessoa.data_inicio_jogador == None,
+            Pessoa.data_inicio_jogador <= datetime.strptime(mes, '%Y-%m')
+        ),
+        Pessoa.categoria.notin_(['Convidado', 'Treinador', 'Goleiro'])
     ).order_by(Pessoa.nome).all()
 
-    '''for pessoa in pessoas:
-        existente = Mensalidade.query.filter_by(pessoa_id=pessoa.id, mes_referencia=mes).first()
+    for jogador in jogadores:
+        existente = Mensalidade.query.filter_by(pessoa_id=jogador.id, mes_referencia=mes).first()
         if not existente:
             nova = Mensalidade(
-                pessoa_id=pessoa.id,
+                pessoa_id=jogador.id,
                 mes_referencia=mes,
                 valor=valor_mensalidade,
                 pago=False
             )
             db.session.add(nova)
 
-    db.session.commit()'''
+    db.session.commit()
 
-    # Carrega mensalidades do mês e cria mapa para acesso rápido no template
     mensalidades = Mensalidade.query.filter_by(mes_referencia=mes).all()
     mensalidade_map = {m.pessoa_id: m for m in mensalidades}
 
     return render_template(
         'financeiro/entradas.html',
-        jogadores=pessoas,
+        jogadores=jogadores,
         mensalidade_map=mensalidade_map,
         valor_mensalidade=valor_mensalidade,
         mes=mes,
@@ -455,6 +458,7 @@ def exibir_entradas():
         mes_proximo=calcular_mes_proximo(mes),
         config=config
     )
+
 
 
 

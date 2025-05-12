@@ -6,28 +6,47 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inter Veterano - Home</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <!-- Supondo que você queira manter o style.css geral do projeto -->
+    <!-- Fonte Google -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            --cor-primaria: #990000;
-            /* Vermelho Grená */
-            --cor-secundaria: #FFFFFF;
-            /* Branco */
+            --cor-primaria: #990000; /* Vermelho Grená */
+            --cor-primaria-hover: #7a0000; /* Vermelho mais escuro para hover */
+            --cor-primaria-light: rgba(153, 0, 0, 0.8); /* Versão com transparência */
+            --cor-secundaria: #FFFFFF; /* Branco */
             --cor-texto-primaria: #FFFFFF;
             --cor-texto-secundaria: #333333;
-            --cor-destaque: #FFD700;
-            /* Dourado para detalhes */
-            --cor-fundo: #f0f0f0;
+            --cor-destaque: #FFD700; /* Dourado para detalhes */
+            --cor-destaque-hover: #e6c300; /* Dourado mais escuro para hover */
+            --cor-fundo: #f5f5f5;
             --cor-fundo-card: #FFFFFF;
+            --cor-borda: #dddddd;
+            --sombra-suave: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --sombra-media: 0 6px 16px rgba(0, 0, 0, 0.12);
+            --transicao-padrao: all 0.3s ease;
+            --border-radius-pequeno: 6px;
+            --border-radius-medio: 8px;
+            --border-radius-grande: 12px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Montserrat', sans-serif;
             margin: 0;
             padding: 0;
             background-color: var(--cor-fundo);
             color: var(--cor-texto-secundaria);
             line-height: 1.6;
+            overflow-x: hidden;
         }
 
         .container {
@@ -37,379 +56,740 @@
             padding: 20px 0;
         }
 
-        /* Estilos do Menu Hamburger (adaptados de base.html) */
+        /* Estilos do Menu Hamburger */
         #menu-toggle {
             display: none;
-            /* Esconde o checkbox */
         }
 
         .menu-icon {
             display: none;
-            /* Inicialmente escondido, aparece no mobile */
-            font-size: 30px;
+            font-size: 24px;
             cursor: pointer;
             color: var(--cor-texto-primaria);
-            /* Cor do ícone do menu */
             padding: 15px;
             position: fixed;
             top: 15px;
             left: 15px;
             z-index: 1001;
-            /* Acima do sidebar para garantir clicabilidade */
             background-color: var(--cor-primaria);
-            border-radius: 5px;
+            border-radius: var(--border-radius-pequeno);
+            box-shadow: var(--sombra-suave);
+            transition: var(--transicao-padrao);
+        }
+
+        .menu-icon:hover {
+            background-color: var(--cor-primaria-hover);
         }
 
         .sidebar {
             position: fixed;
             left: -280px;
-            /* Começa fora da tela */
             top: 0;
             width: 280px;
             height: 100%;
-            background-color: var(--cor-primaria);
+            background: linear-gradient(to bottom, var(--cor-primaria), var(--cor-primaria-hover));
             transition: left 0.3s ease;
             z-index: 1000;
             padding-top: 20px;
-            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.3);
         }
 
         .sidebar .logo-container {
             display: flex;
             align-items: center;
-            gap: 10px;
-            padding: 10px 20px;
+            gap: 15px;
+            padding: 15px 20px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-            margin-bottom: 10px;
+            margin-bottom: 20px;
         }
 
         .sidebar .logo-container img {
-            width: 50px;
-            height: 50px;
+            width: 55px;
+            height: 55px;
             border-radius: 50%;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            border: 2px solid var(--cor-destaque);
         }
 
         .sidebar .logo-container h2 {
             margin: 0;
-            font-size: 1.2em;
+            font-size: 1.3em;
+            font-weight: 700;
             color: var(--cor-texto-primaria);
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        .sidebar nav {
+            margin-top: 10px;
         }
 
         .sidebar nav a {
-            display: block;
+            display: flex;
+            align-items: center;
             color: var(--cor-texto-primaria);
-            padding: 12px 20px;
+            padding: 15px 20px;
             text-decoration: none;
             font-size: 1rem;
-            transition: background-color 0.2s ease, padding-left 0.2s ease;
+            font-weight: 500;
+            transition: var(--transicao-padrao);
+            border-left: 4px solid transparent;
+            margin: 5px 0;
         }
 
         .sidebar nav a:hover,
         .sidebar nav a.active {
-            background-color: var(--cor-secundaria);
-            color: var(--cor-primaria);
-            font-weight: bold;
-            padding-left: 25px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-left: 4px solid var(--cor-destaque);
+            padding-left: 23px;
+        }
+
+        .sidebar nav a.active {
+            font-weight: 600;
         }
 
         .sidebar nav a span {
-            margin-left: 10px;
+            margin-left: 12px;
         }
 
         .wrapper {
             padding-left: 0;
-            /* Ajustado para quando o menu não está fixo à esquerda em desktop */
-            transition: padding-left 0.3s ease;
+            transition: var(--transicao-padrao);
         }
 
         /* Ajuste para o conteúdo principal quando o menu está visível */
-        #menu-toggle:checked~.wrapper .sidebar {
+        #menu-toggle:checked ~ .wrapper .sidebar {
             left: 0;
+        }
+
+        #menu-toggle:checked ~ .wrapper {
+            padding-left: 0;
+        }
+        
+        /* Sobreposição escura quando o menu está aberto em dispositivos móveis */
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        #menu-toggle:checked ~ .overlay {
+            display: block;
+            opacity: 1;
         }
 
         @media (max-width: 768px) {
             .menu-icon {
                 display: block;
-                /* Exibe o botão no mobile */
             }
 
-            /* Remove o header tradicional no mobile se o menu hamburger estiver ativo */
             header.main-header-desktop {
                 display: none;
             }
 
             .wrapper {
                 padding-top: 60px;
-                /* Espaço para o menu icon fixo */
             }
         }
 
-        /* Header Desktop (se houver um, pode ser removido se o menu hamburger for global) */
+        /* Header Desktop */
         header.main-header-desktop {
-            background-color: var(--cor-primaria);
+            background: linear-gradient(to right, var(--cor-primaria), var(--cor-primaria-hover));
             color: var(--cor-texto-primaria);
-            padding: 1rem 0;
+            padding: 1.2rem 0;
             text-align: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
 
         header.main-header-desktop .logo {
             font-size: 2.2rem;
-            font-weight: bold;
+            font-weight: 800;
+            letter-spacing: 1px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
         }
 
+        /* Hero Section */
         .hero-section {
-            background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)),
-            url("{{ url_for('static', filename='img/fundo_login.png') }}") no-repeat center center/cover;
-            /* Usar imagem do projeto */
+            background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.7)),
+                url("{{ url_for('static', filename='img/fundo_login.png') }}") no-repeat center center/cover;
             color: var(--cor-texto-primaria);
-            padding: 70px 20px;
+            padding: 100px 20px;
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 40px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            height: 4px;
+            background: linear-gradient(to right, transparent, var(--cor-destaque), transparent);
         }
 
         .hero-section h1 {
-            font-size: 2.6rem;
-            margin-bottom: 10px;
+            font-size: 3rem;
+            margin-bottom: 15px;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+            font-weight: 800;
+            letter-spacing: 2px;
+            animation: fadeInDown 1s ease;
         }
 
         .hero-section p {
-            font-size: 1.2rem;
-            margin-bottom: 20px;
+            font-size: 1.3rem;
+            margin-bottom: 25px;
+            font-style: italic;
+            animation: fadeInUp 1s ease 0.3s both;
         }
 
+        /* Botões CTA */
         .cta-button {
             display: inline-block;
-            padding: 12px 25px;
-            background-color: var(--cor-destaque);
+            padding: 14px 28px;
+            background: linear-gradient(to right, var(--cor-destaque), var(--cor-destaque-hover));
             color: var(--cor-texto-secundaria);
             text-decoration: none;
-            border-radius: 5px;
+            border-radius: var(--border-radius-medio);
             font-size: 1.1rem;
-            font-weight: bold;
-            transition: background-color 0.3s ease, transform 0.2s ease;
+            font-weight: 700;
+            transition: var(--transicao-padrao);
             border: none;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            position: relative;
+            overflow: hidden;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .cta-button:hover {
-            background-color: #e6c300;
-            transform: translateY(-2px);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
         }
 
+        .cta-button:active {
+            transform: translateY(-1px);
+        }
+
+        .cta-button::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.2);
+            transform: translateX(-100%);
+            transition: transform 0.4s ease;
+        }
+
+        .cta-button:hover::after {
+            transform: translateX(0);
+        }
+
+        /* Seções */
         .section {
-            margin-bottom: 30px;
-            padding: 25px;
+            margin-bottom: 40px;
+            padding: 30px;
             background-color: var(--cor-fundo-card);
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            border-radius: var(--border-radius-grande);
+            box-shadow: var(--sombra-suave);
+            transition: var(--transicao-padrao);
+            border: 1px solid var(--cor-borda);
+        }
+
+        .section:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--sombra-media);
         }
 
         .section-title {
             font-size: 1.8rem;
             color: var(--cor-primaria);
             margin-bottom: 25px;
-            padding-bottom: 10px;
+            padding-bottom: 12px;
             border-bottom: 3px solid var(--cor-primaria);
             text-align: center;
+            position: relative;
+            font-weight: 700;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -3px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 3px;
+            background-color: var(--cor-destaque);
+        }
+
+        /* Título do próximo desafio */
+        h2.section-title {
+            text-align: center;
+            color: var(--cor-primaria);
+            font-size: 2rem;
+            font-weight: 700;
+            margin: 30px 0;
+            padding-bottom: 10px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h2.section-title::after {
+            content: '';
+            display: block;
+            width: 100px;
+            height: 4px;
+            background: linear-gradient(to right, var(--cor-primaria), var(--cor-destaque));
+            margin-top: 10px;
+            border-radius: 2px;
         }
 
         /* Estatísticas Cards */
         .stats-cards-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 25px;
             text-align: center;
         }
 
         .stat-card {
-            background-color: var(--cor-primaria);
+            background: linear-gradient(135deg, var(--cor-primaria), var(--cor-primaria-hover));
             color: var(--cor-texto-primaria);
             padding: 25px 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            border-radius: var(--border-radius-medio);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            position: relative;
+            overflow: hidden;
+            transition: var(--transicao-padrao);
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%);
+            opacity: 0;
+            transition: opacity 0.8s ease;
+            pointer-events: none;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-8px) scale(1.03);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+        }
+
+        .stat-card:hover::before {
+            opacity: 1;
         }
 
         .stat-card .stat-value {
-            font-size: 2.5rem;
-            font-weight: bold;
+            font-size: 3rem;
+            font-weight: 800;
             display: block;
-            margin-bottom: 5px;
+            margin-bottom: 8px;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
         }
 
         .stat-card .stat-label {
-            font-size: 1rem;
+            font-size: 1.1rem;
             display: block;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
         }
 
         /* Próximo Jogo */
-        .next-match-card {
-            text-align: center;
+        .match-details {
+            background: linear-gradient(to bottom, #ffffff, #f9f9f9);
+            padding: 30px;
+            border-radius: var(--border-radius-grande);
+            border: 1px solid var(--cor-borda);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            max-width: 800px;
+            margin: 0 auto 40px;
+            transition: var(--transicao-padrao);
         }
 
-        .match-details {
-            background-color: var(--cor-fundo);
-            padding: 20px;
-            border-radius: 6px;
-            border: 1px solid #ddd;
+        .match-details:hover {
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            transform: translateY(-5px);
         }
 
         .match-details .teams {
             display: flex;
             justify-content: space-around;
             align-items: center;
-            margin-bottom: 15px;
+            margin-bottom: 25px;
+            position: relative;
         }
 
         .match-details .team {
             display: flex;
             flex-direction: column;
             align-items: center;
+            transition: transform 0.3s ease;
+        }
+
+        .match-details .team:hover {
+            transform: scale(1.05);
         }
 
         .match-details .team img {
-            width: 60px;
-            height: 60px;
-            margin-bottom: 5px;
+            width: 80px;
+            height: 80px;
+            margin-bottom: 10px;
             border-radius: 50%;
-            /* Para logos redondos */
+            border: 3px solid var(--cor-primaria);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+            background-color: white;
+            object-fit: cover;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
 
-        .match-details .vs-text {
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: var(--cor-primaria);
+        .match-details .team img:hover {
+            transform: scale(1.1);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            border-color: var(--cor-destaque);
         }
 
-        .match-details p {
-            font-size: 1rem;
-            margin: 8px 0;
-        }
-
-        .match-details p strong {
+        .match-details .team span {
+            font-weight: 600;
+            font-size: 1.1rem;
             color: var(--cor-texto-secundaria);
         }
 
+        .match-details .vs-text {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--cor-primaria);
+            position: relative;
+            background-color: white;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+            border: 2px solid var(--cor-destaque);
+            z-index: 1;
+        }
+
+        .match-details p {
+            font-size: 1.1rem;
+            margin: 10px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .match-details p strong {
+            color: var(--cor-primaria);
+            font-weight: 600;
+        }
+
+        .match-details p span {
+            font-weight: 500;
+        }
+
         .button-container {
-            margin-top: 20px;
+            margin-top: 25px;
+            text-align: center;
         }
 
         /* Acesso Rápido */
         .quick-links-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 25px;
             text-align: center;
         }
 
         .quick-link-item {
-            background-color: var(--cor-primaria);
+            background: linear-gradient(135deg, var(--cor-primaria), var(--cor-primaria-hover));
             color: var(--cor-texto-primaria);
-            padding: 20px 15px;
-            border-radius: 6px;
+            padding: 25px 20px;
+            border-radius: var(--border-radius-medio);
             text-decoration: none;
             font-size: 1.1rem;
-            font-weight: bold;
-            transition: background-color 0.3s ease, transform 0.2s ease;
+            font-weight: 600;
+            transition: var(--transicao-padrao);
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            min-height: 100px;
+            min-height: 140px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .quick-link-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 70%);
+            opacity: 0;
+            transition: opacity 0.5s ease;
         }
 
         .quick-link-item:hover {
-            background-color: #7a0000;
-            transform: translateY(-3px);
+            transform: translateY(-8px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
         }
 
-        .quick-link-item svg {
-            width: 28px;
-            height: 28px;
-            margin-bottom: 10px;
-            fill: var(--cor-texto-primaria);
+        .quick-link-item:hover::before {
+            opacity: 1;
         }
 
+        .quick-link-item i {
+            font-size: 2rem;
+            margin-bottom: 15px;
+            color: var(--cor-texto-primaria);
+            transition: transform 0.3s ease;
+        }
+
+        .quick-link-item:hover i {
+            transform: scale(1.2);
+        }
+
+        .quick-link-item span {
+            font-size: 1.2rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Info Box */
+        #info-box.section {
+            text-align: center;
+            background: linear-gradient(to bottom right, #ffffff, #f9f9f9);
+            border-left: 5px solid var(--cor-primaria);
+        }
+
+        #info-box p {
+            font-size: 1.1rem;
+            margin-bottom: 25px;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Footer */
         .footer {
             text-align: center;
-            padding: 25px 0;
-            background-color: var(--cor-primaria);
+            padding: 35px 0;
+            background: linear-gradient(to right, var(--cor-primaria), var(--cor-primaria-hover));
             color: var(--cor-texto-primaria);
-            margin-top: 40px;
+            margin-top: 60px;
+            position: relative;
+        }
+
+        .footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(to right, transparent, var(--cor-destaque), transparent);
         }
 
         .footer p {
-            margin: 5px 0;
-            font-size: 0.9rem;
+            margin: 8px 0;
+            font-size: 1rem;
+        }
+
+        .footer .social-icons {
+            margin-top: 15px;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .footer .social-icons a {
+            color: var(--cor-texto-primaria);
+            font-size: 1.5rem;
+            transition: var(--transicao-padrao);
+        }
+
+        .footer .social-icons a:hover {
+            color: var(--cor-destaque);
+            transform: translateY(-3px);
+        }
+
+        /* Mensagem sem jogo */
+        #no-match-message {
+            text-align: center;
+            padding: 40px 20px;
+            background-color: var(--cor-fundo-card);
+            border-radius: var(--border-radius-medio);
+            box-shadow: var(--sombra-suave);
+            max-width: 600px;
+            margin: 0 auto 40px;
+        }
+
+        #no-match-message p {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            color: var(--cor-texto-secundaria);
+        }
+
+        /* Animações */
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         /* Responsividade adicional */
+        @media (max-width: 768px) {
+            .hero-section {
+                padding: 70px 20px;
+            }
+            
+            .hero-section h1 {
+                font-size: 2.5rem;
+            }
+            
+            .match-details .teams {
+                flex-direction: row;
+                gap: 15px;
+            }
+            
+            .section {
+                padding: 25px 20px;
+            }
+        }
+
         @media (max-width: 480px) {
+            .hero-section {
+                padding: 50px 15px;
+            }
+            
             .hero-section h1 {
                 font-size: 2rem;
             }
-
+            
             .hero-section p {
                 font-size: 1rem;
             }
-
+            
             .section-title {
                 font-size: 1.6rem;
             }
-
+            
             .stats-cards-grid {
                 grid-template-columns: 1fr;
-                /* Empilha cards de estatísticas */
             }
-
+            
             .quick-links-grid {
                 grid-template-columns: 1fr;
-                /* Empilha links rápidos */
             }
-
+            
+            .match-details {
+                padding: 20px 15px;
+            }
+            
             .match-details .teams {
                 flex-direction: column;
-                gap: 10px;
+                gap: 25px;
             }
-
+            
             .match-details .vs-text {
-                margin: 5px 0;
+                margin: 15px 0;
+            }
+            
+            .cta-button {
+                width: 100%;
+                padding: 12px 20px;
+                font-size: 1rem;
+            }
+            
+            .stat-card .stat-value {
+                font-size: 2.5rem;
             }
         }
     </style>
 </head>
 
 <body>
+    <!-- Menu Toggle -->
     <input type="checkbox" id="menu-toggle">
-    <label for="menu-toggle" class="menu-icon">&#9776;</label> <!-- Hamburger Icon -->
+    <label for="menu-toggle" class="menu-icon"><i class="fas fa-bars"></i></label>
+    
+    <!-- Overlay para fechar o menu ao clicar fora -->
+    <div class="overlay" onclick="document.getElementById('menu-toggle').checked = false;"></div>
 
     <div class="wrapper">
+        <!-- Sidebar Menu -->
         <aside class="sidebar">
             <div class="logo-container">
                 <img src="{{ url_for('static', filename='img/logoredondo.png') }}" alt="Logo Inter Veterano">
                 <h2>Inter Veterano</h2>
             </div>
             <nav>
-                <a href="{{ url_for('home.exibir_home') }}" class="active">🏠<span>Home</span></a>
-                <a href="{{ url_for('plantel.exibir_plantel') }}">🧑‍🤝‍🧑<span>Jogadores</span></a>
-                <a href="{{ url_for('convidado.exibir_convidados') }}">🙋‍♂️<span>Convidados</span></a>
-                <a href="{{ url_for('calendario.exibir_calendario') }}">📅<span>Calendário</span></a>
+                <a href="{{ url_for('home.exibir_home') }}" class="active"><i class="fas fa-home"></i><span>Home</span></a>
+                <a href="{{ url_for('plantel.exibir_plantel') }}"><i class="fas fa-users"></i><span>Jogadores</span></a>
+                <a href="{{ url_for('convidado.exibir_convidados') }}"><i class="fas fa-user-plus"></i><span>Convidados</span></a>
+                <a href="{{ url_for('calendario.exibir_calendario') }}"><i class="fas fa-calendar-alt"></i><span>Calendário</span></a>
                 {% if 'usuario' in session %}
-                <a href="{{ url_for('performance.index') }}">📊<span>Performance</span></a>
-                <a href="{{ url_for('financeiro.exibir_entradas') }}">💰<span>Financeiro</span></a>
-                <a href="{{ url_for('financeiro.relatorios') }}">📄<span>Relatórios</span></a>
+                <a href="{{ url_for('performance.index') }}"><i class="fas fa-chart-line"></i><span>Performance</span></a>
+                <a href="{{ url_for('financeiro.exibir_entradas') }}"><i class="fas fa-money-bill-wave"></i><span>Financeiro</span></a>
+                <a href="{{ url_for('financeiro.relatorios') }}"><i class="fas fa-file-alt"></i><span>Relatórios</span></a>
                 {% endif %}
-                <a href="{{ url_for('performance.graficos') }}">📈<span>Gráficos</span></a>
-                <a href="{{ url_for('performance.ranking') }}">🏅<span>Ranking</span></a>
-                <a href="{{ url_for('galeria.galeria') }}">📷<span>Galeria</span></a>
+                <a href="{{ url_for('performance.graficos') }}"><i class="fas fa-chart-bar"></i><span>Gráficos</span></a>
+                <a href="{{ url_for('performance.ranking') }}"><i class="fas fa-medal"></i><span>Ranking</span></a>
+                <a href="{{ url_for('galeria.galeria') }}"><i class="fas fa-images"></i><span>Galeria</span></a>
                 {% if 'usuario' in session %}
-                <a href="{{ url_for('auth.logout') }}">🔓<span>Sair</span></a>
+                <a href="{{ url_for('auth.logout') }}"><i class="fas fa-sign-out-alt"></i><span>Sair</span></a>
                 {% else %}
-                <a href="{{ url_for('auth.login') }}">🔐<span>Diretoria</span></a>
+                <a href="{{ url_for('auth.login') }}"><i class="fas fa-lock"></i><span>Diretoria</span></a>
                 {% endif %}
             </nav>
         </aside>
 
         <main class="content">
+            <!-- Header Desktop -->
             <header class="main-header-desktop">
                 <div class="container">
                     <div class="logo">
@@ -418,44 +798,43 @@
                 </div>
             </header>
 
+            <!-- Hero Section -->
             <section class="hero-section">
                 <div class="container">
                     <h1>INTER VETERANO</h1>
                     <p>"Aqui o passado é glória e o presente é luta!"</p>
-                    <!--a href="{{ url_for('calendario.exibir_calendario') }}" class="cta-button">Ver Próximos Jogos</a-->
                 </div>
             </section>
 
+            <!-- Próximo Desafio -->
             <h2 class="section-title">PRÓXIMO DESAFIO</h2>
 
-{% if proximo_jogo %}
-<div class="match-details" id="match-details-content">
-    <div class="teams">
-        <div class="team" id="home-team-info">
-            <img src="{{ url_for('static', filename='img/logoredondo.png') }}" alt="Inter Veterano">
-            <span>Inter Veterano</span>
-        </div>
-        <div class="vs-text">VS</div>
-        <div class="team" id="away-team-info">
-            <img src="{{ url_for('static', filename='img/opponent_placeholder.png') }}" alt="{{ proximo_jogo.titulo }}">
-            <span id="opponent-name-placeholder">{{ proximo_jogo.titulo }}</span>
-        </div>
-    </div>
-    <p><strong>Data:</strong> <span id="match-date-placeholder">{{ proximo_jogo.data.strftime('%d/%m/%Y') }}</span></p>
-    <p><strong>Horário:</strong> <span id="match-time-placeholder">{{ proximo_jogo.data.strftime('%H:%M') }}</span></p>
-    <p><strong>Local:</strong> <span id="match-location-placeholder">{{ proximo_jogo.local }}</span></p>
-    <div class="button-container">
-        <a href="{{ url_for('calendario.exibir_calendario') }}" class="cta-button">Ver Calendário Completo</a>
-    </div>
-</div>
-{% else %}
-<div id="no-match-message">
-    <p>Nenhum jogo agendado no momento.</p>
-    <a href="{{ url_for('calendario.exibir_calendario') }}" class="cta-button">Consultar Calendário</a>
-</div>
-{% endif %}
-
-
+            {% if proximo_jogo %}
+            <div class="match-details" id="match-details-content">
+                <div class="teams">
+                    <div class="team" id="home-team-info">
+                        <img src="{{ url_for('static', filename='img/logoredondo.png') }}" alt="Inter Veterano">
+                        <span>Inter Veterano</span>
+                    </div>
+                    <div class="vs-text">VS</div>
+                    <div class="team" id="away-team-info">
+                        <img src="{{ url_for('static', filename='img/opponent_placeholder.png') }}" alt="{{ proximo_jogo.titulo }}">
+                        <span id="opponent-name-placeholder">{{ proximo_jogo.titulo }}</span>
+                    </div>
+                </div>
+                <p><strong><i class="far fa-calendar-alt"></i> Data:</strong> <span id="match-date-placeholder">{{ proximo_jogo.data.strftime('%d/%m/%Y') }}</span></p>
+                <p><strong><i class="far fa-clock"></i> Horário:</strong> <span id="match-time-placeholder">{{ proximo_jogo.data.strftime('%H:%M') }}</span></p>
+                <p><strong><i class="fas fa-map-marker-alt"></i> Local:</strong> <span id="match-location-placeholder">{{ proximo_jogo.local }}</span></p>
+                <div class="button-container">
+                    <a href="{{ url_for('calendario.exibir_calendario') }}" class="cta-button">Ver Calendário Completo</a>
+                </div>
+            </div>
+            {% else %}
+            <div id="no-match-message">
+                <p><i class="fas fa-info-circle"></i> Nenhum jogo agendado no momento.</p>
+                <a href="{{ url_for('calendario.exibir_calendario') }}" class="cta-button">Consultar Calendário</a>
+            </div>
+            {% endif %}
 
             <div class="container">
                 <section id="stats-section" class="section">
@@ -482,31 +861,22 @@
                     <h2 class="section-title">ACESSO RÁPIDO</h2>
                     <div class="quick-links-grid">
                         <a href="{{ url_for('calendario.exibir_calendario') }}" class="quick-link-item">
-                            <svg viewBox="0 0 24 24">
+                            <!--svg viewBox="0 0 24 24">
                                 <path
                                     d="M19,4H17V3a1,1,0,0,0-2,0V4H9V3A1,1,0,0,0,7,3V4H5A3,3,0,0,0,2,7V19a3,3,0,0,0,3,3H19a3,3,0,0,0,3-3V7A3,3,0,0,0,19,4Zm1,15a1,1,0,0,1-1,1H5a1,1,0,0,1-1-1V10H20Zm0-11H4V7A1,1,0,0,1,5,6H7V7A1,1,0,0,0,9,7V6h6V7a1,1,0,0,0,2,0V6h2a1,1,0,0,1,1,1Z" />
-                            </svg>
+                            </svg-->
                             <span>Calendário</span>
                         </a>
                         <a href="{{ url_for('plantel.exibir_plantel') }}" class="quick-link-item">
-                            <svg viewBox="0 0 24 24">
-                                <path
-                                    d="M12,2A10,10,0,1,0,22,12,10,10,0,0,0,12,2Zm0,18a8,8,0,0,1-5.55-2.25,6,6,0,0,1,11.1,0A8,8,0,0,1,12,20ZM10,10V9a1.93,1.93,0,0,0-1.38.59A2,2,0,0,0,8,11a2,2,0,0,0,3.24,1.6,1.93,1.93,0,0,0,.76-1.6V11H10Zm4-2H12V9h2a1,1,0,0,1,1,1v1a1,1,0,0,1-1,1H13a1,1,0,0,1-1-1,1,1,0,0,0-2,0,3,3,0,0,0,3,3h1a3,3,0,0,0,3-3V10A3,3,0,0,0,14,7Z" />
-                            </svg>
+                           
                             <span>Jogadores</span>
                         </a>
                         <a href="{{ url_for('performance.graficos') }}" class="quick-link-item">
-                            <svg viewBox="0 0 24 24">
-                                <path
-                                    d="M21,20H4V18H7a1,1,0,0,0,0-2H4V14H7a1,1,0,0,0,0-2H4V10H7A1,1,0,0,0,7,8H4V6H7A1,1,0,0,0,7,4H4V3A1,1,0,0,0,2,3V21a1,1,0,0,0,1,1H21a1,1,0,0,0,0-2Zm-6-3a1,1,0,0,0-1-1H13V12h2a1,1,0,0,0,0-2H13V8h1a1,1,0,0,0,0-2H10A1,1,0,0,0,10,8h1v2H9a1,1,0,0,0,0,2h2v4h1A1,1,0,0,0,13,17Zm7-14H13a1,1,0,0,0-1,1V7a1,1,0,0,0,1,1h8a1,1,0,0,0,1-1V4A1,1,0,0,0,22,3Zm-1,3H14V5h7Zm1,4H13a1,1,0,0,0-1,1v9a1,1,0,0,0,1,1h9a1,1,0,0,0,1-1V11A1,1,0,0,0,22,10Zm-1,9H14V12h7Z" />
-                            </svg>
+                           
                             <span>Estatísticas</span>
                         </a>
                         <a href="{{ url_for('performance.ranking') }}" class="quick-link-item">
-                            <svg viewBox="0 0 24 24">
-                                <path
-                                    d="M21,11H19.93A8,8,0,0,0,13,4.07V3a1,1,0,0,0-2,0V4.07A8,8,0,0,0,4.07,11H3a1,1,0,0,0,0,2H4.07A8,8,0,0,0,11,19.93V21a1,1,0,0,0,2,0V19.93A8,8,0,0,0,19.93,13H21a1,1,0,0,0,0-2Zm-9,7A6,6,0,0,1,6,12a6,6,0,0,1,6-6,5.94,5.94,0,0,1,5.91,5H17a1,1,0,0,0-.31.05,1,1,0,0,0-.29.13,1,1,0,0,0-.47.77,1,1,0,0,0,.01.15A1,1,0,0,0,16,12a3,3,0,1,1-3-3,1,1,0,0,0,1-1,1,1,0,0,0-.34-.75A1,1,0,0,0,12.6,7a3.24,3.24,0,0,0-.6,0A5.94,5.94,0,0,1,17.91,13H17A6,6,0,0,1,12,18Z" />
-                            </svg>
+                           
                             <span>Ranking</span>
                         </a>
                     </div>

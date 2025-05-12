@@ -8,70 +8,55 @@ convidado_bp = Blueprint('convidado', __name__, template_folder='../templates/co
 
 @convidado_bp.route('/convidados')
 def exibir_convidados():
-    # [X]
-    convidados_ativos = Pessoa.query.filter_by(tipo='convidado', ativo=True).filter(
-        Pessoa.data_inativacao == None
-    ).order_by(Pessoa.nome).all()
+    convidados_ativos = Pessoa.query.filter(Pessoa.categoria == 'Convidado', Pessoa.ativo == True, Pessoa.data_inativacao == None).order_by(Pessoa.nome).all()
+    convidados_desligados = Pessoa.query.filter(Pessoa.categoria == 'Convidado', Pessoa.ativo == True, Pessoa.data_inativacao != None).order_by(Pessoa.nome).all()
 
-    convidados_desligados = Pessoa.query.filter_by(tipo='convidado', ativo=True).filter(
-        Pessoa.data_inativacao != None
-    ).order_by(Pessoa.nome).all()
-    # [Y]
-
-    categorias = Categoria.query.all()
+    categorias = Categoria.query.filter(Categoria.nome == 'Convidado').all()
     posicoes = Posicao.query.all()
 
     return render_template(
-        'convidado/convidados.html',
+        'convidados.html',
         convidados_ativos=convidados_ativos,
         convidados_desligados=convidados_desligados,
         categorias=categorias,
-        posicoes=posicoes
+        posicoes=posicoes      
     )
 
 
 
 
 @convidado_bp.route('/convidados/adicionar', methods=['POST'])
-@login_required
 def adicionar_convidado():
     nome = request.form['nome']
-    categoria_id = request.form['categoria']
-    posicao_id = request.form['posicao']
-    pe_preferencial = request.form['pe_preferencial']
+    categoria_id = request.form.get('categoria')
+    posicao_id = request.form.get('posicao')
+    pe_preferencial = request.form.get('pe_preferencial')
 
-    # Verifica duplicidade (ignora maiúsculas/minúsculas)
-    existente = Pessoa.query.filter(
-        func.lower(Pessoa.nome) == nome.lower(),
-        Pessoa.tipo == 'convidado'
-    ).first()
-
-    if existente:
-        flash('Já existe um convidado com esse nome!', 'erro')
-        return redirect(url_for('convidado.exibir_convidados'))
-
-    foto = request.files['foto']
-    foto_base64 = None
-    if foto:
-        foto_base64 = base64.b64encode(foto.read()).decode('utf-8')
-
+    # Buscar nome da categoria e da posição
     categoria = Categoria.query.get(categoria_id)
     posicao = Posicao.query.get(posicao_id)
 
-    novo = Pessoa(
+    nova_pessoa = Pessoa(
         nome=nome,
+        tipo='jogador',  # permanece como jogador
         categoria=categoria.nome if categoria else '',
         posicao=posicao.nome if posicao else '',
         pe_preferencial=pe_preferencial,
-        foto=foto_base64,
-        tipo='convidado',
         ativo=True
-)
+    )
 
-    
-    db.session.add(novo)
+    # salvar imagem se existir
+    foto = request.files.get('foto')
+    if foto:
+        nova_pessoa.foto = base64.b64encode(foto.read()).decode('utf-8')
+
+    db.session.add(nova_pessoa)
     db.session.commit()
+
     return redirect(url_for('convidado.exibir_convidados'))
+
+
+
 
 
 @convidado_bp.route('/convidados/excluir/<int:id>')
@@ -102,17 +87,20 @@ def editar_convidado(id):
         convidado.categoria = categoria.nome if categoria else ''
         convidado.posicao = posicao.nome if posicao else ''
         convidado.pe_preferencial = request.form['pe_preferencial']
+        convidado.tipo = 'convidado' if convidado.categoria.lower() == 'convidado' else 'jogador'
 
         foto = request.files.get('foto')
         if foto and foto.filename:
             convidado.foto = base64.b64encode(foto.read()).decode('utf-8')
 
         db.session.commit()
-        flash('Convidado atualizado com sucesso!', 'sucesso')
+        flash('Cadastro atualizado com sucesso!', 'sucesso')
+        if convidado.tipo == 'jogador':
+            return redirect(url_for('plantel.exibir_plantel'))
         return redirect(url_for('convidado.exibir_convidados'))
 
-    # ← ESSA LINHA É O RETORNO PARA O GET
     return render_template('convidado/editar.html', jogador=convidado, categorias=categorias, posicoes=posicoes)
+
 
 
 
